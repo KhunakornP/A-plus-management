@@ -12,17 +12,19 @@ Domain Diagram can be found [in the UML diagrams page](../../wiki/UML-diagrams)
 
 ## Mockups
 Calendar Page (Main Page)
-![Calendar Page](https://drive.google.com/uc?export=view&id=13_sJmudvWZExcFtmVXAWZ6Ius3WWB7O4)
+![Calendar Page](https://files.catbox.moe/8tort2.png)
 
 Task Board Page
-![Task Board](https://drive.google.com/uc?export=view&id=1dv4Wm5oZ-DSttdaVzXH3woGzp03gdVW7)
+![Task Board](https://files.catbox.moe/3ask5g.png)
 
 Editing a task
-![Task Board](https://drive.usercontent.google.com/download?id=1_N-dolGpeSkNYgvUbvqtCQyX2VbyHGPo&export=view)
+![Task Board](https://files.catbox.moe/ar5vrt.png)
 
 Burndown Chart
-![Burndown Chart](https://drive.google.com/uc?export=view&id=13MXqerrK4ZAmMuDyOhek6XPAXCdUZw-U)
+![Burndown Chart](https://files.catbox.moe/wgdnw6.png)
 
+A-level Calculator
+![A-level Calendar](https://files.catbox.moe/bwto4v.png)
 
 ## Project Plan
 Project Plan can be found [Here](../../wiki/Project-plan)
