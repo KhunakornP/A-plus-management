@@ -1,0 +1,26 @@
+# exclude django-generated files
+extend-exclude = [
+  "manage.py",
+  "*/migrations/*.py",
+  "/usr/*",
+  "mysite/*",
+  "*/__init__.py",
+  "*/admin.py",
+  "*/urls.py",
+  "*/apps.py",
+]
+
+# Set python target version to 3.11
+target-version = "py311"
+
+[lint]
+# Add checking for docstrings, naming convention and line too long, in addition
+# to Ruff's default linting rules.
+# The line too long rule is added since Ruff cannot automatically formats
+# long strings and docstrings.
+# By default, the maximum line length is 88 characters, which is the same as
+# Black's coding style
+extend-select = ["D", "N", "E501"]
+
+[lint.pydocstyle]
+convention = "pep257"
