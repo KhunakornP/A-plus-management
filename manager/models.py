@@ -23,7 +23,7 @@ class Taskboard(models.Model):
     But each task may only be associated with one task board.
     """
 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, null=False)
 
 
 class Task(models.Model):
@@ -36,6 +36,7 @@ class Task(models.Model):
     """
 
     title = models.CharField(max_length=300)
-    status = models.CharField(max_length=10)
+    status = models.CharField(max_length=20, default="TODO")
     end_date = models.DateTimeField("End date", default=today_midnight)
+    details = models.TextField(default=None, null=True, blank=True)
     taskboard = models.ForeignKey(Taskboard, on_delete=models.CASCADE)
