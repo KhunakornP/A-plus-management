@@ -15,8 +15,7 @@ def create_taskboard(name: str = "Today"):
     return Taskboard.objects.create(name=name)
 
 
-def create_task(title: str, status: str,
-                taskboard: Taskboard, end_date=None):
+def create_task(title: str, status: str, taskboard: Taskboard, end_date=None):
     """
     Create a task with the given parameters.
 
@@ -27,11 +26,11 @@ def create_task(title: str, status: str,
     :returns: A Task object with the given parameters
     """
     if not end_date:
-        return Task.objects.create(title=title, status=status,
-                                   taskboard=taskboard)
+        return Task.objects.create(title=title, status=status, taskboard=taskboard)
     # else create a task with an end date
-    return Task.objects.create(title=title, status=status,
-                               end_date=end_date, taskboard=taskboard)
+    return Task.objects.create(
+        title=title, status=status, end_date=end_date, taskboard=taskboard
+    )
 
 
 class TaskboardModelTestcase(TestCase):
