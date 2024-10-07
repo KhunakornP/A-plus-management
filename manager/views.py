@@ -9,3 +9,10 @@ class TaskboardView(generic.ListView):
 
     template_name = "manager/taskboard.html"
     model = Taskboard
+
+
+class CalendarView(generic.ListView):
+    """A view that displays the calendar."""
+
+    # to be implemented
+    template_name = "manager/calendar.html"
