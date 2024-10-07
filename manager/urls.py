@@ -5,5 +5,6 @@ from . import views
 
 app_name = "manager"
 urlpatterns = [
-    path("<int:pk>taskboard/", views.IndexView.as_view(), name="taskboard"),
+    path("taskboard/", views.TaskboardView.as_view(), name="taskboard"),
+    path("calendar/", views.CalendarView.as_view(), name="calendar"),
 ]
