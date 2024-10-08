@@ -69,5 +69,5 @@ def create_task(request, taskboard_id):
         messages.success(f'Successfully created task {request.POST["title"]}')
         return redirect(reverse("manager:taskboard_index"))
     else:
-        messages.errir("Invalid data")
+        messages.error("Invalid data")
         return redirect(reverse("manager:taskboard_index"))
