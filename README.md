@@ -1,4 +1,6 @@
 # A-plus-management: Productivity and task manager
+[![Django CI](https://github.com/KhunakornP/A-plus-management/actions/workflows/django.yml/badge.svg)](https://github.com/KhunakornP/A-plus-management/actions/workflows/django.yml)
+[![Lint with Ruff](https://github.com/KhunakornP/A-plus-management/actions/workflows/style-checking.yml/badge.svg)](https://github.com/KhunakornP/A-plus-management/actions/workflows/style-checking.yml) \
 An application for managing work and productivity for students using
 the [Django framework](https://www.djangoproject.com/).
 
