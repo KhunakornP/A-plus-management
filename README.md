@@ -15,10 +15,11 @@ python -m venv env
 ```
 2. Activate the virtual environment
 ```
-env/bin/activate
+# on Mac/Linux use
+.env/bin/activate
 
-# on windows use
-\env\scripts\activate
+# on Windows use
+.\env\scripts\activate
 ```
 3. Run the server
 ```
