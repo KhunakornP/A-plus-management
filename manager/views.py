@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
+from typing import Union
 
 
 class TaskboardIndexView(generic.ListView):
@@ -31,10 +32,9 @@ class CalendarView(generic.ListView):
 
 
 class TaskForm(ModelForm):
-    """Create a task object from form post request.
+    """Create a task object from POST request.
 
-    :param ModelForm: Inherits ModelForm, more info at
-    https://docs.djangoproject.com/en/5.1/topics/forms/modelforms
+    More info at https://docs.djangoproject.com/en/5.1/topics/forms/modelforms
     """
 
     class Meta:
@@ -51,26 +51,49 @@ class TaskForm(ModelForm):
         self.fields["details"].required = False
 
 
+class TaskboardForm(ModelForm):
+    """Create a Taskboard object from POST request."""
+
+    class Meta:
+        """The Meta class."""
+
+        model = Taskboard
+        fields = ["name"]
+
+
+def get_taskboard(taskboard_id: int) -> Union[Taskboard, None]:
+    """Return a Taskboard which has a specific taskboard id.
+
+    :param taskboard_id: the ID of the taskboard
+    :return: a Taskboard object, return None if it does not exists
+    """
+    try:
+        return get_object_or_404(Taskboard, pk=taskboard_id)
+    except (KeyError, Taskboard.DoesNotExist):
+        return None
+
+
 def create_task(request, taskboard_id: int) -> redirect:
     """(UNTESTED) Create a new task bounded to a specific taskboard from POST request.
 
     :param request: django request object
-    :param taskboard_id: id of the taskboard we're going to bounded to
+    :param taskboard_id: id of the taskboard we're going to bound the task to
     cannot be tested until the taskboard.html page is finished.
     """
-    try:
-        taskboard = get_object_or_404(Taskboard, pk=taskboard_id)
-    except (KeyError, Taskboard.DoesNotExist):
-        messages.error(request, "Taskboard does not exists.")
-        redirect(reverse("manager:taskboard_index"))
-    request.POST["taskboard"] = taskboard
-
-    form = TaskForm(request.POST)
-    if form.is_valid():
-        form.save()
-        messages.success(request, f'Successfully created task {request.POST["title"]}')
+    taskboard = get_taskboard(taskboard_id)
+    if isinstance(taskboard, Taskboard):
+        request.POST["taskboard"] = taskboard
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request, f'Successfully created task {request.POST["title"]}'
+            )
+        else:
+            messages.error(request, "Invalid data.")
+        # to be changed to the taskboard page that the task belongs to.
         return redirect(reverse("manager:taskboard_index"))
-    messages.error(request, "Invalid data.")
+    messages.error(request, "Taskboard does not exists.")
     return redirect(reverse("manager:taskboard_index"))
 
 
@@ -98,11 +121,28 @@ def delete_taskboard(request, taskboard_id: int) -> redirect:
     :param taskboard_id: the ID of the taskboard which is to be deleted
     :return: redirect to the taskboard index page
     """
-    try:
-        taskboard = get_object_or_404(Taskboard, pk=taskboard_id)
-    except Taskboard.DoesNotExist:
+    taskboard = get_taskboard(taskboard_id)
+    if isinstance(taskboard, Taskboard):
+        messages.success(request, "Deleted Taskboard f{taskboard.name}")
+        taskboard.delete()
+    else:
         messages.error(request, "Taskboard does not exists.")
+    return redirect(reverse("manager:taskboard_index"))
 
-    messages.success(request, "Deleted Taskboard f{taskboard.name}")
-    taskboard.delete()
+
+def modify_taskbaord(request, taskboard_id: int) -> redirect:
+    """(UNTESTED) Modify the taskboard form POST request.
+
+    :param request: _description_
+    :param taskboard_id: the ID of the taskboard which is to be deleted
+    :return: redirect to the taskboard index page
+    """
+    taskboard = get_taskboard(taskboard_id)
+    if isinstance(taskboard, Taskboard):
+        form = TaskboardForm(request.POST, instance=taskboard)
+        if form.is_valid():
+            messages.success(request, "Taskboard updated")
+            form.save()
+        else:
+            messages.error("Cannot update taskboard")
     return redirect(reverse("manager:taskboard_index"))
