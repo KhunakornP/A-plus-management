@@ -19,14 +19,14 @@ not using windows.
 1. clone the repository with the following command
     - make sure you are in a suitable directory before cloning
     - alternatively download and extract the .zip file into the desired directory
-   [here](https://github.com/KhunakornP/ku-polls/releases)
+   [here](https://github.com/KhunakornP/A-plus-management/releases)
 ```
 git clone https://github.com/KhunakornP/A-plus-management.git
 ```
 
-2. change the directory to the ku-polls directory
+2. change the directory to the A-plus-management directory
 ```
-cd ku-polls
+cd A-plus-management
 ```
 
 3. create a virtual environment
@@ -36,13 +36,14 @@ python -m venv env
 
 4. activate the virtual environment
 ```
+# on Mac/Linux use
 .env/bin/activate
 
-# on windows use
+# on Windows use
 .\env\scripts\activate
 ```
 
-5. install required python pakages
+5. install required python packages
 ```
 pip install -r requirements.txt
 ```
