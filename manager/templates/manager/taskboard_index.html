@@ -13,7 +13,7 @@
               <div class="card-body">
                 <div class="d-grid gap-2 d-md-block">
                     <a href="#" class="btn btn-info mx-2">Go to board</a>
-                    <a href="#" class="btn btn-danger mx-2">Delete</a>
+                    <a href="{% url 'manager:delete_taskboard' taskboard.id %}" class="btn btn-danger mx-2">Delete</a>
                 </div>
               </div>
             </div>

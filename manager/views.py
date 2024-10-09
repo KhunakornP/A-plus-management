@@ -51,23 +51,58 @@ class TaskForm(ModelForm):
         self.fields["details"].required = False
 
 
-def create_task(request, taskboard_id):
-    """Create a new task bounded to a specific taskboard.
+def create_task(request, taskboard_id: int) -> redirect:
+    """(UNTESTED) Create a new task bounded to a specific taskboard from POST request.
 
     :param request: django request object
     :param taskboard_id: id of the taskboard we're going to bounded to
+    cannot be tested until the taskboard.html page is finished.
     """
     try:
         taskboard = get_object_or_404(Taskboard, pk=taskboard_id)
     except (KeyError, Taskboard.DoesNotExist):
-        messages.error(request, "Cannot find taskboard")
+        messages.error(request, "Taskboard does not exists.")
         redirect(reverse("manager:taskboard_index"))
     request.POST["taskboard"] = taskboard
+
     form = TaskForm(request.POST)
     if form.is_valid():
         form.save()
-        messages.success(f'Successfully created task {request.POST["title"]}')
+        messages.success(request, f'Successfully created task {request.POST["title"]}')
         return redirect(reverse("manager:taskboard_index"))
-    else:
-        messages.error("Invalid data")
+    messages.error(request, "Invalid data.")
+    return redirect(reverse("manager:taskboard_index"))
+
+
+def create_taskboard(request) -> redirect:
+    """Create a taskboard from POST request.
+
+    :param request: django's request object
+    :return: redirect to taskboard index page
+    """
+    try:
+        taskboard_name = request.POST["name"]
+    except KeyError:
+        messages.error("Please enter taskboard name.")
         return redirect(reverse("manager:taskboard_index"))
+
+    new_taskboard = Taskboard.objects.create(name=taskboard_name)
+    new_taskboard.save()
+    return redirect(reverse("manager:taskboard_index"))
+
+
+def delete_taskboard(request, taskboard_id: int) -> redirect:
+    """Delete a specific taskboard from the database.
+
+    :param request: Django's request object
+    :param taskboard_id: the ID of the taskboard which is to be deleted
+    :return: redirect to the taskboard index page
+    """
+    try:
+        taskboard = get_object_or_404(Taskboard, pk=taskboard_id)
+    except Taskboard.DoesNotExist:
+        messages.error(request, "Taskboard does not exists.")
+
+    messages.success(request, "Deleted Taskboard f{taskboard.name}")
+    taskboard.delete()
+    return redirect(reverse("manager:taskboard_index"))
