@@ -86,9 +86,7 @@ def create_task(request, taskboard_id: int) -> redirect:
     form = TaskForm(post_data)
     if form.is_valid():
         form.save()
-        messages.success(
-            request, f'Successfully created task {request.POST["title"]}'
-        )
+        messages.success(request, f'Successfully created task {request.POST["title"]}')
         # TODO to be changed to the taskboard page that the task belongs to.
         return redirect(reverse("manager:taskboard_index"))
     else:
@@ -115,7 +113,7 @@ def delete_task(request, task_id: int) -> redirect:
 
 def update_task(request, task_id: int) -> redirect:
     """Update task attributes from POST request.
-    
+
     This method will OVERRIDE the task with everything that's put in the
     POST request if the post request contains all non-optional attributes of
     a task, namely the title and the taskboard. it will DO NOTHING if the either
@@ -174,10 +172,10 @@ def delete_taskboard(request, taskboard_id: int) -> redirect:
     return redirect(reverse("manager:taskboard_index"))
 
 
-def update_taskbaord(request, taskboard_id: int) -> redirect:
+def update_taskboard(request, taskboard_id: int) -> redirect:
     """Modify the taskboard form POST request.
 
-    :param request: _description_
+    :param request: Django's request object
     :param taskboard_id: the ID of the taskboard which is to be deleted
     :return: redirect to the taskboard index page
     """
