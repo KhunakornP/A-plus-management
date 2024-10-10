@@ -81,21 +81,19 @@ def create_task(request, taskboard_id: int) -> redirect:
     cannot be tested until the taskboard.html page is finished.
     """
     # TODO test this method once the frontend is done
-    taskboard = get_taskboard(taskboard_id)
-    if isinstance(taskboard, Taskboard):
-        request.POST["taskboard"] = taskboard
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(
-                request, f'Successfully created task {request.POST["title"]}'
-            )
-        else:
-            messages.error(request, "Invalid data.")
+    post_data = request.POST.copy()
+    post_data["taskboard"] = taskboard_id
+    form = TaskForm(post_data)
+    if form.is_valid():
+        form.save()
+        messages.success(
+            request, f'Successfully created task {request.POST["title"]}'
+        )
         # TODO to be changed to the taskboard page that the task belongs to.
         return redirect(reverse("manager:taskboard_index"))
-    messages.error(request, "Taskboard does not exists.")
-    return redirect(reverse("manager:taskboard_index"))
+    else:
+        messages.error(request, "Invalid data.")
+        return redirect(reverse("manager:taskboard_index"))
 
 
 def delete_task(request, task_id: int) -> redirect:
@@ -169,7 +167,7 @@ def delete_taskboard(request, taskboard_id: int) -> redirect:
     """
     taskboard = get_taskboard(taskboard_id)
     if isinstance(taskboard, Taskboard):
-        messages.success(request, "Deleted Taskboard f{taskboard.name}")
+        messages.success(request, f"Deleted Taskboard {taskboard.name}")
         taskboard.delete()
     else:
         messages.error(request, "Taskboard does not exists.")
