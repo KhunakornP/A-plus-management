@@ -107,9 +107,9 @@ def delete_task(request, task_id: int) -> redirect:
     """
     # TODO test this method once the frontend is done
     try:
-        task = get_object_or_404(Taskboard, pk=task_id)
+        task = get_object_or_404(Task, pk=task_id)
         task.delete()
-    except (KeyError, Taskboard.DoesNotExist):
+    except (KeyError, Task.DoesNotExist):
         messages.error(request, "This task does not exist")
     # TODO to be changed to the taskboard page that the task belongs to.
     return redirect(reverse("manager:taskboard_index"))
@@ -129,8 +129,8 @@ def update_task(request, task_id: int) -> redirect:
     """
     # TODO test this method once the frontend is done
     try:
-        task = get_object_or_404(Taskboard, pk=task_id)
-    except (KeyError, Taskboard.DoesNotExist):
+        task = get_object_or_404(Task, pk=task_id)
+    except (KeyError, Task.DoesNotExist):
         messages.error(request, "This task does not exist")
         return redirect(reverse("manager:taskboard_index"))
     form = TaskForm(request.POST, instance=task)
