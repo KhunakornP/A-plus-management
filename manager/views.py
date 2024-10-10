@@ -20,7 +20,7 @@ class TaskboardIndexView(generic.ListView):
 class TaskboardView(generic.DetailView):
     """A view that display a specific taskboard."""
 
-    tempalte = "manager/taskboard.html"
+    template_name = "manager/taskboard.html"
     model = Taskboard
 
 
@@ -106,7 +106,7 @@ def create_taskboard(request) -> redirect:
     try:
         taskboard_name = request.POST["name"]
     except KeyError:
-        messages.error("Please enter taskboard name.")
+        messages.error(request, "Please enter taskboard name.")
         return redirect(reverse("manager:taskboard_index"))
 
     new_taskboard = Taskboard.objects.create(name=taskboard_name)
@@ -144,5 +144,5 @@ def modify_taskbaord(request, taskboard_id: int) -> redirect:
             messages.success(request, "Taskboard updated")
             form.save()
         else:
-            messages.error("Cannot update taskboard")
+            messages.error(request, "Cannot update taskboard")
     return redirect(reverse("manager:taskboard_index"))
