@@ -147,12 +147,11 @@ def create_taskboard(request) -> redirect:
     # TODO test this method once the frontend is done
     try:
         taskboard_name = request.POST["name"]
+        new_taskboard = Taskboard.objects.create(name=taskboard_name)
+        new_taskboard.save()
     except KeyError:
         messages.error(request, "Please enter taskboard name.")
-        return redirect(reverse("manager:taskboard_index"))
 
-    new_taskboard = Taskboard.objects.create(name=taskboard_name)
-    new_taskboard.save()
     return redirect(reverse("manager:taskboard_index"))
 
 

@@ -15,7 +15,7 @@ def create_taskboard(tb_name: str) -> Taskboard:
     return Taskboard.objects.create(name=tb_name)
 
 
-class TaskboardCreationTests(TestCase):
+class TaskboardTests(TestCase):
     """Test creating, deleting and modifying taskboards."""
 
     def test_create_valid_taskboard(self):
@@ -51,7 +51,7 @@ class TaskboardCreationTests(TestCase):
         self.assertEqual(Taskboard.objects.count(), 0)
         url = reverse("manager:delete_taskboard", args=(400,))
         response = self.client.get(url)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(Taskboard.objects.count(), 0)
 
     def test_modifying_taskboard(self):
@@ -61,5 +61,5 @@ class TaskboardCreationTests(TestCase):
         new_data = {"name": new_name}
         url = reverse("manager:update_taskboard", args=(tb.id,))
         response = self.client.post(url, new_data)
-        self.assertContains(response, new_name)
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(Taskboard.objects.filter(name=new_name).count(), 1)
