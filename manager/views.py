@@ -74,12 +74,13 @@ def get_taskboard(taskboard_id: int) -> Union[Taskboard, None]:
 
 
 def create_task(request, taskboard_id: int) -> redirect:
-    """(UNTESTED) Create a new task bounded to a specific taskboard from POST request.
+    """Create a new task bounded to a specific taskboard from POST request.
 
     :param request: django request object
     :param taskboard_id: id of the taskboard we're going to bound the task to
     cannot be tested until the taskboard.html page is finished.
     """
+    # TODO test this method once the frontend is done
     taskboard = get_taskboard(taskboard_id)
     if isinstance(taskboard, Taskboard):
         request.POST["taskboard"] = taskboard
@@ -91,9 +92,53 @@ def create_task(request, taskboard_id: int) -> redirect:
             )
         else:
             messages.error(request, "Invalid data.")
-        # to be changed to the taskboard page that the task belongs to.
+        # TODO to be changed to the taskboard page that the task belongs to.
         return redirect(reverse("manager:taskboard_index"))
     messages.error(request, "Taskboard does not exists.")
+    return redirect(reverse("manager:taskboard_index"))
+
+
+def delete_task(request, task_id: int) -> redirect:
+    """Delete a specific task from the database.
+
+    :param request: Django's request object
+    :param task_id: the ID of the task which is to be deleted
+    :return: redirects to the Taskboard page that this task belongs
+    """
+    # TODO test this method once the frontend is done
+    try:
+        task = get_object_or_404(Taskboard, pk=task_id)
+        task.delete()
+    except (KeyError, Taskboard.DoesNotExist):
+        messages.error(request, "This task does not exist")
+    # TODO to be changed to the taskboard page that the task belongs to.
+    return redirect(reverse("manager:taskboard_index"))
+
+
+def update_task(request, task_id: int) -> redirect:
+    """Update task attributes from POST request.
+    
+    This method will OVERRIDE the task with everything that's put in the
+    POST request if the post request contains all non-optional attributes of
+    a task, namely the title and the taskboard. it will DO NOTHING if the either
+    the title, or the taskboard, or both, are not specified.
+
+    :param request: Django's request object
+    :param task_id: the ID of the task that is to be updated
+    :return: redirects to the Taskboard page that this task belongs
+    """
+    # TODO test this method once the frontend is done
+    try:
+        task = get_object_or_404(Taskboard, pk=task_id)
+    except (KeyError, Taskboard.DoesNotExist):
+        messages.error(request, "This task does not exist")
+        return redirect(reverse("manager:taskboard_index"))
+    form = TaskForm(request.POST, instance=task)
+    if form.is_valid():
+        messages.success(request, "The task has been updated")
+    else:
+        messages.error(request, "Task does not exist")
+    # TODO to be changed to the taskboard page that the task belongs to.
     return redirect(reverse("manager:taskboard_index"))
 
 
@@ -103,6 +148,7 @@ def create_taskboard(request) -> redirect:
     :param request: django's request object
     :return: redirect to taskboard index page
     """
+    # TODO test this method once the frontend is done
     try:
         taskboard_name = request.POST["name"]
     except KeyError:
@@ -130,13 +176,14 @@ def delete_taskboard(request, taskboard_id: int) -> redirect:
     return redirect(reverse("manager:taskboard_index"))
 
 
-def modify_taskbaord(request, taskboard_id: int) -> redirect:
-    """(UNTESTED) Modify the taskboard form POST request.
+def update_taskbaord(request, taskboard_id: int) -> redirect:
+    """Modify the taskboard form POST request.
 
     :param request: _description_
     :param taskboard_id: the ID of the taskboard which is to be deleted
     :return: redirect to the taskboard index page
     """
+    # TODO test this method once the frontend is done
     taskboard = get_taskboard(taskboard_id)
     if isinstance(taskboard, Taskboard):
         form = TaskboardForm(request.POST, instance=taskboard)
