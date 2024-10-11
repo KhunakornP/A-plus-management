@@ -1,53 +1,11 @@
 {% extends "base.html" %}
 <title>Calendar</title>
 
-<style>
-  html, body {
-    height: 100%;
-  }
-  .full-height {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  .stretch-row {
-    flex-grow: 1;
-  }
-</style>
 
 {% block content %}
 
-<style>
-  html, body {
-    height: 100%;
-  }
-  .full-height {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  .stretch-row {
-    flex-grow: 1;
-  }
-  .calendar .col {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: center;
-  }
-  .calendar .date-row .col {
-    height: 100px; /* Adjust height as needed */
-    vertical-align: middle; /* Vertically centers the content */
-  }
-  .calendar .events {
-    font-size: 0.85rem;
-  }
-  .calendar .event {
-    background-color: #f0f0f0;
-    padding: 2px 4px;
-    margin: 2px 0;
-    border-radius: 3px;
-  }
-</style>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
 
 </head>
 <body>
