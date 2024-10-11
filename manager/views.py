@@ -19,6 +19,7 @@ class CalendarView(generic.ListView):
 
     # to be implemented
     template_name = "manager/calendar.html"
+    model = Event
 
 
 class EventForm(ModelForm):
@@ -53,7 +54,7 @@ def create_event(request) -> redirect:
             return redirect(reverse("manager:calendar"))
     # if method is not POST or form is not valid
     messages.error(request, "Event data is invalid.")
-    return redirect(redirect("manager:calendar"))
+    return redirect(reverse("manager:calendar"))
 
 
 def delete_event(request, event_id: int) -> redirect:
@@ -65,7 +66,7 @@ def delete_event(request, event_id: int) -> redirect:
     :return: A redirect to the calendar page.
     """
     try:
-        event = Event.objects.get(pk=[event_id])
+        event = Event.objects.get(pk=event_id)
     except Event.DoesNotExist:
         messages.error(request, "Event does not exist")
         return redirect(reverse("manager:calendar"))
