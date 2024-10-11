@@ -1,21 +1,24 @@
 {% extends "base.html" %}
-{% block content %}
+{% block headcontent %}
 <title>{{taskboard.name}}</title>
+{% load static %}
+<link rel="stylesheet" href="{% static 'manager/taskboard.css' %}">
+<script src="{% static 'manager/taskboard.js' %}" defer></script>
+{% endblock %}
+{% block content %}
 <div class="container-fluid py-4">
   <h1 class="text-center md-6">{{taskboard.name}}</h1>
   <div class="row gx-4 mt-3">
-    <div class="col-lg-4 mb-4 mb-lg-0" id="todo">
+    <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 text-success-emphasis bg-success-subtle text-center rounded">To-Do</h4>
-        <div>
+        <div class="drop_area pb-5" id="todo">
           {% for task in taskboard.task_set.all %}
             {% if task.status == "TODO" %}
-              <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3">
-                <div class="text-center py-2">
+              <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3 draggable text-center py-2" draggable="true">
                   <a href="" class="my-0 py-0 link-light" data-bs-toggle="offcanvas" data-bs-target="#detail{{task.id}}"" aria-controls="detail{{task.id}}">
                     {{task.title}}
                   </a>
-                </div>
               </div>
 
               <div class="offcanvas offcanvas-end" tabindex="-1" id="detail{{task.id}}" aria-labelledby="detail{{task.id}}Label">
@@ -26,138 +29,88 @@
                   <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
-                  <div class="mb-3">
-                    <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
-                    <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="task{{task.id}}Enddate" class="form-label fw-bold">Due Date :</label>
-                    <p>{{task.end_date}}</p>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="task{{task.id}}Details" class="for-label fw-bold">Details :</label>
-                    <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
-                  </div>
-
-                  <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                  <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
+                  <form>
+                    <div class="mb-3">
+                      <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
+                      <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
+                    </div>
+  
+                    <div class="mb-3">
+                      <h6 class="form-label fw-bold">Due Date :</h6>
+                      <p>{{task.end_date}}</p>
+                    </div>
+  
+                    <div class="mb-3">
+                      <label for="task{{task.id}}Details" class="form-label fw-bold">Details :</label>
+                      <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
+                    </div>
+  
+                    <a href="#" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
+                  </form>
                 </div>
               </div>
             {% endif %}
           {% endfor %}
         </div>
+      </div>
+    </div>
+    <div class="col-lg-4 mb-4 mb-lg-0">
+      <div class="p-4 bg-light-subtle rounded" id="in-progress">
+        <h4 class="py-3 text-warning bg-warning-subtle text-center rounded">In Progress</h4>
+        <div class="drop_area pb-5" id="in-progress">
+          {% for task in taskboard.task_set.all %}
+          {% if task.status == "IN PROGRESS" %}
+          <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3 draggable text-center py-2" draggable="true">
+            <a href="" class="my-0 py-0 link-light" data-bs-toggle="offcanvas" data-bs-target="#detail{{task.id}}"" aria-controls="detail{{task.id}}">
+              {{task.title}}
+            </a>
+          </div>
 
-        <button class="btn btn-primary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#addTask">
-          Add Task
-        </button>
-
-        <div class="modal fade" id="addTask" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addTaskLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h1 class="modal-title fs-5" id="addTaskLabel">Create a Task</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <form action="{% url 'manager:create_task' taskboard.id %}" method="post">
-                {% csrf_token %}
-                <div class="modal-body">
-                  <div class="mb-3">
-                    <label for="task_title" class="form-label">Task title</label>
-                    <input type="text" name="title" class="form-control" id="task_title" placeholder="New task title">
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="task_status" class="form-label">Task status</label>
-                    <select name="status" class="form-control">
-                      <option value="TODO">To-Do</option>
-                      <option value="IN PROGRESS">In Progress</option>
-                      <option value="DONE">Done</option>
-                    </select>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="task_enddate" class="form-label">Due date</label>
-                    <input type="datetime-local" name="end_date" class="form-control" id="task_enddate" aria-describedby="enddateHelp">
-                    <div id="enddateHelp" class="form-text text-center">
-                      The due date is set to today, midnight if no value is provided.
-                    </div>
-                  </div>
-
-                  <div class="mb-3">
-                    <label for="task_details" class="form-label">Details</label>
-                    <input type="text" name="details" class="form-control" id="task_details" placeholder="New task details (Optional)" aria-describedby="detailsHelp">
-                  </div>
+          <div class="offcanvas offcanvas-end" tabindex="-1" id="detail{{task.id}}" aria-labelledby="detail{{task.id}}Label">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="detail{{task.id}}Label">
+                {{task.title}}
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+              <form>
+                <div class="mb-3">
+                  <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
+                  <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
                 </div>
-                <div class="modal-footer">
-                  <button type="submit" class="btn btn-primary">Create</button>
+
+                <div class="mb-3">
+                  <h6 class="form-label fw-bold">Due Date :</h6>
+                  <p>{{task.end_date}}</p>
                 </div>
+
+                <div class="mb-3">
+                  <label for="task{{task.id}}Details" class="form-label fw-bold">Details :</label>
+                  <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
+                </div>
+
+                <a href="#" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
               </form>
             </div>
           </div>
-        </div>
-
-      </div>
-    </div>
-    <div class="col-lg-4 mb-4 mb-lg-0" id="in-progress">
-      <div class="p-4 bg-light-subtle rounded">
-        <h4 class="py-3 text-warning bg-warning-subtle text-center rounded">In Progress</h4>
-        <div>
-          {% for task in taskboard.task_set.all %}
-          {% if task.status == "IN PROGRESS" %}
-          <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3">
-            <div class="text-center py-2">
-              <a href="" class="my-0 py-0 link-light" data-bs-toggle="offcanvas" data-bs-target="#detail{{task.id}}"" aria-controls="detail{{task.id}}">
-                {{task.title}}
-              </a>
-            </div>
-          </div>
-
-          <div class="offcanvas offcanvas-end" tabindex="-1" id="detail{{task.id}}" aria-labelledby="detail{{task.id}}Label">
-            <div class="offcanvas-header">
-              <h5 class="offcanvas-title" id="detail{{task.id}}Label">
-                {{task.title}}
-              </h5>
-              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-              <div class="mb-3">
-                <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
-                <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
-              </div>
-
-              <div class="mb-3">
-                <label for="task{{task.id}}Enddate" class="form-label fw-bold">Due Date :</label>
-                <p>{{task.end_date}}</p>
-              </div>
-
-              <div class="mb-3">
-                <label for="task{{task.id}}Details" class="for-label fw-bold">Details :</label>
-                <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
-              </div>
-
-              <a href="#" class="btn btn-sm btn-primary">Edit</a>
-              <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
-            </div>
-          </div>
           {% endif %}
           {% endfor %}
         </div>
       </div>
     </div>
-    <div class="col-lg-4 mb-4 mb-lg-0" id="done">
+    <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 bg-black bg-gradient text-center rounded">Done</h4>
-        <div>
+        <div class="drop_area pb-5" id="done">
           {% for task in taskboard.task_set.all %}
           {% if task.status == "DONE" %}
-          <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3">
-            <div class="text-center py-2">
-              <a href="" class="my-0 py-0 link-light" data-bs-toggle="offcanvas" data-bs-target="#detail{{task.id}}"" aria-controls="detail{{task.id}}">
-                {{task.title}}
-              </a>
-            </div>
+          <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3 draggable text-center py-2" draggable="true">
+            <a href="" class="my-0 py-0 link-light" data-bs-toggle="offcanvas" data-bs-target="#detail{{task.id}}"" aria-controls="detail{{task.id}}">
+              {{task.title}}
+            </a>
           </div>
 
           <div class="offcanvas offcanvas-end" tabindex="-1" id="detail{{task.id}}" aria-labelledby="detail{{task.id}}Label">
@@ -168,28 +121,79 @@
               <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
-              <div class="mb-3">
-                <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
-                <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
-              </div>
+              <form>
+                <div class="mb-3">
+                  <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
+                  <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
+                </div>
 
-              <div class="mb-3">
-                <label for="task{{task.id}}Enddate" class="form-label fw-bold">Due Date :</label>
-                <p>{{task.end_date}}</p>
-              </div>
+                <div class="mb-3">
+                  <h6 class="form-label fw-bold">Due Date :</h6>
+                  <p>{{task.end_date}}</p>
+                </div>
 
-              <div class="mb-3">
-                <label for="task{{task.id}}Details" class="for-label fw-bold">Details :</label>
-                <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
-              </div>
+                <div class="mb-3">
+                  <label for="task{{task.id}}Details" class="form-label fw-bold">Details :</label>
+                  <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
+                </div>
 
-              <a href="#" class="btn btn-sm btn-primary">Edit</a>
-              <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
+                <a href="#" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
+              </form>
             </div>
           </div>
           {% endif %}
           {% endfor %}
         </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-sm w-100 position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#addTask">
+    Add Task
+  </button>
+
+  <div class="modal fade" id="addTask" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addTaskLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="addTaskLabel">Create a Task</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="{% url 'manager:create_task' taskboard.id %}" method="post">
+          {% csrf_token %}
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="task_title" class="form-label">Task title</label>
+              <input type="text" name="title" class="form-control" id="task_title" placeholder="New task title">
+            </div>
+
+            <div class="mb-3">
+              <label for="task_status" class="form-label">Task status</label>
+              <select name="status" class="form-control" id="task_status">
+                <option value="TODO">To-Do</option>
+                <option value="IN PROGRESS">In Progress</option>
+                <option value="DONE">Done</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="task_enddate" class="form-label">Due date</label>
+              <input type="datetime-local" name="end_date" class="form-control" id="task_enddate" aria-describedby="enddateHelp">
+              <div id="enddateHelp" class="form-text text-center">
+                The due date is set to today, midnight if no value is provided.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="task_details" class="form-label">Details</label>
+              <input type="text" name="details" class="form-control" id="task_details" placeholder="New task details (Optional)" aria-describedby="detailsHelp">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Create</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
