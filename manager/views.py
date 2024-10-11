@@ -3,7 +3,7 @@
 from django.views import generic
 from .models import Taskboard, Event
 from django.forms import ModelForm
-from django.shortcuts import redirect
+from django.shortcuts import redirect, reverse
 from django.contrib import messages
 
 
@@ -48,7 +48,26 @@ def create_event(request) -> redirect:
         if form.is_valid():
             form.save()
             messages.info(request, f"Event: {request.POST['title']} added!")
-            return redirect("manager:calendar")
+            return redirect(reverse("manager:calendar"))
     # if method is not POST or form is not valid
     messages.error(request, f"Event data is invalid.")
-    return redirect("manager:calendar")
+    return redirect(redirect("manager:calendar"))
+
+
+def delete_event(request, event_id: int) -> redirect:
+    """Deletes the given event from the database
+
+    :param request: A django HttpRequest object
+    :param event_id: The Primary Key (id) of the event
+    :return: A redirect to the calendar page
+    """
+    try:
+        event = Event.objects.get(pk=[event_id])
+    except Event.DoesNotExist:
+        messages.error(request, "Event does not exist")
+        return redirect(reverse("manager:calendar"))
+    event_title = event.title
+    event.delete()
+    messages.info(request, f"Event: {event_title}, has been deleted.")
+    return redirect(reverse("manager:calendar"))
+
