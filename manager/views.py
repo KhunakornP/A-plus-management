@@ -13,4 +13,7 @@ class TaskboardView(generic.ListView):
 
 
 def calendar_view(request):
-    return render(request, 'manager/calendar.html')
+    """Display calendar."""
+    return render(request, 'manager/calendar.html', {
+        
+    })
