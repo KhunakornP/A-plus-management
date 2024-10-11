@@ -29,7 +29,26 @@
   .stretch-row {
     flex-grow: 1;
   }
+  .calendar .col {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+  }
+  .calendar .date-row .col {
+    height: 100px; /* Adjust height as needed */
+    vertical-align: middle; /* Vertically centers the content */
+  }
+  .calendar .events {
+    font-size: 0.85rem;
+  }
+  .calendar .event {
+    background-color: #f0f0f0;
+    padding: 2px 4px;
+    margin: 2px 0;
+    border-radius: 3px;
+  }
 </style>
+
 </head>
 <body>
 
@@ -44,6 +63,11 @@
       <div class="card-body overflow-auto">
         <div class="calendar">
           <div class="row">
+            <div class="col">prev</div>
+            <div class="col">October 2024</div>
+            <div class="col">next</div>
+          </div>
+          <div class="row">
             <div class="col">Sun</div>
             <div class="col">Mon</div>
             <div class="col">Tue</div>
@@ -52,7 +76,7 @@
             <div class="col">Fri</div>
             <div class="col">Sat</div>
           </div>
-          <div class="row">
+          <div class="row date-row">
             <div class="col"></div>
             <div class="col"></div>
             <div class="col">1</div>
@@ -61,7 +85,7 @@
             <div class="col">4</div>
             <div class="col">5</div>
           </div>
-          <div class="row">
+          <div class="row date-row">
             <div class="col">6</div>
             <div class="col">7</div>
             <div class="col">8</div>
@@ -70,7 +94,7 @@
             <div class="col">11</div>
             <div class="col">12</div>
           </div>
-          <div class="row">
+          <div class="row date-row">
             <div class="col">13</div>
             <div class="col">14</div>
             <div class="col">15</div>
@@ -79,7 +103,7 @@
             <div class="col">18</div>
             <div class="col">19</div>
           </div>
-          <div class="row">
+          <div class="row date-row">
             <div class="col">20</div>
             <div class="col">21</div>
             <div class="col">22</div>
@@ -88,7 +112,7 @@
             <div class="col">25</div>
             <div class="col">26</div>
           </div>
-          <div class="row">
+          <div class="row date-row">
             <div class="col">27</div>
             <div class="col">28</div>
             <div class="col">29</div>
