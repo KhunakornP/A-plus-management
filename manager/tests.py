@@ -101,13 +101,19 @@ class EventViewTests(TestCase):
     def test_create_valid_event(self):
         """Test creating an event."""
         url = reverse("manager:create_event")
-        data = {"title": "New festival", "start_date": datetime.now(),
-                "end_date": datetime.now()}
+        data = {
+            "title": "New festival",
+            "start_date": datetime.now(),
+            "end_date": datetime.now(),
+        }
         response = self.client.post(url, data)
         self.assertRedirects(response, reverse("manager:calendar"))
         self.assertEqual(Event.objects.filter(title="New festival").count(), 1)
-        data = {"title": "Midterms", "start_date": datetime.now(),
-                "end_date": datetime.now()}
+        data = {
+            "title": "Midterms",
+            "start_date": datetime.now(),
+            "end_date": datetime.now(),
+        }
         response = self.client.post(url, data)
         self.assertRedirects(response, reverse("manager:calendar"))
         self.assertEqual(Event.objects.filter(title="Midterms").count(), 1)
@@ -129,7 +135,7 @@ class EventViewTests(TestCase):
         """Test deleting a valid event."""
         event = Event.objects.create(title="Bug bounty ISP")
         self.assertEqual(Event.objects.count(), 1)
-        url = reverse("manager:delete_event", args=(event.id, ))
+        url = reverse("manager:delete_event", args=(event.id,))
         response = self.client.post(url)
         self.assertEqual(Event.objects.count(), 0)
         self.assertRedirects(response, reverse("manager:calendar"))
@@ -142,6 +148,6 @@ class EventViewTests(TestCase):
         event could not be deleted.
         """
         # delete an event that does not exist (yet)
-        url = reverse("manager:delete_event", args=(9999, ))
+        url = reverse("manager:delete_event", args=(9999,))
         response = self.client.get(url)
         self.assertRedirects(response, reverse("manager:calendar"))
