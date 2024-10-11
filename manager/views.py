@@ -22,15 +22,16 @@ class CalendarView(generic.ListView):
 
 
 class EventForm(ModelForm):
-    """A class for creating an event object from the given POST request"""
+    """A class for creating an event object from the given POST request."""
 
     class Meta:
-        """Metaclass for the form"""
+        """Metaclass for the form."""
+
         model = Event
         fields = ["title", "start_date", "end_date", "details"]
 
     def __init__(self, *args, **kwargs):
-        """Modify the init method to specify which fields are optional"""
+        """Modify the init method to specify which fields are optional."""
         super().__init__(*args, **kwargs)
         # Note while event does have defaults for dates please enter
         # the date that the user clicked on the calendar for the default.
@@ -38,7 +39,8 @@ class EventForm(ModelForm):
 
 
 def create_event(request) -> redirect:
-    """Create an event object from the POST request
+    """
+    Create an event object from the POST request.
 
     :param request: A django HttpRequest object.
     :return: A redirect to the Calendar page.
@@ -50,16 +52,17 @@ def create_event(request) -> redirect:
             messages.info(request, f"Event: {request.POST['title']} added!")
             return redirect(reverse("manager:calendar"))
     # if method is not POST or form is not valid
-    messages.error(request, f"Event data is invalid.")
+    messages.error(request, "Event data is invalid.")
     return redirect(redirect("manager:calendar"))
 
 
 def delete_event(request, event_id: int) -> redirect:
-    """Deletes the given event from the database
+    """
+    Delete the given event from the database.
 
-    :param request: A django HttpRequest object
-    :param event_id: The Primary Key (id) of the event
-    :return: A redirect to the calendar page
+    :param request: A django HttpRequest object.
+    :param event_id: The Primary Key (id) of the event.
+    :return: A redirect to the calendar page.
     """
     try:
         event = Event.objects.get(pk=[event_id])
@@ -70,4 +73,3 @@ def delete_event(request, event_id: int) -> redirect:
     event.delete()
     messages.info(request, f"Event: {event_title}, has been deleted.")
     return redirect(reverse("manager:calendar"))
-
