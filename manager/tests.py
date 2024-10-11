@@ -96,7 +96,7 @@ class TaskModelTestcase(TestCase):
 # to the group who's working on the taskboard could you please
 # refactor this to your test suit. While we're here shall we also do codecov?
 class EventViewTests(TestCase):
-    """Tests for the front end views for creating and deleting tasks"""
+    """Tests for the front end views for creating and deleting tasks."""
 
     def test_create_valid_event(self):
         """Test creating an event."""
