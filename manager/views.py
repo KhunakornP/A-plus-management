@@ -2,6 +2,7 @@
 
 from django.views import generic
 from .models import Taskboard
+from django.shortcuts import render
 
 
 class TaskboardView(generic.ListView):
@@ -11,8 +12,5 @@ class TaskboardView(generic.ListView):
     model = Taskboard
 
 
-class CalendarView(generic.ListView):
-    """A view that displays the calendar."""
-
-    # to be implemented
-    template_name = "manager/calendar.html"
+def calendar_view(request):
+    return render(request, 'manager/calendar.html')
