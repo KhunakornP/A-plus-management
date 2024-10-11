@@ -3,6 +3,7 @@
 from django.views import generic
 from .models import Taskboard, Task
 from django.shortcuts import get_object_or_404, redirect
+from django.http import Http404
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
@@ -69,7 +70,7 @@ def get_taskboard(taskboard_id: int) -> Union[Taskboard, None]:
     """
     try:
         return get_object_or_404(Taskboard, pk=taskboard_id)
-    except (KeyError, Taskboard.DoesNotExist):
+    except Http404:
         return None
 
 
@@ -80,15 +81,13 @@ def create_task(request, taskboard_id: int) -> redirect:
     :param taskboard_id: id of the taskboard we're going to bound the task to
     cannot be tested until the taskboard.html page is finished.
     """
-    # TODO test this method once the frontend is done
     post_data = request.POST.copy()
     post_data["taskboard"] = taskboard_id
     form = TaskForm(post_data)
     if form.is_valid():
         form.save()
         messages.success(request, f'Successfully created task {request.POST["title"]}')
-        # TODO to be changed to the taskboard page that the task belongs to.
-        return redirect(reverse("manager:taskboard_index"))
+        return redirect(reverse("manager:taskboard", args=(taskboard_id,)))
     else:
         messages.error(request, "Invalid data.")
         return redirect(reverse("manager:taskboard_index"))
@@ -103,12 +102,13 @@ def delete_task(request, task_id: int) -> redirect:
     """
     # TODO test this method once the frontend is done
     try:
-        task = get_object_or_404(Task, pk=task_id)
+        task = Task.objects.get(pk=task_id)
+        tb_id = task.taskboard.id
         task.delete()
+        return redirect(reverse("manager:taskboard", args=(tb_id,)))
     except (KeyError, Task.DoesNotExist):
         messages.error(request, "This task does not exist")
-    # TODO to be changed to the taskboard page that the task belongs to.
-    return redirect(reverse("manager:taskboard_index"))
+        return redirect(reverse("manager:taskboard_index"))
 
 
 def update_task(request, task_id: int) -> redirect:
@@ -123,19 +123,20 @@ def update_task(request, task_id: int) -> redirect:
     :param task_id: the ID of the task that is to be updated
     :return: redirects to the Taskboard page that this task belongs
     """
-    # TODO test this method once the frontend is done
     try:
-        task = get_object_or_404(Task, pk=task_id)
+        task = Task.objects.get(pk=task_id)
     except (KeyError, Task.DoesNotExist):
         messages.error(request, "This task does not exist")
         return redirect(reverse("manager:taskboard_index"))
-    form = TaskForm(request.POST, instance=task)
+    post_data = request.POST.copy()
+    post_data["taskboard"] = task.taskboard.id
+    form = TaskForm(post_data, instance=task)
     if form.is_valid():
+        form.save()
         messages.success(request, "The task has been updated")
     else:
         messages.error(request, "Task does not exist")
-    # TODO to be changed to the taskboard page that the task belongs to.
-    return redirect(reverse("manager:taskboard_index"))
+    return redirect(reverse("manager:taskboard", args=(task_id,)))
 
 
 def create_taskboard(request) -> redirect:
