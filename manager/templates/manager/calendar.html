@@ -1,5 +1,122 @@
 {% extends "base.html" %}
 <title>Calendar</title>
+
+<style>
+  html, body {
+    height: 100%;
+  }
+  .full-height {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .stretch-row {
+    flex-grow: 1;
+  }
+</style>
+
 {% block content %}
-Lorem Ipsum
+
+<style>
+  html, body {
+    height: 100%;
+  }
+  .full-height {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .stretch-row {
+    flex-grow: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="container-fluid full-height my-2">
+<div class="row stretch-row">
+  <!-- Calendar Section -->
+  <div class="col-md-8 d-flex">
+    <div class="card flex-fill">
+      <div class="card-header">
+        Calendar
+      </div>
+      <div class="card-body overflow-auto">
+        <div class="calendar">
+          <div class="row">
+            <div class="col">Sun</div>
+            <div class="col">Mon</div>
+            <div class="col">Tue</div>
+            <div class="col">Wed</div>
+            <div class="col">Thu</div>
+            <div class="col">Fri</div>
+            <div class="col">Sat</div>
+          </div>
+          <div class="row">
+            <div class="col"></div>
+            <div class="col"></div>
+            <div class="col">1</div>
+            <div class="col">2</div>
+            <div class="col">3</div>
+            <div class="col">4</div>
+            <div class="col">5</div>
+          </div>
+          <div class="row">
+            <div class="col">6</div>
+            <div class="col">7</div>
+            <div class="col">8</div>
+            <div class="col">9</div>
+            <div class="col">10</div>
+            <div class="col">11</div>
+            <div class="col">12</div>
+          </div>
+          <div class="row">
+            <div class="col">13</div>
+            <div class="col">14</div>
+            <div class="col">15</div>
+            <div class="col">16</div>
+            <div class="col">17</div>
+            <div class="col">18</div>
+            <div class="col">19</div>
+          </div>
+          <div class="row">
+            <div class="col">20</div>
+            <div class="col">21</div>
+            <div class="col">22</div>
+            <div class="col">23</div>
+            <div class="col">24</div>
+            <div class="col">25</div>
+            <div class="col">26</div>
+          </div>
+          <div class="row">
+            <div class="col">27</div>
+            <div class="col">28</div>
+            <div class="col">29</div>
+            <div class="col">30</div>
+            <div class="col">31</div>
+            <div class="col"></div>
+            <div class="col"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taskboard Section -->
+  <div class="col-md-4 d-flex">
+    <div class="card flex-fill">
+      <div class="card-header">
+        Taskboard
+      </div>
+      <div class="card-body overflow-auto">
+        <div class="taskboard">
+          <!-- placeholder task -->
+          <p>No tasks for today.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
 {% endblock %}
