@@ -67,6 +67,7 @@
                     <label for="task_title" class="form-label">Task title</label>
                     <input type="text" name="title" class="form-control" id="task_title" placeholder="New task title">
                   </div>
+
                   <div class="mb-3">
                     <label for="task_status" class="form-label">Task status</label>
                     <select name="status" class="form-control">
@@ -74,6 +75,19 @@
                       <option value="IN PROGRESS">In Progress</option>
                       <option value="DONE">Done</option>
                     </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="task_enddate" class="form-label">Due date</label>
+                    <input type="datetime-local" name="end_date" class="form-control" id="task_enddate" aria-describedby="enddateHelp">
+                    <div id="enddateHelp" class="form-text text-center">
+                      The due date is set to today, midnight if no value is provided.
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="task_details" class="form-label">Details</label>
+                    <input type="text" name="details" class="form-control" id="task_details" placeholder="New task details (Optional)" aria-describedby="detailsHelp">
                   </div>
                 </div>
                 <div class="modal-footer">

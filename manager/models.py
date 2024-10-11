@@ -41,3 +41,9 @@ class Task(models.Model):
     end_date = models.DateTimeField("End date", default=today_midnight)
     details = models.TextField(default=None, null=True, blank=True)
     taskboard = models.ForeignKey(Taskboard, on_delete=models.CASCADE)
+    
+    def save(self, *args, **kwargs):
+        """Set default end date if there's a NULL value inserted."""
+        if self.end_date is None:
+            self.end_date = today_midnight()
+        super().save(*args, **kwargs)
