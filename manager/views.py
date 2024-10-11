@@ -12,6 +12,16 @@ class TaskboardView(generic.ListView):
     template_name = "manager/taskboard.html"
     model = Taskboard
 
+def generate_calendar(start_day, n_days):
+    """Return a nested list of days representing a calendar."""
+    days = [''] * start_day + list(range(1, n_days + 1))
+    rows = [days[i:i + 7] for i in range(0, len(days), 7)]
+    
+    # Ensure the last row has exactly 7 elements
+    if len(rows[-1]) < 7:
+        rows[-1].extend([''] * (7 - len(rows[-1])))
+    
+    return rows
 
 def calendar_view(request, date=date.today()):
     """Display calendar."""
@@ -20,13 +30,15 @@ def calendar_view(request, date=date.today()):
     start_day, n_days = calendar.monthrange(current_year, current_month)
 
     tasks = Task.objects.filter(end_date__year=current_year,
-                                 end_date__month=current_month)
+                                end_date__month=current_month)
     task_data = [{'title': task.title, 'end_date': task.end_date} for task in tasks]
 
     return render(request, 'manager/calendar.html', {
         'current_month': current_month,
         'current_year': current_year,
-        'start_day': start_day,
-        'n_days': n_days,
+        'rows': generate_calendar(start_day+1, n_days),
         'tasks': task_data,
     })
+
+if __name__ == 'main':
+    print(generate_calendar(2, 31))
