@@ -12,7 +12,7 @@
               </div>
               <div class="card-body">
                 <div class="d-grid gap-2 d-md-block">
-                    <a href="#" class="btn btn-info mx-2">Go to board</a>
+                    <a href="{% url 'manager:taskboard' taskboard.id %}" class="btn btn-info mx-2">Go to board</a>
                     <a href="{% url 'manager:delete_taskboard' taskboard.id %}" class="btn btn-danger mx-2">Delete</a>
                 </div>
               </div>
@@ -20,32 +20,35 @@
           </div>
       {% endfor %}
     {% else %}
-      <div class="d-grid gap-2 col-6 mx-auto">
-        <h4 class="text-white text-center">You have no taskboard</h4>
+      <h4 class="text-white text-center">You have no taskboard</h4>
+    {% endif %}
 
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="center">
-          Create a taskboard
-        </button>
+    <button type="button" class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="center">
+      Create a taskboard
+    </button>
 
-        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h1 class="modal-title fs-5" id="staticBackdropLabel">Create a taskboard</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                To be changed into form after taskboard creation is implemented.
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Create</button>
-              </div>
-            </div>
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">Create a taskboard</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
+          <div class="modal-body">
+            <form action="{% url 'manager:create_taskboard' %}" method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="taskboard_name" class="form-label">Taskboard name</label>
+                <input type="text" name="name" class="form-control" id="taskboard_title" placeholder="New taskboard name">
+              </div>
+
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Create</button>
+              </div>
+            </form>
         </div>
       </div>
-    {% endif %}
+    </div>
   </div>
 </div>
 {% endblock %}
