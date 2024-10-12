@@ -74,3 +74,32 @@ def delete_event(request, event_id: int) -> redirect:
     event.delete()
     messages.info(request, f"Event: {event_title}, has been deleted.")
     return redirect(reverse("manager:calendar"))
+
+
+def update_event(request, event_id: int) -> redirect:
+    """
+    Update an event attributes with the given data.
+
+    This function takes a POST request and updates the event with the given
+    event_id. It updates all attributes specified in the POST request for the
+    event object.
+
+    :param request: A django HttpRequest object.
+    :param event_id: The Primary Key (id) of the event.
+    :return: A redirect to the calendar page.
+    """
+    try:
+        event = Event.objects.get(pk=event_id)
+    except Event.DoesNotExist:
+        messages.error(request, "Event does not exist")
+        return redirect(reverse("manager:calendar"))
+    if request.method == "POST:":
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            messages.info(request, f"Event: {request.POST['title']} updated.")
+            return redirect(reverse("manager:calendar"))
+    # if the request was not POST or form is not valid
+    messages.error(request, "Event data provided is invalid.")
+    return redirect(reverse("manager:calendar"))
+
