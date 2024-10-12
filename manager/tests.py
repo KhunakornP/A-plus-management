@@ -171,7 +171,7 @@ class EventViewTests(TestCase):
         self.assertRedirects(response, reverse("manager:calendar"))
 
     def test_update_valid_event(self):
-        """Test updating an event with valid information"""
+        """Test updating an event with valid information."""
         event = Event.objects.create(title="Bug bounty ISP")
         data = {
             "title": "Team Bug bounty ISP 2024",
@@ -189,7 +189,7 @@ class EventViewTests(TestCase):
         self.assertEqual(event, updated_event)
 
     def test_update_invalid_event(self):
-        """Updating an event that does not exist does not create a new event"""
+        """Updating an event that does not exist does not create a new event."""
         data = {
             "title": "My first date",
             "start_date": datetime.now(),
