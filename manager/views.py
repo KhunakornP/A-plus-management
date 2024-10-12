@@ -100,7 +100,6 @@ def delete_task(request, task_id: int) -> HttpResponse:
     :param task_id: the ID of the task which is to be deleted
     :return: redirects to the Taskboard page that this task belongs
     """
-    # TODO test this method once the frontend is done
     try:
         task = Task.objects.get(pk=task_id)
         tb_id = task.taskboard.id
@@ -146,7 +145,6 @@ def create_taskboard(request) -> HttpResponse:
     :param request: django's request object
     :return: redirect to taskboard index page
     """
-    # TODO test this method once the frontend is done
     try:
         taskboard_name = request.POST["name"]
         new_taskboard = Taskboard.objects.create(name=taskboard_name)
@@ -180,7 +178,6 @@ def update_taskboard(request, taskboard_id: int) -> HttpResponse:
     :param taskboard_id: the ID of the taskboard which is to be deleted
     :return: redirect to the taskboard index page
     """
-    # TODO test this method once the frontend is done
     taskboard = get_taskboard(taskboard_id)
     if isinstance(taskboard, Taskboard):
         form = TaskboardForm(request.POST, instance=taskboard)
