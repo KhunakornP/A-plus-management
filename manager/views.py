@@ -23,19 +23,38 @@ def generate_calendar(start_day, n_days):
     
     return rows
 
-def calendar_view(request, date=date.today()):
+def calendar_view(request):
     """Display calendar."""
-    current_year = date.year
-    current_month = date.month
-    start_day, n_days = calendar.monthrange(current_year, current_month)
+    year = request.GET.get('year')
+    month = request.GET.get('month')
+    day = request.GET.get('date')
 
-    tasks = Task.objects.filter(end_date__year=current_year,
-                                end_date__month=current_month)
+    if year is None or month is None:
+        year = date.today().year
+        month = date.today().month
+        day = date.today().day
+    else:
+        year = int(year)
+        month = int(month)
+        day = date
+
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
+        
+    start_day, n_days = calendar.monthrange(year, month)
+
+    tasks = Task.objects.filter(end_date__year=year,
+                                end_date__month=month)
     task_data = [{'title': task.title, 'end_date': task.end_date} for task in tasks]
 
     return render(request, 'manager/calendar.html', {
-        'current_month': current_month,
-        'current_year': current_year,
+        'current_day': day,
+        'current_month': month,
+        'current_year': year,
         'rows': generate_calendar(start_day+1, n_days),
         'tasks': task_data,
     })

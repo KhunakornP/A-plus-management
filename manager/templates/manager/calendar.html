@@ -21,9 +21,21 @@
       <div class="card-body overflow-auto">
         <div class="calendar">
           <div class="row">
-            <div class="col">prev</div>
-            <div class="col">October 2024</div>
-            <div class="col">next</div>
+            <div class="col">
+              <form method="get" action="{% url 'manager:calendar' %}">
+                <input type="hidden" name="year" value="{{ current_year }}">
+                <input type="hidden" name="month" value="{{ current_month|add:'-1' }}">
+                <button type="submit">prev</button>
+              </form>              
+            </div>
+            <div class="col">{{current_month}} {{current_year}}</div>
+            <div class="col">
+              <form method="get" action="{% url 'manager:calendar' %}">
+                <input type="hidden" name="year" value="{{ current_year }}">
+                <input type="hidden" name="month" value="{{ current_month|add:'1' }}">
+                <button type="submit">next</button>
+              </form>
+            </div>
           </div>
           <div class="row">
             <div class="col">Sun</div>
