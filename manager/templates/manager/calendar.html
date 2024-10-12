@@ -18,6 +18,13 @@
       <div class="card-header">
         Calendar
       </div>
+
+      <form id="calendar-form" method="get" action="{% url 'manager:calendar' %}">
+        <input type="hidden" name="year" value="{{ current_year }}">
+        <input type="hidden" name="month" value="{{ current_month }}">
+        <input type="hidden" name="day" id="selected-day" value="">
+      </form>
+
       <div class="card-body overflow-auto">
         <div class="calendar">
           <div class="row">
@@ -49,7 +56,13 @@
           {% for row in rows %}
             <div class="row date-row">
               {% for day in row %}
-                <div class="col">{{ day }}</div>
+                <div class="col date-cell" data-day="{{ day }}">
+                  {% if day %}
+                    {{ day }}
+                  {% else %}
+                    &nbsp;
+                  {% endif %}
+                </div>
               {% endfor %}
             </div>
           {% endfor %}
@@ -74,5 +87,19 @@
   </div>
 </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.date-cell').forEach(function(cell) {
+      cell.addEventListener('click', function() {
+        var day = this.getAttribute('data-day');
+        if (day) {
+          document.getElementById('selected-day').value = day;
+          document.getElementById('calendar-form').submit();
+        }
+      });
+    });
+  });
+</script>
 
 {% endblock %}

@@ -32,11 +32,9 @@ def calendar_view(request):
     if year is None or month is None:
         year = date.today().year
         month = date.today().month
-        day = date.today().day
     else:
         year = int(year)
         month = int(month)
-        day = date
 
     if month < 1:
         month = 12

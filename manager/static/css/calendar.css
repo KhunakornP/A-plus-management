@@ -13,25 +13,46 @@ html, body {
     flex-grow: 1;
   }
   
+  .card {
+    background-color: #343a40; /* Light gray background for the cards */
+    color: #ffffff; /* Darker font color */
+  }
+
   .calendar .col {
-    border: 1px solid #ccc;
+    border: 1px solid #a3a6a9;
     padding: 10px;
     text-align: center;
+    background-color: #eeeeee; /* Light blue background for the calendar cells */
+    color: #000000;
   }
   
   .calendar .date-row .col {
     height: 100px; /* Adjust height as needed */
     vertical-align: middle; /* Vertically centers the content */
   }
-  
-  .calendar .events {
-    font-size: 0.85rem;
+
+  .date-cell {
+    cursor: pointer;
+    transition: background-color 0.3s;
   }
-  
-  .calendar .event {
-    background-color: #f0f0f0;
-    padding: 2px 4px;
-    margin: 2px 0;
-    border-radius: 3px;
+
+  .date-cell:hover {
+    background-color: #b9b9bb;
+  }
+
+  .selected-day {
+    border: 2px solid red;
+    border-radius: 50%;
+    padding: 5px;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+  }
+
+  /* Taskboard font color */
+.taskboard p {
+  color: #ffffff; /* Dark teal font for taskboard text */
   }
   
