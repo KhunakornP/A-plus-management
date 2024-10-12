@@ -3,7 +3,7 @@
 from django.views import generic
 from .models import Taskboard, Task
 from django.shortcuts import get_object_or_404, redirect
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
@@ -74,7 +74,7 @@ def get_taskboard(taskboard_id: int) -> Union[Taskboard, None]:
         return None
 
 
-def create_task(request, taskboard_id: int) -> redirect:
+def create_task(request, taskboard_id: int) -> HttpResponse:
     """Create a new task bounded to a specific taskboard from POST request.
 
     :param request: django request object
@@ -93,7 +93,7 @@ def create_task(request, taskboard_id: int) -> redirect:
         return redirect(reverse("manager:taskboard_index"))
 
 
-def delete_task(request, task_id: int) -> redirect:
+def delete_task(request, task_id: int) -> HttpResponse:
     """Delete a specific task from the database.
 
     :param request: Django's request object
@@ -111,7 +111,7 @@ def delete_task(request, task_id: int) -> redirect:
         return redirect(reverse("manager:taskboard_index"))
 
 
-def update_task(request, task_id: int) -> redirect:
+def update_task(request, task_id: int) -> HttpResponse:
     """Update task attributes from POST request.
 
     This method will OVERRIDE the task with everything that's put in the
@@ -129,6 +129,7 @@ def update_task(request, task_id: int) -> redirect:
         messages.error(request, "This task does not exist")
         return redirect(reverse("manager:taskboard_index"))
     post_data = request.POST.copy()
+    assert task.taskboard is not None
     post_data["taskboard"] = task.taskboard.id
     form = TaskForm(post_data, instance=task)
     if form.is_valid():
@@ -139,7 +140,7 @@ def update_task(request, task_id: int) -> redirect:
     return redirect(reverse("manager:taskboard", args=(task_id,)))
 
 
-def create_taskboard(request) -> redirect:
+def create_taskboard(request) -> HttpResponse:
     """Create a taskboard from POST request.
 
     :param request: django's request object
@@ -156,7 +157,7 @@ def create_taskboard(request) -> redirect:
     return redirect(reverse("manager:taskboard_index"))
 
 
-def delete_taskboard(request, taskboard_id: int) -> redirect:
+def delete_taskboard(request, taskboard_id: int) -> HttpResponse:
     """Delete a specific taskboard from the database.
 
     :param request: Django's request object
@@ -172,7 +173,7 @@ def delete_taskboard(request, taskboard_id: int) -> redirect:
     return redirect(reverse("manager:taskboard_index"))
 
 
-def update_taskboard(request, taskboard_id: int) -> redirect:
+def update_taskboard(request, taskboard_id: int) -> HttpResponse:
     """Modify the taskboard form POST request.
 
     :param request: Django's request object

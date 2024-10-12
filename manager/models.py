@@ -24,7 +24,7 @@ class Taskboard(models.Model):
     But each task may only be associated with one task board.
     """
 
-    name = models.CharField(max_length=200, null=False)
+    name: models.CharField = models.CharField(max_length=200, null=False)
 
 
 class Task(models.Model):
@@ -36,12 +36,16 @@ class Task(models.Model):
     can have multiple tasks.
     """
 
-    title = models.CharField(max_length=300)
-    status = models.CharField(max_length=20, default="TODO")
-    end_date = models.DateTimeField("End date", default=today_midnight)
-    details = models.TextField(default=None, null=True, blank=True)
-    taskboard = models.ForeignKey(Taskboard, on_delete=models.CASCADE)
-    
+    title: models.CharField = models.CharField(max_length=300)
+    status: models.CharField = models.CharField(max_length=20, default="TODO")
+    end_date: models.DateTimeField = models.DateTimeField(
+        "End date", default=today_midnight
+    )
+    details: models.TextField = models.TextField(default=None, null=True, blank=True)
+    taskboard: models.ForeignKey = models.ForeignKey(
+        Taskboard, on_delete=models.CASCADE
+    )
+
     def save(self, *args, **kwargs):
         """Set default end date if there's a NULL value inserted."""
         if self.end_date is None:
