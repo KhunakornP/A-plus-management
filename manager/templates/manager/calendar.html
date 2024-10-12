@@ -56,9 +56,21 @@
           {% for row in rows %}
             <div class="row date-row">
               {% for day in row %}
-                <div class="col date-cell" data-day="{{ day }}">
+                <div class="col date-cell {% if day == current_day %}current-day{% endif %}" data-day="{{ day }}">
                   {% if day %}
-                    {{ day }}
+                    <div class="date-number">{{ day }}</div>
+                    <div class="task-dots">
+                      {% for task in tasks %}
+                        {% if task.end_date.day == day %}
+                          <span class="task-dot"></span>
+                        {% endif %}
+                      {% endfor %}
+                        {% for event in events %}
+                          {% if event.start_date.day == day or event.end_date.day == day %}
+                            <span class="event-dot"></span>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
                   {% else %}
                     &nbsp;
                   {% endif %}
@@ -79,10 +91,22 @@
       </div>
       <div class="card-body overflow-auto">
         <div class="taskboard">
-          <!-- placeholder task -->
-          <p>No tasks for today.</p>
+          {% for task in tasks %}
+            <p>{{ task.title }} - {{ task.end_date|date:"Y-m-d" }}</p>
+          {% empty %}
+            <p>No tasks for this month.</p>
+          {% endfor %}
+          
+          {% for event in events %}
+            <p>{{ event.title }} : {{ event.start_date|date:"Y-m-d" }} - {{ event.end_date|date:"Y-m-d" }}</p>
+          {% empty %}
+          <p>No events for this month.</p>
+          {% endfor %}
         </div>
       </div>
+      <a class="btn btn-primary position-absolute" style="bottom: 10px; right: 10px;">
+        + Add
+      </a>
     </div>
   </div>
 </div>

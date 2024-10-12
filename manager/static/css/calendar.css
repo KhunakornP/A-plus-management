@@ -31,6 +31,11 @@ html, body {
     vertical-align: middle; /* Vertically centers the content */
   }
 
+ .current-day {
+    background-color: #ffeb3b; /* Yellow background color */
+    color: #000; /* Black text color */
+  }
+
   .date-cell {
     cursor: pointer;
     transition: background-color 0.3s;
@@ -40,19 +45,27 @@ html, body {
     background-color: #b9b9bb;
   }
 
-  .selected-day {
-    border: 2px solid red;
-    border-radius: 50%;
-    padding: 5px;
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    text-align: center;
-    line-height: 30px;
-  }
-
   /* Taskboard font color */
 .taskboard p {
   color: #ffffff; /* Dark teal font for taskboard text */
   }
+
+  .task-dot {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    background-color: red;
+    border-radius: 50%;
+    margin-left: 2px;
+}
+
+.event-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background-color: rgb(84, 78, 255);
+  border-radius: 50%;
+  margin-left: 2px;
+}
+
   

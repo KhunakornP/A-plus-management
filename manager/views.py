@@ -1,9 +1,9 @@
 """Module for all view classes for pages in the manager app."""
 import calendar
 from django.views import generic
-from .models import Taskboard, Task
+from .models import Taskboard, Task, Event
 from django.shortcuts import render
-from datetime import date
+from datetime import date, timedelta
 
 
 class TaskboardView(generic.ListView):
@@ -27,7 +27,7 @@ def calendar_view(request):
     """Display calendar."""
     year = request.GET.get('year')
     month = request.GET.get('month')
-    day = request.GET.get('date')
+    day = request.GET.get('day')
 
     if year is None or month is None:
         year = date.today().year
@@ -47,14 +47,23 @@ def calendar_view(request):
 
     tasks = Task.objects.filter(end_date__year=year,
                                 end_date__month=month)
-    task_data = [{'title': task.title, 'end_date': task.end_date} for task in tasks]
+    
+    # Calculate the start and end of the month
+    start_date = date(year, month, 1)
+    end_date = start_date + timedelta(days=n_days - 1)
+
+    # Filter events based on start_date or end_date within the month
+    events = Event.objects.filter(
+        start_date__lte=end_date,
+        end_date__gte=start_date)
 
     return render(request, 'manager/calendar.html', {
         'current_day': day,
         'current_month': month,
         'current_year': year,
         'rows': generate_calendar(start_day+1, n_days),
-        'tasks': task_data,
+        'tasks': tasks,
+        'events': events,
     })
 
 if __name__ == 'main':
