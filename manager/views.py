@@ -93,7 +93,7 @@ def update_event(request, event_id: int) -> redirect:
     except Event.DoesNotExist:
         messages.error(request, "Event does not exist")
         return redirect(reverse("manager:calendar"))
-    if request.method == "POST:":
+    if request.method == "POST":
         form = EventForm(request.POST, instance=event)
         if form.is_valid():
             form.save()
@@ -102,4 +102,3 @@ def update_event(request, event_id: int) -> redirect:
     # if the request was not POST or form is not valid
     messages.error(request, "Event data provided is invalid.")
     return redirect(reverse("manager:calendar"))
-
