@@ -22,6 +22,7 @@ def generate_calendar(start_day, n_days):
     # Ensure the last row has exactly 7 elements
     if len(rows[-1]) < 7:
         rows[-1].extend([""] * (7 - len(rows[-1])))
+        rows = [row for row in rows if any(day != "" for day in row)]
 
     return rows
 
@@ -69,7 +70,3 @@ def calendar_view(request):
             "events": events,
         },
     )
-
-
-if __name__ == "main":
-    print(generate_calendar(2, 31))

@@ -14,26 +14,26 @@ html, body {
   }
   
   .card {
-    background-color: #343a40; /* Light gray background for the cards */
-    color: #ffffff; /* Darker font color */
+    background-color: #343a40;
+    color: #ffffff;
   }
 
   .calendar .col {
     border: 1px solid #a3a6a9;
     padding: 10px;
     text-align: center;
-    background-color: #eeeeee; /* Light blue background for the calendar cells */
+    background-color: #eeeeee;
     color: #000000;
   }
   
   .calendar .date-row .col {
-    height: 100px; /* Adjust height as needed */
-    vertical-align: middle; /* Vertically centers the content */
+    height: 100px;
+    vertical-align: middle;
   }
 
  .current-day {
-    background-color: #ffeb3b; /* Yellow background color */
-    color: #000; /* Black text color */
+    background-color: #ffeb3b;
+    color: #000;
   }
 
   .date-cell {
@@ -45,9 +45,8 @@ html, body {
     background-color: #b9b9bb;
   }
 
-  /* Taskboard font color */
 .taskboard p {
-  color: #ffffff; /* Dark teal font for taskboard text */
+  color: #ffffff;
   }
 
   .task-dot {
@@ -68,4 +67,7 @@ html, body {
   margin-left: 2px;
 }
 
-  
+.add-button {
+  bottom: 10px;
+  right: 10px;
+}  
