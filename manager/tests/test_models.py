@@ -6,7 +6,7 @@ from django.test import TestCase
 from manager.models import Taskboard, Task
 
 
-def create_taskboard(name: str = "Today"):
+def create_taskboard(name: str = "Today") -> Taskboard:
     """
     Create a taskboard with the given name.
 
@@ -15,7 +15,7 @@ def create_taskboard(name: str = "Today"):
     return Taskboard.objects.create(name=name)
 
 
-def create_task(title: str, status: str, taskboard: Taskboard, end_date=None):
+def create_task(title: str, status: str, taskboard: Taskboard, end_date=None) -> Task:
     """
     Create a task with the given parameters.
 
