@@ -41,7 +41,9 @@ jobs:
           cat .env
 
       - name: Run Migrations
-        run: python manage.py migrate
+        run: |
+            python manage.py makemigrations
+            python manage.py migrate
 
       - name: Run tests
         run: coverage run --branch manage.py test manager
