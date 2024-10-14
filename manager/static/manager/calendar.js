@@ -1,5 +1,4 @@
-const data = document.currentScript.dataset
-const eventsURL = data.events_url
+const allEvents = JSON.parse(document.getElementById('events-data').textContent)
 
 document.addEventListener('DOMContentLoaded', function() {
   var calendarElement = document.getElementById('calendar');
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     selectMirror: true,
     dayMaxEvents: true,
     timeZone: 'UTC',
-    events: eventsURL
+    events: allEvents
   });
   calendar.render();
 })

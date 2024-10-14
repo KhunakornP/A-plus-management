@@ -3,7 +3,7 @@
 from django.views import generic
 from .models import Taskboard, Task, Event
 from django.shortcuts import get_object_or_404, redirect
-from django.http import Http404, HttpResponse, HttpResponseNotFound, JsonResponse
+from django.http import Http404, HttpResponse
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
@@ -32,24 +32,22 @@ class CalendarView(generic.ListView):
     model = Event
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Create context dictionary used to render the template."""
-        context = super().get_context_data(**kwargs)
-        context['events_url'] = reverse("manager:events_json")
+        """Create context dictionary used to render the template.
+
+        :return: A dictionary containing a list of dicts about events
+                 information to be converted into array.
+        """
+        all_events = Event.objects.all()
+        events_array = []
+        for event in all_events:
+            event_info = {
+                "title": event.title,
+                "start": event.start_date.isoformat(),
+                "end": event.end_date.isoformat(),
+            }
+            events_array.append(event_info)
+        context = {"events": events_array}
         return context
-
-
-def get_events_json(request) -> JsonResponse:
-    """Get the events information in JSON format."""
-    all_events = Event.objects.all()
-    events_array = []
-    for event in all_events:
-        event_info = {
-            "title": event.title,
-            "start": event.start_date,
-            "end": event.end_date,
-        }
-        events_array.append(event_info)
-    return JsonResponse(events_array, safe=False)
 
 
 class EventForm(ModelForm):
