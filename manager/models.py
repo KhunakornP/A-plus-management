@@ -64,4 +64,3 @@ class Event(models.Model):
     start_date = models.DateTimeField("Start date", default=timezone.now)
     end_date = models.DateTimeField("End date", default=timezone.now)
     details = models.TextField(default=None, null=True, blank=True)
-    taskboard = models.ForeignKey(Taskboard, on_delete=models.CASCADE)
