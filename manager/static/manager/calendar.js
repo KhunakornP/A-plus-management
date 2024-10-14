@@ -1,6 +1,8 @@
 const allEvents = JSON.parse(document.getElementById('events-data').textContent)
+const allTasks = JSON.parse(document.getElementById('tasks-data').textContent)
 
 document.addEventListener('DOMContentLoaded', function() {
+  console.log(allTasks)
   var calendarElement = document.getElementById('calendar');
   var calendar = new FullCalendar.Calendar(calendarElement, {
     themeSystem: 'bootstrap5',
@@ -17,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     selectMirror: true,
     dayMaxEvents: true,
     timeZone: 'UTC',
-    events: allEvents
+    events: allEvents.concat(allTasks)
   });
   calendar.render();
 })

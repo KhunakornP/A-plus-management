@@ -25,11 +25,10 @@ class TaskboardView(generic.DetailView):
     model = Taskboard
 
 
-class CalendarView(generic.ListView):
+class CalendarView(generic.TemplateView):
     """A view that display the calendar that show events and tasks."""
 
     template_name = "manager/calendar.html"
-    model = Event
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         """Create context dictionary used to render the template.
@@ -38,15 +37,25 @@ class CalendarView(generic.ListView):
                  information to be converted into array.
         """
         all_events = Event.objects.all()
-        events_array = []
+        all_tasks = Task.objects.all()
+        events_list = []
+        tasks_list = []
         for event in all_events:
             event_info = {
                 "title": event.title,
                 "start": event.start_date.isoformat(),
                 "end": event.end_date.isoformat(),
+                "color": "#6767fe",
             }
-            events_array.append(event_info)
-        context = {"events": events_array}
+            events_list.append(event_info)
+        for task in all_tasks:
+            tasks_info = {
+                "title": task.title,
+                "start": task.end_date.isoformat(),
+                "color": "#FF00FF",
+            }
+            tasks_list.append(tasks_info)
+        context = {"events": events_list, "tasks": tasks_list}
         return context
 
 
