@@ -27,6 +27,16 @@ class Taskboard(models.Model):
     name: models.CharField = models.CharField(max_length=200, null=False)
 
 
+class EstimateHistory(models.Model):
+    """A class containing time estimate history of each day of a specific taskboard."""
+
+    taskboard = models.ForeignKey(Taskboard, on_delete=models.CASCADE)
+    date = models.DateField(default=timezone.localdate)
+    time_remaining = models.IntegerField(default=0)
+    # TODO modify the creation method to get the time remaining of previous day
+    # as initial value
+
+
 class Task(models.Model):
     """
     A class representing tasks to be done.
@@ -45,11 +55,41 @@ class Task(models.Model):
     taskboard: models.ForeignKey = models.ForeignKey(
         Taskboard, on_delete=models.CASCADE
     )
+    time_estimate = models.IntegerField(default=0)
+
+    def __compute_time_diff(self, new_time: int) -> int:
+        """Compute the difference between old and new time estimate."""
+        try:
+            old_time = Task.objects.get(pk=self.pk).time_estimate
+            return new_time - old_time
+        except Task.DoesNotExist:
+            return new_time
 
     def save(self, *args, **kwargs):
-        """Set default end date if there's a NULL value inserted."""
+        """Override default save method.
+
+        Namely,
+        - Set end_date to today midnight if end_date is NULL.
+        - Update the time remaining of the related estimate history object.
+        """
         if self.end_date is None:
             self.end_date = today_midnight()
+
+        try:
+            estimate_history_obj = EstimateHistory.objects.get(
+                date=timezone.localdate(), taskboard=self.taskboard
+            )
+        except EstimateHistory.DoesNotExist:
+            estimate_history_obj = EstimateHistory.objects.create(
+                taskboard=self.taskboard
+            )
+            estimate_history_obj.save()
+
+        estimate_history_obj.time_remaining += self.__compute_time_diff(
+            self.time_estimate
+        )
+        estimate_history_obj.save()
+
         super().save(*args, **kwargs)
 
 
