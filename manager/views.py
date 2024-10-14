@@ -2,7 +2,7 @@
 
 from django.views import generic
 from .models import Taskboard, Task, Event
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http import Http404, HttpResponse
 from django.contrib import messages
 from django.forms import ModelForm
@@ -270,3 +270,12 @@ def update_taskboard(request, taskboard_id: int) -> HttpResponse:
         else:
             messages.error(request, "Cannot update taskboard")
     return redirect(reverse("manager:taskboard_index"))
+
+
+def display_burndown_chart(request, taskboard_id) -> HttpResponse:
+    """Display the burndown chart page.
+
+    :param request: Django's request object.
+    :return: Renders the burndown chart page.
+    """
+    return render(request, "manager/burndown.html", {})
