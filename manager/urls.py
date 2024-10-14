@@ -13,8 +13,9 @@ urlpatterns = [
     path("taskboard/<int:taskboard_id>/add_task/", views.create_task, name="create_task"),
     path("task/<int:task_id>/delete/", views.delete_task, name="delete_task"),
     path("task/<int:task_id>/update/", views.update_task, name="update_task"),
-    path("calendar/", views.calendar_view, name="calendar"),
+    path("calendar/", views.CalendarView.as_view(), name="calendar"),
     path("event/create/", views.create_event, name="create_event"),
     path("event/<int:event_id>/delete/", views.delete_event, name="delete_event"),
     path("event/<int:event_id>/update/", views.update_event, name="update_event"),
+    path("events_json", views.get_events_json, name="events_json")
 ]

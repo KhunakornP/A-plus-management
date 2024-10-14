@@ -1,15 +1,13 @@
 """Module for all view classes for pages in the manager app."""
 
-import calendar
 from django.views import generic
 from .models import Taskboard, Task, Event
-from django.shortcuts import render, get_object_or_404, redirect
-from datetime import date, timedelta
-from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, redirect
+from django.http import Http404, HttpResponse, HttpResponseNotFound, JsonResponse
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
-from typing import Union
+from typing import Any, Union
 
 
 class TaskboardIndexView(generic.ListView):
@@ -27,61 +25,32 @@ class TaskboardView(generic.DetailView):
     model = Taskboard
 
 
-def generate_calendar(start_day, n_days):
-    """Return a nested list of days representing a calendar."""
-    days = [""] * start_day + list(range(1, n_days + 1))
-    rows = [days[i : i + 7] for i in range(0, len(days), 7)]
-    
-    if len(rows[-1]) < 7:
-      rows[-1].extend([""] * (7 - len(rows[-1])))
-      rows = [row for row in rows if any(day != "" for day in row)]
+class CalendarView(generic.ListView):
+    """A view that display the calendar that show events and tasks."""
 
-    return rows
+    template_name = "manager/calendar.html"
+    model = Event
 
-  
-def calendar_view(request):
-    """Display calendar."""
-    year = request.GET.get("year")
-    month = request.GET.get("month")
-    day = request.GET.get("day")
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Create context dictionary used to render the template."""
+        context = super().get_context_data(**kwargs)
+        context['events_url'] = reverse("manager:events_json")
+        return context
 
-    if year is None or month is None:
-        year = date.today().year
-        month = date.today().month
-    else:
-        year = int(year)
-        month = int(month)
 
-    if month < 1:
-        month = 12
-        year -= 1
-    elif month > 12:
-        month = 1
-        year += 1
+def get_events_json(request) -> JsonResponse:
+    """Get the events information in JSON format."""
+    all_events = Event.objects.all()
+    events_array = []
+    for event in all_events:
+        event_info = {
+            "title": event.title,
+            "start": event.start_date,
+            "end": event.end_date,
+        }
+        events_array.append(event_info)
+    return JsonResponse(events_array, safe=False)
 
-    start_day, n_days = calendar.monthrange(year, month)
-
-    tasks = Task.objects.filter(end_date__year=year, end_date__month=month)
-
-    # Calculate the start and end of the month
-    start_date = date(year, month, 1)
-    end_date = start_date + timedelta(days=n_days - 1)
-
-    # Filter events based on start_date or end_date within the month
-    events = Event.objects.filter(start_date__lte=end_date, end_date__gte=start_date)
-
-    return render(
-        request,
-        "manager/calendar.html",
-        {
-            "current_day": day,
-            "current_month": month,
-            "current_year": year,
-            "rows": generate_calendar(start_day + 1, n_days),
-            "tasks": tasks,
-            "events": events,
-        },
-    )
 
 class EventForm(ModelForm):
     """A class for creating an event object from the given POST request."""
