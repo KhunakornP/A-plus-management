@@ -1,0 +1,12 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80% # at LEAST 80% of your code should be thoroughly tested
+        threshold: 1% # you get 1% difference leniency
+        base: auto
+
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
