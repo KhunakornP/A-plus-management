@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'manager.apps.ManagerConfig',
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -55,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -118,6 +120,10 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email'
         ],
+        'APP': {
+            'client_id': config('CLIENT_ID', ""),
+            'secret': config('SECRET', ""),
+        },
         'AUTH_PARAMS': {
             'access_type':'online',  # TODO change this to 'offline' after confiming it works
         }
