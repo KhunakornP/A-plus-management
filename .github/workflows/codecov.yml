@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest pytest-cov
+          pip install coverage
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           
       - name: Create .env file
@@ -42,7 +42,7 @@ jobs:
         run: python manage.py migrate
 
       - name: Run tests
-        run: pytest --cov --cov-report=xml
+        run: coverage run --branch manage.py test manager
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v4
