@@ -12,7 +12,10 @@
   <button type="submit">Log Out</button>
 </form>
     {% else %}
-        <a href="{% provider_login_url 'google' %}">Login with Google</a>
+    <form action="{% provider_login_url 'google' %}" method="post">
+   {% csrf_token %}
+  <button type="submit">Login with Google account</button>
+</form>
     {% endif %}
     {% block headcontent %}
     {% endblock %}

@@ -125,14 +125,14 @@ SOCIALACCOUNT_PROVIDERS = {
             'secret': config('SECRET', ""),
         },
         'AUTH_PARAMS': {
-            'access_type':'online',  # TODO change this to 'offline' after confiming it works
+            'access_type':'online',
         }
     }
 }
 
 SITE_ID = 2
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = 'manager:taskboard_index'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
