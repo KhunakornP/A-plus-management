@@ -1,2 +1,4 @@
 Django >= 5.1
 python-decouple >= 3.8
+freezegun >= 1.5
+seaborn >= 0.13
