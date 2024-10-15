@@ -278,4 +278,5 @@ def display_burndown_chart(request, taskboard_id) -> HttpResponse:
     :param request: Django's request object.
     :return: Renders the burndown chart page.
     """
-    return render(request, "manager/burndown.html", {})
+    context = {"taskboard_id": taskboard_id}
+    return render(request, "manager/burndown.html", context)

@@ -1,4 +1,43 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% block headcontent %}
+<title>Taskboard {{taskboard_id}} Burndown Chart</title>
+{% endblock %}
 {% block content %}
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorem sapiente alias vitae. Nesciunt quo autem maxime, magni quis sunt laborum cupiditate consequatur unde numquam consequuntur enim exercitationem tenetur non earum!
+
+<div class="container-fluid">
+  <a href="{% url 'manager:taskboard' taskboard_id %}" class="btn btn-secondary my-3">
+    Back to Taskboard
+  </a>
+  <div class="row align-items-start">
+    <div class="col">
+      Graph {{taskboard_id}}
+    </div>
+
+    <div class="col">
+      <h2>Select Event</h2>
+      <form method="post" action="#">
+        {% csrf_token %}
+
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+          <label class="form-check-label" for="flexCheckDefault">
+            Default checkbox
+          </label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+          <label class="form-check-label" for="flexCheckChecked">
+            Checked checkbox
+          </label>
+        </div>
+
+        <input type="submit" value="View event on graph">
+
+      </form>
+    
+  </div>
+
+</div>
+
 {% endblock %}
