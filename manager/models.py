@@ -27,14 +27,41 @@ class Taskboard(models.Model):
     name: models.CharField = models.CharField(max_length=200, null=False)
 
 
+class EstimateHistoryManager(models.Manager):
+    """A custom Manager for EstimateHistory model."""
+
+    def create(self, **kwargs):
+        """Override the create method.
+
+        Set initial time remaining to match the previous day, if exists.
+        """
+        taskboard = kwargs["taskboard"]
+        eh_of_previous_day_of_this_tb = self.filter(taskboard=taskboard).last()
+
+        if eh_of_previous_day_of_this_tb:
+            kwargs["time_remaining"] = eh_of_previous_day_of_this_tb.time_remaining
+
+        return super().create(**kwargs)
+
+    def get(self, *args, **kwargs):
+        """Override default get method.
+
+        If the object does not exist, create a new one instead.
+        """
+        try:
+            return super().get(*args, **kwargs)
+        except EstimateHistory.DoesNotExist:
+            new_obj = self.create(**kwargs)
+            return new_obj
+
+
 class EstimateHistory(models.Model):
     """A class containing time estimate history of each day of a specific taskboard."""
 
     taskboard = models.ForeignKey(Taskboard, on_delete=models.CASCADE)
     date = models.DateField(default=timezone.localdate)
     time_remaining = models.IntegerField(default=0)
-    # TODO modify the creation method to get the time remaining of previous day
-    # as initial value
+    objects = EstimateHistoryManager()
 
 
 class Task(models.Model):
@@ -74,23 +101,27 @@ class Task(models.Model):
         """
         if self.end_date is None:
             self.end_date = today_midnight()
-
-        try:
-            estimate_history_obj = EstimateHistory.objects.get(
-                date=timezone.localdate(), taskboard=self.taskboard
-            )
-        except EstimateHistory.DoesNotExist:
-            estimate_history_obj = EstimateHistory.objects.create(
-                taskboard=self.taskboard
-            )
-            estimate_history_obj.save()
-
-        estimate_history_obj.time_remaining += self.__compute_time_diff(
-            self.time_estimate
+        eh = EstimateHistory.objects.get(
+            date=timezone.localdate(), taskboard=self.taskboard
         )
-        estimate_history_obj.save()
+        eh.time_remaining += self.__compute_time_diff(self.time_estimate)
+        eh.save()
 
         super().save(*args, **kwargs)
+
+    def delete(self, using=None, keep_parents=False):
+        """Override default delete method.
+
+        Also subtracts the time remaining in the related EstimateHistory object.
+        """
+        est = self.time_estimate
+        eh = EstimateHistory.objects.get(
+            date=timezone.localdate(), taskboard=self.taskboard
+        )
+        eh.time_remaining -= est
+        eh.save()
+
+        super().delete(using, keep_parents)
 
 
 class Event(models.Model):
