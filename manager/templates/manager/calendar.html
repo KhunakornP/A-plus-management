@@ -8,6 +8,68 @@
 {% endblock %}
 {% block content %}
 <div id='calendar'></div>
+<div class="modal fade" id="eventDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="eventDetailsModalTitle"></h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="eventStart" class="form-label fw-bold"> Start :</label>
+            <input type="datetime-local" readonly class="form-control-plaintext" id="eventStart">
+          </div>
+  
+          <div class="mb-3">
+            <label for="eventEnd" class="form-label fw-bold"> End :</label>
+            <input type="datetime-local" readonly class="form-control-plaintext" id="eventEnd">
+          </div>
+  
+          <div class="mb-3">
+            <label for="eventDetails" class="form-label fw-bold">Details :</label>
+            <input type="text" readonly class="form-control-plaintext" id="eventDetails">
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn btn-sm btn-primary">Edit</a>
+          <a href="#" class="btn btn-sm btn-danger">Delete</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="taskDetailsModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="taskDetailsModalTitle"></h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <form>
+            <label for="taskDue" class="form-label fw-bold"> Due :</label>
+            <input type="datetime-local" readonly class="form-control-plaintext" id="taskDue">
+          </div>
+  
+          <div class="mb-3">
+            <label for="taskDetails" class="form-label fw-bold">Details :</label>
+            <input type="text" readonly class="form-control-plaintext" id="taskDetails">
+          </div>
+
+          <div class="modal-footer">
+            <a href="#" class="btn btn-sm btn-primary">Edit</a>
+            <a href="#" class="btn btn-sm btn-danger">Delete</a>
+          </div>
+          </form>
+      </div>
+    </div>
+  </div>
+</div>
 {{ events|json_script:"events-data" }}
 {{ tasks|json_script:"tasks-data" }}
 {% endblock %}

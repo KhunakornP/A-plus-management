@@ -42,17 +42,23 @@ class CalendarView(generic.TemplateView):
         tasks_list = []
         for event in all_events:
             event_info = {
+                "type": "event",
                 "title": event.title,
                 "start": event.start_date.isoformat(),
                 "end": event.end_date.isoformat(),
                 "color": "#6767fe",
+                "editable": True,
+                "details": event.details
             }
             events_list.append(event_info)
         for task in all_tasks:
             tasks_info = {
+                "type": "task",
                 "title": task.title,
                 "start": task.end_date.isoformat(),
                 "color": "#FF00FF",
+                "editable": False,
+                "details": task.details
             }
             tasks_list.append(tasks_info)
         context = {"events": events_list, "tasks": tasks_list}
