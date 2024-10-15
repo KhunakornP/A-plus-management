@@ -86,7 +86,19 @@ class TaskModelTestcase(TestCase):
         taskboard2 = create_taskboard("project delta")
         task1 = create_task("Study math", "TODO", taskboard1)
         task2 = create_task("Study chemistry", "TODO", taskboard1)
-        task3 = create_task("Pick a color palette", "TODO", taskboard2)
-        task4 = create_task("Sketch the subject", "TODO", taskboard2)
+        task3 = create_task("Study math", "TODO", taskboard2)
+        task4 = create_task("Study chemistry", "TODO", taskboard2)
         self.assertEqual([task1, task2], list(taskboard1.task_set.all()))
         self.assertEqual([task3, task4], list(taskboard2.task_set.all()))
+
+    def test_task_default_time_estimate(self):
+        """The default time estimate of a task is 0 hours."""
+        taskboard = create_taskboard()
+        task = create_task("Do homework", "TODO", taskboard)
+        self.assertEqual(task.time_estimate, 0)
+
+    def test_task_default_status(self):
+        """The default status of tasks is TO-DO."""
+        taskboard = create_taskboard()
+        task = Task.objects.create(title="Do homework", taskboard=taskboard)
+        self.assertEqual(task.status, "TODO")
