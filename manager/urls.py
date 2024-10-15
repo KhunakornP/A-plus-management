@@ -17,4 +17,6 @@ urlpatterns = [
     path("event/create/", views.create_event, name="create_event"),
     path("event/<int:event_id>/delete/", views.delete_event, name="delete_event"),
     path("event/<int:event_id>/update/", views.update_event, name="update_event"),
+    # TODO replace views.TaskboardView.as_view() with the view for burndown chart
+    path("taskboard/<int:taskboard_id>/burndown/", views.display_burndown_chart, name="burndown_chart"),
 ]

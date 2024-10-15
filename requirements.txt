@@ -4,3 +4,5 @@ PyJWT >= 2.9.0
 cryptography >= 43.0.1
 python-decouple >= 3.8
 requests >= 2.32.3
+freezegun >= 1.5
+seaborn >= 0.13
