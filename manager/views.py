@@ -1,7 +1,9 @@
 """Module for all view classes for pages in the manager app."""
 
+import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
 from django.views import generic
-from .models import Taskboard, Task, Event
+from .models import Taskboard, Task, Event, EstimateHistory
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import Http404, HttpResponse
 from django.contrib import messages
@@ -278,4 +280,21 @@ def display_burndown_chart(request, taskboard_id) -> HttpResponse:
     :param request: Django's request object.
     :return: Renders the burndown chart page.
     """
-    return render(request, "manager/burndown.html", {})
+    taskboard = get_taskboard(taskboard_id)
+    estimate_histories = EstimateHistory.objects.filter(
+        taskboard=taskboard).order_by('date')
+    
+    dates = [history.date for history in estimate_histories]
+    time_remaining = [history.time_remaining for history in estimate_histories]
+
+    fig, ax = plt.subplots()
+    ax.bar(dates, time_remaining)
+
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Time Remaining')
+    ax.set_title('Time Remaining on Taskboard Over Time')
+
+    ax.xaxis.set_major_formatter(DateFormatter("%Y-%m-%d"))
+    plt.xticks(rotation=90, ha='right')
+
+    return render(request, "manager/burndown.html", {'borndown': fig})
