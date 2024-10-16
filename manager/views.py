@@ -1,5 +1,6 @@
 """Module for all view classes for pages in the manager app."""
 
+import json
 from django.views import generic
 from .models import Taskboard, Task, Event
 from django.shortcuts import get_object_or_404, redirect
@@ -48,7 +49,8 @@ class CalendarView(generic.TemplateView):
                 "end": event.end_date.isoformat(),
                 "color": "#6767fe",
                 "editable": True,
-                "details": event.details
+                "details": event.details,
+                "update": reverse('manager:update_event', args=(event.id,))
             }
             events_list.append(event_info)
         for task in all_tasks:
@@ -137,12 +139,12 @@ def update_event(request, event_id: int) -> redirect:
         messages.error(request, "Event does not exist")
         return redirect(reverse("manager:calendar"))
     if request.method == "POST":
-        form = EventForm(request.POST, instance=event)
+        data = json.loads(request.body)
+        form = EventForm(data, instance=event)
         if form.is_valid():
             form.save()
-            messages.info(request, f"Event: {request.POST['title']} updated.")
+            messages.info(request, f"Event: {data['title']} updated.")
             return redirect(reverse("manager:calendar"))
-    # if the request was not POST or form is not valid
     messages.error(request, "Event data provided is invalid.")
     return redirect(reverse("manager:calendar"))
 

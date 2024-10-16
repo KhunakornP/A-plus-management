@@ -4,6 +4,7 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'manager/calendar.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
 <script src="{% static 'manager/calendar.js' %}" defer></script>
 {% endblock %}
 {% block content %}
@@ -15,7 +16,6 @@
         <h1 class="modal-title fs-5" id="eventDetailsModalTitle"></h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form>
         <div class="modal-body">
           <div class="mb-3">
             <label for="eventStart" class="form-label fw-bold"> Start :</label>
@@ -34,10 +34,9 @@
 
         </div>
         <div class="modal-footer">
-          <a href="#" class="btn btn-sm btn-primary">Edit</a>
-          <a href="#" class="btn btn-sm btn-danger">Delete</a>
+          <button class="btn btn-sm btn-primary" id="editButton">Edit</a>
+          <button class="btn btn-sm btn-danger" id="deleteButton">Delete</a>
         </div>
-      </form>
     </div>
   </div>
 </div>
@@ -51,7 +50,6 @@
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <form>
             <label for="taskDue" class="form-label fw-bold"> Due :</label>
             <input type="datetime-local" readonly class="form-control-plaintext" id="taskDue">
           </div>
@@ -60,12 +58,6 @@
             <label for="taskDetails" class="form-label fw-bold">Details :</label>
             <input type="text" readonly class="form-control-plaintext" id="taskDetails">
           </div>
-
-          <div class="modal-footer">
-            <a href="#" class="btn btn-sm btn-primary">Edit</a>
-            <a href="#" class="btn btn-sm btn-danger">Delete</a>
-          </div>
-          </form>
       </div>
     </div>
   </div>
