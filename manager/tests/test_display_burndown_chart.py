@@ -2,7 +2,7 @@
 
 import matplotlib.pyplot as plt
 from django.test import TestCase
-from manager.models import Taskboard, Task
+from manager.models import Taskboard, Task, EstimateHistory
 from manager.views import get_estimate_history_data, create_figure
 
 def create_taskboard(tb_name: str) -> Taskboard:
@@ -23,6 +23,16 @@ def create_task(title: str, tb: Taskboard) -> Task:
     return Task.objects.create(title=title, taskboard=tb)
 
 
+def create_estimate_hisotry(title: str, tb: Taskboard) -> Task:
+    """Create a new Task bounded to a specific taskboard.
+
+    :param title: Task's title
+    :param tb: the Taskboard that this task would be bounded to
+    :return: a Task object
+    """
+    return EstimateHistory.objects.create(title=title, taskboard=tb)
+
+
 class BurndownChartTests(TestCase):
     """Test the figure creation of burndown chart."""
 
@@ -34,4 +44,4 @@ class BurndownChartTests(TestCase):
         est_hist = get_estimate_history_data()
         fig = create_figure(est_hist)
 
-        plt.show()
+        plt.savefig()
