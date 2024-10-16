@@ -280,10 +280,12 @@ def display_burndown_chart(request, taskboard_id) -> HttpResponse:
     :param request: Django's request object.
     :return: Renders the burndown chart page.
     """
+    # Separate getting data
     taskboard = get_taskboard(taskboard_id)
     estimate_histories = EstimateHistory.objects.filter(
         taskboard=taskboard).order_by('date')
     
+    # Separate figure creation to different method 
     dates = [history.date for history in estimate_histories]
     time_remaining = [history.time_remaining for history in estimate_histories]
 
