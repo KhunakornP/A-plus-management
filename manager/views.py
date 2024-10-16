@@ -274,18 +274,14 @@ def update_taskboard(request, taskboard_id: int) -> HttpResponse:
     return redirect(reverse("manager:taskboard_index"))
 
 
-def display_burndown_chart(request, taskboard_id) -> HttpResponse:
-    """Display the burndown chart page.
-
-    :param request: Django's request object.
-    :return: Renders the burndown chart page.
-    """
-    # Separate getting data
+def get_estimate_history_data(taskboard_id):
+    """Get EstimateHistory data."""
     taskboard = get_taskboard(taskboard_id)
-    estimate_histories = EstimateHistory.objects.filter(
-        taskboard=taskboard).order_by('date')
-    
-    # Separate figure creation to different method 
+    return EstimateHistory.objects.filter(taskboard=taskboard).order_by('date')
+
+
+def create_figure(estimate_histories):
+    """Create figure from estimate_history data."""
     dates = [history.date for history in estimate_histories]
     time_remaining = [history.time_remaining for history in estimate_histories]
 
@@ -298,5 +294,16 @@ def display_burndown_chart(request, taskboard_id) -> HttpResponse:
 
     ax.xaxis.set_major_formatter(DateFormatter("%Y-%m-%d"))
     plt.xticks(rotation=90, ha='right')
+    return fig
+
+
+def display_burndown_chart(request, taskboard_id) -> HttpResponse:
+    """Display the burndown chart page.
+
+    :param request: Django's request object.
+    :return: Renders the burndown chart page.
+    """
+    estimate_histories = get_estimate_history_data(taskboard_id)
+    fig = create_figure(estimate_histories)
 
     return render(request, "manager/burndown.html", {'borndown': fig})
