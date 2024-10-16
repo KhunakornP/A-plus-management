@@ -286,12 +286,12 @@ class BurndownView(generic.View):
         return context
 
     def get(self, request, *args, **kwargs):
-        """Render burndown chart page when there's get request."""
+        """Render burndown chart page when there's a GET request."""
         context = self.get_context_data(**kwargs)
-        return render(request, "manager/burndown.html", context)
+        return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        """Render burndown chart page when there's get request."""
+        """Render burndown chart page when there's a POST request."""
         kwargs["events"] = request.POST.getlist("events")
         context = self.get_context_data(**kwargs)
-        return render(request, "manager/burndown.html", context)
+        return render(request, self.template_name, context)
