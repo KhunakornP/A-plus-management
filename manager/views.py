@@ -272,11 +272,26 @@ def update_taskboard(request, taskboard_id: int) -> HttpResponse:
     return redirect(reverse("manager:taskboard_index"))
 
 
-def display_burndown_chart(request, taskboard_id) -> HttpResponse:
-    """Display the burndown chart page.
+class BurndownView(generic.View):
+    """A view for the burndown chart page."""
 
-    :param request: Django's request object.
-    :return: Renders the burndown chart page.
-    """
-    context = {"taskboard_id": taskboard_id}
-    return render(request, "manager/burndown.html", context)
+    template_name = "manager/burndown.html"
+
+    def get_context_data(self, **kwargs):
+        """Get context data for burndown chart view."""
+        context = {}
+        context["taskboard_id"] = self.kwargs.get("taskboard_id")
+        if "events" in kwargs:
+            context["events"] = kwargs["events"]
+        return context
+
+    def get(self, request, *args, **kwargs):
+        """Render burndown chart page when there's get request."""
+        context = self.get_context_data(**kwargs)
+        return render(request, "manager/burndown.html", context)
+
+    def post(self, request, *args, **kwargs):
+        """Render burndown chart page when there's get request."""
+        kwargs["events"] = request.POST.getlist("events")
+        context = self.get_context_data(**kwargs)
+        return render(request, "manager/burndown.html", context)
