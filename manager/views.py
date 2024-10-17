@@ -294,7 +294,7 @@ def create_figure(estimate_histories):
 
     ax.xaxis.set_major_formatter(DateFormatter("%Y-%m-%d"))
     plt.xticks(rotation=90, ha='right')
-    return fig
+    return fig, ax
 
 
 def display_burndown_chart(request, taskboard_id) -> HttpResponse:

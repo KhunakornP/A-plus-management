@@ -1,9 +1,11 @@
 """Test cases for the display_burndown_chart view."""
-
 import matplotlib.pyplot as plt
-from django.test import TestCase
-from manager.models import Taskboard, Task, EstimateHistory
+import matplotcheck.base as mpc
+import numpy as np
+from datetime import date, timedelta
+from manager.models import Taskboard, EstimateHistory
 from manager.views import get_estimate_history_data, create_figure
+from django.test import TestCase
 
 def create_taskboard(tb_name: str) -> Taskboard:
     """Create a new taskboard.
@@ -13,24 +15,15 @@ def create_taskboard(tb_name: str) -> Taskboard:
     """
     return Taskboard.objects.create(name=tb_name)
 
-def create_task(title: str, tb: Taskboard) -> Task:
+def create_estimate_hisotry(tb: Taskboard, date: date, time_remaining: int ) -> EstimateHistory:
     """Create a new Task bounded to a specific taskboard.
 
     :param title: Task's title
     :param tb: the Taskboard that this task would be bounded to
     :return: a Task object
     """
-    return Task.objects.create(title=title, taskboard=tb)
-
-
-def create_estimate_hisotry(title: str, tb: Taskboard) -> Task:
-    """Create a new Task bounded to a specific taskboard.
-
-    :param title: Task's title
-    :param tb: the Taskboard that this task would be bounded to
-    :return: a Task object
-    """
-    return EstimateHistory.objects.create(title=title, taskboard=tb)
+    return EstimateHistory.objects.create(taskboard=tb, date=date,
+                                           time_remaining=time_remaining)
 
 
 class BurndownChartTests(TestCase):
@@ -39,9 +32,22 @@ class BurndownChartTests(TestCase):
     def test_create_figure(self):
         """Test create_figure."""
         tb = create_taskboard("Taskboard 1")
-        create_task('task1', tb)
 
-        est_hist = get_estimate_history_data()
-        fig = create_figure(est_hist)
+        create_estimate_hisotry(tb, date=date.today()-timedelta(days=3), time_remaining=50)
+        create_estimate_hisotry(tb, date=date.today()-timedelta(days=2), time_remaining=40)
+        create_estimate_hisotry(tb, date=date.today()-timedelta(days=1), time_remaining=20)
 
-        plt.savefig()
+        est_hist = get_estimate_history_data(tb.id)
+
+        fig, ax = create_figure(est_hist)
+        plt.show()
+
+        # Create a Matplotcheck PlotTester object
+        plot_tester_1 = mpc.PlotTester(ax)
+
+        # Test that the histogram plot has 5 bins
+        plot_tester_1.assert_num_bins(3)
+
+        # Test that the histogram bin values (the height of each bin) is as expected
+        expected_bin_values = [50, 40, 20]
+        plot_tester_1.assert_bin_values(expected_bin_values)
