@@ -172,5 +172,5 @@ class StudentInfo(models.Model):
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     displayed_name = models.CharField(max_length=50)
-    parent = models.ForeignKey(ParentInfo, null=True, blank=True,
-                               on_delete=models.SET_NULL)
+    parent = models.ForeignKey(User, null=True, blank=True,
+                               on_delete=models.SET_NULL, related_name="%(class)s_parent")
