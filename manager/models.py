@@ -147,6 +147,8 @@ class UserPermissions(models.Model):
     """
 
     class Meta:
+        """The Meta class for UserPermissions."""
+
         managed = False
 
         permissions = [
