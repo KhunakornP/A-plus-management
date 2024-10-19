@@ -1,4 +1,5 @@
 """Test StudentInfo creation, update and User deletion."""
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from manager.models import StudentInfo, ParentInfo
