@@ -61,3 +61,7 @@ python manage.py migrate
 
 8. create a .env file <br>
 note: Decide if we want a sample.env or if we will use testing.env
+
+9. get your [google credentials](https://support.google.com/cloud/answer/6158849?hl=en) and put them into .env
+    - detailed instructions [here](google_auth_setup_guide.md#Setting-up-Google-OAuth-2.0)
+    - **DO NOT** publish your client id and secret on the internet.
