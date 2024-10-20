@@ -17,7 +17,6 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 
 
-
 class TaskboardIndexView(generic.ListView):
     """A view that displays all task boards."""
 
@@ -335,7 +334,7 @@ def create_figure(estimate_histories):
     plt.xticks(rotation=90, ha="right")
     return fig, ax
 
- 
+
 class BurndownView(generic.View):
     """A view for the burndown chart page."""
 
