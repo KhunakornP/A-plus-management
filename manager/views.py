@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
+import json
 from django.views import generic
 from .models import Taskboard, Task, Event, EstimateHistory, StudentInfo
 from .serializers import EstimateHistorySerialzer
@@ -10,7 +11,7 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
-from typing import Union
+from typing import Any, Union
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
@@ -32,12 +33,45 @@ class TaskboardView(generic.DetailView):
     model = Taskboard
 
 
-class CalendarView(generic.ListView):
-    """A view that displays the calendar."""
+class CalendarView(generic.TemplateView):
+    """A view that display the calendar that show events and tasks."""
 
-    # to be implemented
     template_name = "manager/calendar.html"
-    model = Event
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Create context dictionary used to render the template.
+
+        :return: A dictionary containing a list of dicts about events
+                 information to be converted into array.
+        """
+        all_events = Event.objects.all()
+        all_tasks = Task.objects.all()
+        events_list = []
+        tasks_list = []
+        for event in all_events:
+            event_info = {
+                "type": "event",
+                "title": event.title,
+                "start": event.start_date.isoformat(),
+                "end": event.end_date.isoformat(),
+                "color": "#6767fe",
+                "editable": True,
+                "details": event.details,
+                "update": reverse("manager:update_event", args=(event.id,)),
+            }
+            events_list.append(event_info)
+        for task in all_tasks:
+            tasks_info = {
+                "type": "task",
+                "title": task.title,
+                "start": task.end_date.isoformat(),
+                "color": "#FF00FF",
+                "editable": False,
+                "details": task.details,
+            }
+            tasks_list.append(tasks_info)
+        context = {"events": events_list, "tasks": tasks_list}
+        return context
 
 
 class EventForm(ModelForm):
@@ -112,12 +146,12 @@ def update_event(request, event_id: int) -> redirect:
         messages.error(request, "Event does not exist")
         return redirect(reverse("manager:calendar"))
     if request.method == "POST":
-        form = EventForm(request.POST, instance=event)
+        data = json.loads(request.body)
+        form = EventForm(data, instance=event)
         if form.is_valid():
             form.save()
-            messages.info(request, f"Event: {request.POST['title']} updated.")
+            messages.info(request, f"Event: {data['title']} updated.")
             return redirect(reverse("manager:calendar"))
-    # if the request was not POST or form is not valid
     messages.error(request, "Event data provided is invalid.")
     return redirect(reverse("manager:calendar"))
 
