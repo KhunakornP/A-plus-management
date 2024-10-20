@@ -45,7 +45,7 @@ class EstimateHistoryJsonTests(TestCase):
         )
 
         url = reverse(
-            "taskboard/<int:taskboard_id>/burndown/response",
+            "manager:est_hist_json",
             kwargs={"taskboard_id": tb.id},
         )
         response = self.client.get(url)
