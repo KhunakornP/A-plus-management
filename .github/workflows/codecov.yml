@@ -36,10 +36,14 @@ jobs:
           echo ALLOWED_HOSTS="${{ secrets.ALLOWED_HOSTS }}" >> .env
           echo DEBUG="${{ secrets.DEBUG }}" >> .env
           echo TIME_ZONE="${{ secrets.TIME_ZONE }}" >> .env
+          echo CLIENT_ID="${{ secrets.CLIENT_ID }}" >> .env
+          echo SECRET="${{ secrets.SECRET }}" >> .env
           cat .env
 
       - name: Run Migrations
-        run: python manage.py migrate
+        run: |
+            python manage.py makemigrations
+            python manage.py migrate
 
       - name: Run tests
         run: coverage run --branch manage.py test manager

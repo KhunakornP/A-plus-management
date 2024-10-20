@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 from django.views import generic
-from .models import Taskboard, Task, Event, EstimateHistory
+from .models import Taskboard, Task, Event, EstimateHistory, StudentInfo
 from .serializers import EstimateHistorySerialzer
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import Http404, HttpResponse, JsonResponse
@@ -11,6 +11,10 @@ from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
 from typing import Union
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+
 
 
 class TaskboardIndexView(generic.ListView):
@@ -297,6 +301,31 @@ def create_figure(estimate_histories):
     plt.xticks(rotation=90, ha='right')
     return fig, ax
 
+ 
+class BurndownView(generic.View):
+    """A view for the burndown chart page."""
+
+    template_name = "manager/burndown.html"
+
+    def get_context_data(self, **kwargs):
+        """Get context data for burndown chart view."""
+        context = {}
+        context["taskboard_id"] = self.kwargs.get("taskboard_id")
+        if "events" in kwargs:
+            context["events"] = kwargs["events"]
+        return context
+
+    def get(self, request, *args, **kwargs):
+        """Render burndown chart page when there's a GET request."""
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        """Render burndown chart page when there's a POST request."""
+        kwargs["events"] = request.POST.getlist("events")
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)
+
 
 def display_burndown_chart(request, taskboard_id) -> HttpResponse:
     """Display the burndown chart page.
@@ -314,3 +343,17 @@ def estimate_histories_json(request, taskboard_id):
     estimate_histories = get_estimate_history_data(taskboard_id)
     eh_serializer = EstimateHistorySerialzer(estimate_histories, many=True)
     return JsonResponse(eh_serializer.data, safe=False)
+
+
+@receiver(post_save, sender=User)
+def create_default_info_on_user_creation(sender, instance, created, **kwargs):
+    """
+    Create and bind a StudentInfo object whenever a new User is created.
+
+    The default displayed name of the user is their Google email.
+    :param sender: The Model class that is sending the signal.
+    :param instance: The object that is being saved.
+    :param created: A boolean, True if the created object is new.
+    """
+    if created:
+        StudentInfo.objects.create(user=instance, displayed_name=instance.email)
