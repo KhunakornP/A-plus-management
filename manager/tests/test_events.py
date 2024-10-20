@@ -1,6 +1,7 @@
 """Test cases for models."""
 
 from datetime import datetime
+import json
 from django.utils import timezone
 from django.test import TestCase
 from manager.models import Event
@@ -89,11 +90,13 @@ class EventViewTests(TestCase):
         event = Event.objects.create(title="Bug bounty ISP")
         data = {
             "title": "Team Bug bounty ISP 2024",
-            "start_date": datetime.now(),
-            "end_date": datetime.now(),
+            "start_date": datetime.now().isoformat(),
+            "end_date": datetime.now().isoformat(),
         }
         url = reverse("manager:update_event", args=(event.id,))
-        response = self.client.post(url, data)
+        response = self.client.post(
+            url, json.dumps(data), content_type="application/json"
+        )
         self.assertRedirects(response, reverse("manager:calendar"))
         updated_event = Event.objects.get(pk=event.id)
         self.assertEqual(

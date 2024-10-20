@@ -22,5 +22,6 @@ from django.views.generic.base import RedirectView
 urlpatterns = [
     path('', RedirectView.as_view(url='manager/taskboard')),
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('manager/', include('manager.urls'))
 ]

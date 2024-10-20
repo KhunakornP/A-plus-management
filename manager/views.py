@@ -2,15 +2,20 @@
 
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
+import json
 from django.views import generic
-from .models import Taskboard, Task, Event, EstimateHistory
+from .models import Taskboard, Task, Event, EstimateHistory, StudentInfo
 from .serializers import EstimateHistorySerialzer
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import Http404, HttpResponse, JsonResponse
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
-from typing import Union
+from typing import Any, Union
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+
 
 
 class TaskboardIndexView(generic.ListView):
@@ -28,12 +33,45 @@ class TaskboardView(generic.DetailView):
     model = Taskboard
 
 
-class CalendarView(generic.ListView):
-    """A view that displays the calendar."""
+class CalendarView(generic.TemplateView):
+    """A view that display the calendar that show events and tasks."""
 
-    # to be implemented
     template_name = "manager/calendar.html"
-    model = Event
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Create context dictionary used to render the template.
+
+        :return: A dictionary containing a list of dicts about events
+                 information to be converted into array.
+        """
+        all_events = Event.objects.all()
+        all_tasks = Task.objects.all()
+        events_list = []
+        tasks_list = []
+        for event in all_events:
+            event_info = {
+                "type": "event",
+                "title": event.title,
+                "start": event.start_date.isoformat(),
+                "end": event.end_date.isoformat(),
+                "color": "#6767fe",
+                "editable": True,
+                "details": event.details,
+                "update": reverse("manager:update_event", args=(event.id,)),
+            }
+            events_list.append(event_info)
+        for task in all_tasks:
+            tasks_info = {
+                "type": "task",
+                "title": task.title,
+                "start": task.end_date.isoformat(),
+                "color": "#FF00FF",
+                "editable": False,
+                "details": task.details,
+            }
+            tasks_list.append(tasks_info)
+        context = {"events": events_list, "tasks": tasks_list}
+        return context
 
 
 class EventForm(ModelForm):
@@ -108,12 +146,12 @@ def update_event(request, event_id: int) -> redirect:
         messages.error(request, "Event does not exist")
         return redirect(reverse("manager:calendar"))
     if request.method == "POST":
-        form = EventForm(request.POST, instance=event)
+        data = json.loads(request.body)
+        form = EventForm(data, instance=event)
         if form.is_valid():
             form.save()
-            messages.info(request, f"Event: {request.POST['title']} updated.")
+            messages.info(request, f"Event: {data['title']} updated.")
             return redirect(reverse("manager:calendar"))
-    # if the request was not POST or form is not valid
     messages.error(request, "Event data provided is invalid.")
     return redirect(reverse("manager:calendar"))
 
@@ -297,6 +335,31 @@ def create_figure(estimate_histories):
     plt.xticks(rotation=90, ha="right")
     return fig, ax
 
+ 
+class BurndownView(generic.View):
+    """A view for the burndown chart page."""
+
+    template_name = "manager/burndown.html"
+
+    def get_context_data(self, **kwargs):
+        """Get context data for burndown chart view."""
+        context = {}
+        context["taskboard_id"] = self.kwargs.get("taskboard_id")
+        if "events" in kwargs:
+            context["events"] = kwargs["events"]
+        return context
+
+    def get(self, request, *args, **kwargs):
+        """Render burndown chart page when there's a GET request."""
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        """Render burndown chart page when there's a POST request."""
+        kwargs["events"] = request.POST.getlist("events")
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)
+
 
 def display_burndown_chart(request, taskboard_id) -> HttpResponse:
     """Display the burndown chart page.
@@ -315,3 +378,17 @@ def estimate_histories_json(request, taskboard_id):
     estimate_histories = get_estimate_history_data(taskboard_id)
     eh_serializer = EstimateHistorySerialzer(estimate_histories, many=True)
     return JsonResponse(eh_serializer.data, safe=False)
+
+
+@receiver(post_save, sender=User)
+def create_default_info_on_user_creation(sender, instance, created, **kwargs):
+    """
+    Create and bind a StudentInfo object whenever a new User is created.
+
+    The default displayed name of the user is their Google email.
+    :param sender: The Model class that is sending the signal.
+    :param instance: The object that is being saved.
+    :param created: A boolean, True if the created object is new.
+    """
+    if created:
+        StudentInfo.objects.create(user=instance, displayed_name=instance.email)
