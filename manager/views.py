@@ -343,9 +343,13 @@ class BurndownView(generic.View):
     def get_context_data(self, **kwargs):
         """Get context data for burndown chart view."""
         context = {}
-        context["taskboard_id"] = self.kwargs.get("taskboard_id")
+        taskboard_id = self.kwargs.get("taskboard_id")
+        context["taskboard_id"] = taskboard_id
         if "events" in kwargs:
             context["events"] = kwargs["events"]
+        estimate_histories = get_estimate_history_data(taskboard_id)
+        fig = create_figure(estimate_histories)
+        context["burndown"] = fig
         return context
 
     def get(self, request, *args, **kwargs):
@@ -358,18 +362,6 @@ class BurndownView(generic.View):
         kwargs["events"] = request.POST.getlist("events")
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
-
-
-def display_burndown_chart(request, taskboard_id) -> HttpResponse:
-    """Display the burndown chart page.
-
-    :param request: Django's request object.
-    :return: Renders the burndown chart page.
-    """
-    estimate_histories = get_estimate_history_data(taskboard_id)
-    fig = create_figure(estimate_histories)
-
-    return render(request, "manager/burndown.html", {"borndown": fig})
 
 
 def estimate_histories_json(request, taskboard_id):

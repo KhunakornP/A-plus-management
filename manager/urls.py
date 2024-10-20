@@ -17,6 +17,6 @@ urlpatterns = [
     path("event/create/", views.create_event, name="create_event"),
     path("event/<int:event_id>/delete/", views.delete_event, name="delete_event"),
     path("event/<int:event_id>/update/", views.update_event, name="update_event"),
-    path("taskboard/<int:taskboard_id>/burndown/", views.display_burndown_chart, name="burndown_chart"),
-    path("taskboard/<int:taskboard_id>/burndown/response", views.estimate_histories_json, name="est_hist_json")
+    path("taskboard/<int:taskboard_id>/burndown/", views.BurndownView.as_view(), name="burndown_chart"),
+    path("taskboard/<int:taskboard_id>/burndown/response/", views.estimate_histories_json, name="est_hist_json")
 ]
