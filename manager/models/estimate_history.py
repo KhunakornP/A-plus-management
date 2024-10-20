@@ -1,3 +1,5 @@
+"""Module for Estimate history models."""
+
 from django.db import models
 from django.utils import timezone
 from .taskboard import Taskboard

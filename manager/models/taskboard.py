@@ -1,3 +1,5 @@
+"""Module for Taskboard models."""
+
 from django.db import models
 
 

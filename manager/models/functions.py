@@ -1,3 +1,5 @@
+"""Module for functions used by models."""
+
 from django.utils import timezone
 
 

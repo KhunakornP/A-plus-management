@@ -1,3 +1,5 @@
+"""Module for Task models."""
+
 from django.db import models
 from django.utils import timezone
 from .functions import today_midnight
