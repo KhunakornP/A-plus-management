@@ -50,7 +50,7 @@ class CalendarView(generic.TemplateView):
                 "color": "#6767fe",
                 "editable": True,
                 "details": event.details,
-                "update": reverse('manager:update_event', args=(event.id,))
+                "update": reverse("manager:update_event", args=(event.id,)),
             }
             events_list.append(event_info)
         for task in all_tasks:
@@ -60,7 +60,7 @@ class CalendarView(generic.TemplateView):
                 "start": task.end_date.isoformat(),
                 "color": "#FF00FF",
                 "editable": False,
-                "details": task.details
+                "details": task.details,
             }
             tasks_list.append(tasks_info)
         context = {"events": events_list, "tasks": tasks_list}
