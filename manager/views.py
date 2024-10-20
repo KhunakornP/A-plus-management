@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 from django.views import generic
 from .models import Taskboard, Task, Event, EstimateHistory
+from .serializers import EstimateHistorySerialzer
 from django.shortcuts import get_object_or_404, redirect, render
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
@@ -307,3 +308,9 @@ def display_burndown_chart(request, taskboard_id) -> HttpResponse:
     fig = create_figure(estimate_histories)
 
     return render(request, "manager/burndown.html", {'borndown': fig})
+
+def estimate_histories_json(request, taskboard_id):
+    """Return EstimateHistory as a json file."""
+    estimate_histories = get_estimate_history_data(taskboard_id)
+    eh_serializer = EstimateHistorySerialzer(estimate_histories, many=True)
+    return JsonResponse(eh_serializer.data, safe=False)

@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import Taskboard, EstimateHistory
 
-# Register your models here.
+admin.site.register(Taskboard)
+admin.site.register(EstimateHistory)
