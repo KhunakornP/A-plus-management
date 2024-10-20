@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from manager.serializers import EstimateHistorySerialzer
 from manager.models import EstimateHistory
 from django.views import generic
-from .views import get_taskboard
+from .taskboard import get_taskboard
 
 
 def get_estimate_history_data(taskboard_id):
