@@ -26,6 +26,12 @@ jobs:
     - name: Create .env file from testing.env
       run: |
         mv testing.env .env
+
+    - name: Run Migrations
+      run: |
+        python manage.py makemigrations
+        python manage.py migrate
+
     - name: Run Tests
       run: |
         python manage.py test
