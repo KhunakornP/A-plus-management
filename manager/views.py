@@ -278,7 +278,7 @@ def update_taskboard(request, taskboard_id: int) -> HttpResponse:
 def get_estimate_history_data(taskboard_id):
     """Get EstimateHistory data."""
     taskboard = get_taskboard(taskboard_id)
-    return EstimateHistory.objects.filter(taskboard=taskboard).order_by('date')
+    return EstimateHistory.objects.filter(taskboard=taskboard).order_by("date")
 
 
 def create_figure(estimate_histories):
@@ -289,12 +289,12 @@ def create_figure(estimate_histories):
     fig, ax = plt.subplots()
     ax.bar(dates, time_remaining)
 
-    ax.set_xlabel('Date')
-    ax.set_ylabel('Time Remaining')
-    ax.set_title('Time Remaining on Taskboard Over Time')
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Time Remaining")
+    ax.set_title("Time Remaining on Taskboard Over Time")
 
     ax.xaxis.set_major_formatter(DateFormatter("%Y-%m-%d"))
-    plt.xticks(rotation=90, ha='right')
+    plt.xticks(rotation=90, ha="right")
     return fig, ax
 
 
@@ -307,7 +307,8 @@ def display_burndown_chart(request, taskboard_id) -> HttpResponse:
     estimate_histories = get_estimate_history_data(taskboard_id)
     fig = create_figure(estimate_histories)
 
-    return render(request, "manager/burndown.html", {'borndown': fig})
+    return render(request, "manager/burndown.html", {"borndown": fig})
+
 
 def estimate_histories_json(request, taskboard_id):
     """Return EstimateHistory as a json file."""
