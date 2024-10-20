@@ -274,7 +274,7 @@ def update_taskboard(request, taskboard_id: int) -> HttpResponse:
             messages.error(request, "Cannot update taskboard")
     return redirect(reverse("manager:taskboard_index"))
 
-  
+
 class BurndownView(generic.View):
     """A view for the burndown chart page."""
 
@@ -300,7 +300,7 @@ class BurndownView(generic.View):
         return render(request, self.template_name, context)
 
 
- def display_burndown_chart(request, taskboard_id) -> HttpResponse:
+def display_burndown_chart(request, taskboard_id) -> HttpResponse:
     """Display the burndown chart page.
 
     :param request: Django's request object.
