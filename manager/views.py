@@ -1,13 +1,16 @@
 """Module for all view classes for pages in the manager app."""
 
 from django.views import generic
-from .models import Taskboard, Task, Event
+from .models import Taskboard, Task, Event, StudentInfo
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import Http404, HttpResponse
 from django.contrib import messages
 from django.forms import ModelForm
 from django.urls import reverse
 from typing import Union
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
 
 
 class TaskboardIndexView(generic.ListView):
@@ -295,3 +298,26 @@ class BurndownView(generic.View):
         kwargs["events"] = request.POST.getlist("events")
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
+
+
+def display_burndown_chart(request, taskboard_id) -> HttpResponse:
+    """Display the burndown chart page.
+
+    :param request: Django's request object.
+    :return: Renders the burndown chart page.
+    """
+    return render(request, "manager/burndown.html", {})
+
+
+@receiver(post_save, sender=User)
+def create_default_info_on_user_creation(sender, instance, created, **kwargs):
+    """
+    Create and bind a StudentInfo object whenever a new User is created.
+
+    The default displayed name of the user is their Google email.
+    :param sender: The Model class that is sending the signal.
+    :param instance: The object that is being saved.
+    :param created: A boolean, True if the created object is new.
+    """
+    if created:
+        StudentInfo.objects.create(user=instance, displayed_name=instance.email)
