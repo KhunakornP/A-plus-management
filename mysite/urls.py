@@ -23,5 +23,6 @@ urlpatterns = [
     path('', RedirectView.as_view(url='manager/taskboard')),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path('manager/', include('manager.urls'))
+    path('manager/', include('manager.urls')),
+    path('api-auth/', include('rest_framework.urls'))
 ]
