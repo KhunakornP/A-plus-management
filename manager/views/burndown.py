@@ -1,7 +1,5 @@
 """Module for views relating to burndown chart pages."""
 
-import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
 from django.shortcuts import render
 from django.http import JsonResponse
 from manager.serializers import EstimateHistorySerialzer
@@ -18,19 +16,7 @@ def get_estimate_history_data(taskboard_id):
 
 def create_figure(estimate_histories):
     """Create figure from estimate_history data."""
-    dates = [history.date for history in estimate_histories]
-    time_remaining = [history.time_remaining for history in estimate_histories]
-
-    fig, ax = plt.subplots()
-    ax.bar(dates, time_remaining)
-
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Time Remaining")
-    ax.set_title("Time Remaining on Taskboard Over Time")
-
-    ax.xaxis.set_major_formatter(DateFormatter("%Y-%m-%d"))
-    plt.xticks(rotation=90, ha="right")
-    return fig, ax
+    pass
 
 
 class BurndownView(generic.View):
