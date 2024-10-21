@@ -9,6 +9,21 @@ from django.http import HttpResponse, Http404
 from django.views import generic
 from typing import Union
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from manager.serializers import TaskboardSerializer
+
+
+class TaskboardApiView(APIView):
+    """Taskboard view but REST."""
+
+    def get(self, requset, format=None):
+        """Get request."""
+        taskboards = Taskboard.objects.all()
+        serializer = TaskboardSerializer(taskboards, many=True)
+
+        return Response(serializer.data)
+
 
 class TaskboardIndexView(generic.ListView):
     """A view that displays all task boards."""

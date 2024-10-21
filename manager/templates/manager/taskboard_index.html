@@ -1,5 +1,12 @@
 {% extends "base.html" %}
-<title>Taskboard</title>
+
+{% block headcontent %}
+  <title>Taskboard</title>
+
+  {% load static %}
+  <script src="{% static 'manager/taskboard_index.js' %}" defer></script>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
