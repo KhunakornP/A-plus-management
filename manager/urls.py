@@ -3,11 +3,12 @@ from django.urls import path
 from . import views
 
 
+
+
+
 app_name = "manager"
 urlpatterns = [
     path("taskboard/", views.TaskboardIndexView.as_view(), name="taskboard_index"),
-    path("api/taskboard/", views.TaskboardApiView.as_view(), name="taskboard_index2"),
-
     path("taskboard/<int:pk>/", views.TaskboardView.as_view(), name="taskboard"),
     path("taskboard/create/", views.create_taskboard, name="create_taskboard"),
     path("taskboard/<int:taskboard_id>/delete/", views.delete_taskboard, name="delete_taskboard"),
