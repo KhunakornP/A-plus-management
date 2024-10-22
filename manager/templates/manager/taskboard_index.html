@@ -9,26 +9,7 @@
 
 {% block content %}
 <div class="container py-5">
-  <div class="row justify-content-center">
-    {% if taskboard_list %}
-      {% for taskboard in taskboard_list %}
-          <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 bg-light-subtle border-0 shadow-lg rounded-lg overflow-hidden">
-              <div class="card-header bg-warning text-white text-center py-4">
-                  <h4 class="mb-0">{{taskboard.name}}</h4>
-              </div>
-              <div class="card-body">
-                <div class="d-grid gap-2 d-md-block">
-                    <a href="{% url 'manager:taskboard' taskboard.id %}" class="btn btn-info mx-2">Go to board</a>
-                    <a href="{% url 'manager:delete_taskboard' taskboard.id %}" class="btn btn-danger mx-2">Delete</a>
-                </div>
-              </div>
-            </div>
-          </div>
-      {% endfor %}
-    {% else %}
-      <h4 class="text-white text-center">You have no taskboard</h4>
-    {% endif %}
+  <div class="row justify-content-center" id="taskboard-container">
 
     <button type="button" class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="center">
       Create a taskboard
