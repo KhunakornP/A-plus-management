@@ -163,7 +163,7 @@ class TaskViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None, **kwargs):
         """
         Delete an Event by ID.
-        
+
         :param request: The HTTP request.
         :param pk: Primary key of the Event to delete
         :return: Response indicating deletion status.
