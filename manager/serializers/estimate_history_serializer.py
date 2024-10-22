@@ -1,7 +1,7 @@
-"""Serilizer."""
+"""Module for EstimateHistory serializer."""
 
 from rest_framework import serializers
-from .models import EstimateHistory
+from manager.models import EstimateHistory
 
 
 class EstimateHistorySerialzer(serializers.ModelSerializer):
