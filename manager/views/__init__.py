@@ -1,6 +1,6 @@
 from .burndown import *
 from .calendar import CalendarView
 from .events import EventForm, create_event, delete_event, update_event, EventViewSet
-from .tasks import TaskForm, create_task, delete_task, update_task
+from .tasks import TaskForm, create_task, delete_task, update_task, TaskViewSet
 from .taskboard import *
 from .default_role import create_default_info_on_user_creation
