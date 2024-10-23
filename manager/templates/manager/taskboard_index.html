@@ -20,7 +20,7 @@
               <div class="card-body">
                 <div class="d-grid gap-2 d-md-block">
                     <a href="{% url 'manager:taskboard' taskboard.id %}" class="btn btn-info mx-2">Go to board</a>
-                    <a href="{% url 'manager:delete_taskboard' taskboard.id %}" class="btn btn-danger mx-2">Delete</a>
+                    <a href="https://www.google.com" class="btn btn-danger mx-2">Delete</a>
                 </div>
               </div>
             </div>
@@ -42,7 +42,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form action="{% url 'manager:create_taskboard' %}" method="post">
+            <form action="https://www.google.com" method="post">
               {% csrf_token %}
               <div class="mb-3">
                 <label for="taskboard_name" class="form-label">Taskboard name</label>
