@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lazyFetching: true,
       },
       {
-        url: '/api/tasks/',
+        url: '/api/tasks/?exclude=DONE',
         color: '#FF00FF',
         lazyFetching: true,
       }
