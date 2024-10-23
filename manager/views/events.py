@@ -2,27 +2,9 @@
 
 from django.core.exceptions import ObjectDoesNotExist
 from manager.models import Event
-from django.forms import ModelForm
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from manager.serializers import EventSerializer
-
-
-class EventForm(ModelForm):
-    """A class for creating an event object from the given POST request."""
-
-    class Meta:
-        """Metaclass for the form."""
-
-        model = Event
-        fields = ["title", "start_date", "end_date", "details"]
-
-    def __init__(self, *args, **kwargs):
-        """Modify the init method to specify which fields are optional."""
-        super().__init__(*args, **kwargs)
-        # Note while event does have defaults for dates please enter
-        # the date that the user clicked on the calendar for the default.
-        self.fields["details"].required = False
 
 
 class EventViewSet(viewsets.ViewSet):
