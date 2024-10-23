@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'allauth',
     'allauth.account',
+    'dj_rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 ]
@@ -123,10 +124,6 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email'
         ],
-        'APP': {
-            'client_id': config('CLIENT_ID', ""),
-            'secret': config('SECRET', ""),
-        },
         'AUTH_PARAMS': {
             'access_type':'online',
         }
@@ -136,6 +133,9 @@ SOCIALACCOUNT_PROVIDERS = {
 SITE_ID = 3
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'manager:taskboard_index'
+
+SOCIALACCOUNT_STORE_TOKENS = True
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
