@@ -46,7 +46,7 @@
                     </div>
   
                     <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    <a href="#" class="btn btn-sm btn-danger">Delete</a>
                   </form>
                 </div>
               </div>
@@ -92,7 +92,7 @@
                 </div>
 
                 <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
+                <a href="#" class="btn btn-sm btn-danger">Delete</a>
               </form>
             </div>
           </div>
@@ -138,7 +138,7 @@
                 </div>
 
                 <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                <a href="{% url 'manager:delete_task' task.id %}" class="btn btn-sm btn-danger">Delete</a>
+                <a href="#" class="btn btn-sm btn-danger">Delete</a>
               </form>
             </div>
           </div>
@@ -160,7 +160,7 @@
           <h1 class="modal-title fs-5" id="addTaskLabel">Create a Task</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form action="{% url 'manager:create_task' taskboard.id %}" method="post">
+        <form action="#" method="post">
           {% csrf_token %}
           <div class="modal-body">
             <div class="mb-3">
