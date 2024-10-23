@@ -23,6 +23,8 @@ omit =
 include =
     # include the main app files
     manager/*
+    # include auth app files
+    auth/*
 
 [report]
 # dont test __str__ and __repr__ methods
