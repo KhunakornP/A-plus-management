@@ -25,7 +25,9 @@ def create_event(
         start_date = timezone.now()
     if not end_date:
         end_date = timezone.now()
-    return Event.objects.create(title=title, start_date=start_date, end_date=end_date)
+    return Event.objects.create(
+        title=title, start_date=start_date, end_date=end_date, details="something"
+    )
 
 
 def create_event_json(
@@ -47,7 +49,7 @@ def create_event_json(
     if not end_date:
         end_date = timezone.now()
 
-    data = {}
+    data = {"details": "something"}
     if id is not None:
         data["id"] = str(id)
 
@@ -58,8 +60,8 @@ def create_event_json(
 
 # to the group who's working on the taskboard could you please
 # refactor this to your test suit. While we're here shall we also do codecov?
-class EventViewTests(TestCase):
-    """Tests for the front end views for creating and deleting tasks."""
+class EventViewSetTests(TestCase):
+    """Tests for the Event API viewset."""
 
     def test_create_valid_event(self):
         """Test creating an event."""
@@ -138,3 +140,29 @@ class EventViewTests(TestCase):
         event.refresh_from_db()
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(event.title, "goodbye")
+
+    def test_get_one_event(self):
+        """Test getting a specifc event instance."""
+        time1 = timezone.make_aware(datetime(2020, 3, 9, 12, 00, 00))
+        time2 = timezone.make_aware(datetime(2020, 10, 9, 12, 00, 00))
+        create_event("ni hao")
+        create_event("ni hao 2")
+        event = create_event("zaijian", time1, time2)
+        event_json = create_event_json(event.title, time1, time2, event.id)
+        request = self.client.get(f"/api/events/{event.id}/")
+        self.assertEqual(request.data["title"], event_json["title"])
+        self.assertEqual(
+            datetime.fromisoformat(request.data["start_date"]), event_json["start_date"]
+        )
+        self.assertEqual(
+            datetime.fromisoformat(request.data["end_date"]), event_json["end_date"]
+        )
+        self.assertEqual(request.data["details"], event_json["details"])
+
+    def test_get_all_events(self):
+        """Test getting all events."""
+        create_event("ni hao")
+        create_event("ni hao 2")
+        create_event("zaijian")
+        request = self.client.get("/api/events/")
+        self.assertEqual(len(request.data), 3)
