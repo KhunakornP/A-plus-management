@@ -3,16 +3,8 @@
 from datetime import date
 from freezegun import freeze_time
 from django.test import TestCase
-from manager.models import Taskboard, Task, EstimateHistory
-
-
-def create_taskboard(tb_name: str) -> Taskboard:
-    """Create a new taskboard.
-
-    :param tb_name: taskboard name
-    :return: a Taskboard object
-    """
-    return Taskboard.objects.create(name=tb_name)
+from manager.models import Task, EstimateHistory
+from .templates_for_tests import create_taskboard
 
 
 class EstimateHistoryTest(TestCase):
@@ -59,7 +51,7 @@ class EstimateHistoryTest(TestCase):
             obj2.time_estimate + obj1.time_estimate,
         )
 
-    def test_deleting_task(self):
+    def test_deleting_task_also_subtract_estimate_time(self):
         """If a task got deleted, the time estimate should go down as well."""
         tb = create_taskboard("test")
         t = Task.objects.create(title="someting2", taskboard=tb, time_estimate=7)

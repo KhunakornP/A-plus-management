@@ -1,5 +1,5 @@
 async function fetchTaskboardJSON() {
-  const response = await fetch('/manager/api/taskboard/');
+  const response = await fetch('/api/taskboards/');
   const taskboards = await response.json();
   return taskboards;
 }

@@ -3,16 +3,7 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from manager.models import Taskboard
-
-
-def create_taskboard(name: str = "Today") -> Taskboard:
-    """
-    Create a taskboard with the given name.
-
-    :returns: A Taskboard object with the given name.
-    """
-    return Taskboard.objects.create(name=name)
+from .templates_for_tests import create_taskboard
 
 
 class TestBurndownChartView(TestCase):
