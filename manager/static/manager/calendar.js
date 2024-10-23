@@ -4,6 +4,7 @@ const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDeta
 const taskDetailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'), {
   focus: true
 });
+var deleteButton = document.getElementById('deleteButton');
 
 document.addEventListener('DOMContentLoaded', () => {
   var calendarElement = document.getElementById('calendar');
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timeZone: 'UTC',
     eventSources: [
       {
+        id: 420,
         url: '/api/events/',
         color: '#6767fe',
         editable: true,
@@ -51,37 +53,42 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('taskDetails').value = eventObj.extendedProps.details;
         taskDetailsModal.show();
       }
-    },
-    eventDrop: (eventDropInfo) => {
-      var eventObj = eventDropInfo.event;
-      fetch(eventObj.extendedProps.update, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': Cookies.get('csrftoken')
-        },
-        body: JSON.stringify({
-          'title': eventObj.title,
-          'start_date': eventObj.start.toISOString().slice(0, 16),
-          'end_date': eventObj.end.toISOString().slice(0, 16)
-        })
+      var deleteButtonClone = deleteButton.cloneNode(true);
+      deleteButton.parentNode.replaceChild(deleteButtonClone, deleteButton);
+      deleteButton = deleteButtonClone;
+      deleteButton.addEventListener('click', async () => {
+        await fetch('/api/events/'.concat(eventObj.id).concat('/'), {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': Cookies.get('csrftoken')
+          }
+        });
+        calendar.getEventSourceById(420).refetch();
       });
     },
+    eventDrop: (eventDropInfo) => {
+      updateEventTime(eventDropInfo);
+    },
     eventResize: (eventResizeInfo) => {
-      var eventObj = eventResizeInfo.event;
-      fetch(eventObj.extendedProps.update, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': Cookies.get('csrftoken')
-        },
-        body: JSON.stringify({
-          'title': eventObj.title,
-          'start_date': eventObj.start.toISOString().slice(0, 16),
-          'end_date': eventObj.end.toISOString().slice(0, 16)
-        })
-      })
-    }
+      updateEventTime(eventResizeInfo);
+    },
   });
   calendar.render();
 });
+
+async function updateEventTime(eventInfo) {
+  var eventObj = eventInfo.event;
+  await fetch('/api/events/'.concat(eventObj.id).concat('/'), {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': Cookies.get('csrftoken')
+    },
+    body: JSON.stringify({
+      'title': eventObj.title,
+      'start_date': eventObj.start.toISOString(),
+      'end_date': eventObj.end.toISOString()
+    })
+  });
+}
