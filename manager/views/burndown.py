@@ -5,7 +5,22 @@ from django.http import JsonResponse
 from manager.serializers import EstimateHistorySerialzer
 from manager.models import EstimateHistory
 from django.views import generic
-from .taskboard import get_taskboard
+from django.shortcuts import get_object_or_404
+from django.http import Http404
+from typing import Optional
+from manager.models import Taskboard
+
+
+def get_taskboard(taskboard_id: int) -> Optional[Taskboard]:
+    """Return a Taskboard which has a specific taskboard id.
+
+    :param taskboard_id: the ID of the taskboard
+    :return: a Taskboard object, return None if it does not exists
+    """
+    try:
+        return get_object_or_404(Taskboard, pk=taskboard_id)
+    except Http404:
+        return None
 
 
 def get_estimate_history_data(taskboard_id):

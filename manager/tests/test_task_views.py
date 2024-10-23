@@ -1,101 +1,145 @@
 """Test task creation, deletion, modification and redirections."""
 
+from datetime import datetime
+from rest_framework import status
+from django.utils import timezone
 from django.test import TestCase
-from django.urls import reverse
-
 from manager.models import Taskboard, Task
+from typing import Any, Optional
+from .templates_for_tests import create_taskboard, create_task
 
 
-def create_taskboard(tb_name: str) -> Taskboard:
-    """Create a new taskboard.
-
-    :param tb_name: taskboard name
-    :return: a Taskboard object
+def create_task_json(
+    title: str,
+    task_status: str,
+    taskboard: Taskboard,
+    end_date: Optional[datetime] = None,
+    id: Optional[int] = None,
+) -> dict[str, Any]:
     """
-    return Taskboard.objects.create(name=tb_name)
+    Create a task as a Dict with the given title and end date.
 
-
-def create_task(title: str, tb: Taskboard) -> Task:
-    """Create a new Task bounded to a specific taskboard.
-
-    :param title: Task's title
-    :param tb: the Taskboard that this task would be bounded to
-    :return: a Task object
+    :param title: The name of the task.
+    :param end_date: The due date of the task.
+    :return: Dictionary containing task data.
     """
-    return Task.objects.create(title=title, taskboard=tb)
+    if not task_status:
+        task_status = "TODO"
+    if not end_date:
+        end_date = timezone.now()
+
+    data = {}
+    if id is not None:
+        data["id"] = str(id)
+
+    data.update(
+        {
+            "title": title,
+            "status": task_status.upper(),
+            "end_date": end_date,
+            "taskboard": taskboard.id,
+        }
+    )
+
+    return data
 
 
-class TaskTests(TestCase):
-    """Test task creation, modification and deletion."""
+class TaskViewTests(TestCase):
+    """Tests for TaskViewSet."""
+
+    def setUp(self):
+        """Create Taskboards with some tasks."""
+        due_date = timezone.make_aware(datetime(2030, 10, 2, 10))
+        self.taskboard_1 = create_taskboard("Today")
+        self.taskboard_2 = create_taskboard("Today but number 2")
+        self.task_1 = create_task("Task 1", "TODO", self.taskboard_1, due_date)
+        self.task_2 = create_task("Task 2", "INPROGRESS", self.taskboard_1)
+        self.task_3 = create_task("Task 3", "TODO", self.taskboard_2, due_date)
+
+    def test_get_all_tasks(self):
+        """Test getting all tasks info."""
+        response = self.client.get("/api/tasks/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+
+    def test_get_one_tasks(self):
+        """Test getting a specific task info."""
+        response = self.client.get(f"/api/tasks/{self.task_2.id}/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], self.task_2.title)
+        self.assertEqual(response.data["status"], self.task_2.status)
 
     def test_create_valid_task(self):
         """Test creating a Task."""
-        tb = create_taskboard("Taskboard 1")
-        url = reverse("manager:create_task", args=(tb.id,))
-        task_title = "Task1"
-        data = {"title": task_title, "taskboard": tb.id}
-        response = self.client.post(url, data)
-        self.assertRedirects(response, reverse("manager:taskboard", args=(tb.id,)))
-        self.assertEqual(Task.objects.filter(title=task_title).count(), 1)
-        self.assertEqual(Task.objects.filter(taskboard=tb).count(), 1)
+        task = create_task_json("Hello", "DONE", self.taskboard_2)
+        response = self.client.post("/api/tasks/", task, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Task.objects.count(), 4)
+        self.assertEqual(Task.objects.last().title, "Hello")
 
     def test_create_invalid_task(self):
-        """Test creating an invalid task."""
-        tb = create_taskboard("Taskboard 1")
-        url = reverse("manager:create_task", args=(tb.id,))
-        data = {}
-        response = self.client.post(url, data)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
-        self.assertEqual(Task.objects.count(), 0)
+        """
+        Test creating an invalid task.
+
+        If a required form field is empty, no task should be created.
+        """
+        response = self.client.post("/api/tasks/", {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Task.objects.count(), 3)
 
     def test_delete_valid_task(self):
         """Test deleting a valid task."""
-        tb = create_taskboard("Taskboard 1")
-        task = create_task("title", tb)
+        response_1 = self.client.delete(f"/api/tasks/{self.task_2.id}/")
+        self.assertEqual(response_1.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Task.objects.count(), 2)
+        response_2 = self.client.delete(f"/api/tasks/{self.task_3.id}/")
+        self.assertEqual(response_2.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Task.objects.count(), 1)
-        url = reverse("manager:delete_task", args=(task.id,))
-        response = self.client.get(url)
-        self.assertRedirects(response, reverse("manager:taskboard", args=(tb.id,)))
-        self.assertEqual(Task.objects.count(), 0)
 
     def test_delete_invalid_task(self):
         """Test deleting an invalid task."""
-        url = reverse("manager:delete_task", args=(3000,))
-        response = self.client.get(url)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
+        response = self.client.delete("/api/tasks/9999/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(Task.objects.count(), 3)
 
-    def test_update_task(self):
-        """Test updating attributes in a task."""
-        tb = create_taskboard("Hello World")
-        task = create_task("Das Kapital", tb)
-        new_title = "Wealth of Nations"
-        new_data = {"title": new_title, "taskboard": tb}
-        url = reverse("manager:update_task", args=(task.id,))
-        response = self.client.post(url, new_data)
-        self.assertRedirects(response, reverse("manager:taskboard", args=(tb.id,)))
-        self.assertEqual(Task.objects.count(), 1)
-        self.assertEqual(Task.objects.filter(title=new_title).count(), 1)
-        self.assertEqual(
-            task.taskboard, Task.objects.filter(title=new_title).first().taskboard
+    def test_update_valid_task(self):
+        """Test updating a task with valid information."""
+        task = create_task_json("Task 1 Edited", "DONE", self.taskboard_1)
+        response = self.client.put(
+            f"/api/tasks/{self.task_1.id}/",
+            task,
+            format="json",
+            content_type="application/json",
         )
-
-    def test_update_non_existent_task(self):
-        """Test updating attributes in a task."""
-        tb = create_taskboard("Hello World")
-        new_title = "Wealth of Nations"
-        new_data = {"title": new_title, "taskboard": tb}
-        url = reverse("manager:update_task", args=(3000,))
-        response = self.client.post(url, new_data)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
-        self.assertEqual(Task.objects.count(), 0)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.task_1.refresh_from_db()
+        self.assertEqual(self.task_1.title, "Task 1 Edited")
+        self.assertEqual(self.task_1.status, "DONE")
 
     def test_update_task_with_invalid_data(self):
-        """Test updating a task with invalid attributes."""
-        tb = create_taskboard("Hello World")
-        old_title = "Das Kapital"
-        task = create_task(old_title, tb)
-        url = reverse("manager:update_task", args=(task.id,))
-        response = self.client.post(url, {})
-        self.assertRedirects(response, reverse("manager:taskboard", args=(tb.id,)))
-        self.assertEqual(Task.objects.count(), 1)
-        self.assertEqual(Task.objects.filter(title=old_title).count(), 1)
+        """Updating a task with invalid data should raise HTTP 400."""
+        task = {"title": "", "taskboard": ""}
+        response = self.client.put(
+            f"/api/tasks/{self.task_1.id}/",
+            task,
+            format="json",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.task_1.refresh_from_db()
+        self.assertEqual(self.task_1.title, "Task 1")
+        self.assertEqual(self.task_1.status, "TODO")
+
+    def test_update_non_existent_task(self):
+        """Updating a task that does not exist should raise HTTP 404."""
+        task = create_task_json("Task 1 Edited", "DONE", self.taskboard_1)
+        response = self.client.put(
+            "/api/tasks/9999/",
+            task,
+            format="json",
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.task_1.refresh_from_db()
+        self.assertEqual(self.task_1.title, "Task 1")
+        self.assertEqual(self.task_1.status, "TODO")
