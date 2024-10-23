@@ -37,7 +37,6 @@ class GoogleLoginCallback(APIView):
             'process' : 'login',
         }
 
-        token_valid = False
         response = requests.post(url=token_endpoint_url, data={"code": code}, params=params)
         key = response.json()["key"]
         user_id = Token.objects.get(key=key).user_id
