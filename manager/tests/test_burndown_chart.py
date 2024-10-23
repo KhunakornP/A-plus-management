@@ -4,15 +4,7 @@ from datetime import date, timedelta
 from manager.models import Taskboard, EstimateHistory
 from django.test import TestCase
 from django.urls import reverse
-
-
-def create_taskboard(tb_name: str) -> Taskboard:
-    """Create a new taskboard.
-
-    :param tb_name: taskboard name
-    :return: a Taskboard object
-    """
-    return Taskboard.objects.create(name=tb_name)
+from .templates_for_tests import create_taskboard
 
 
 def create_estimate_hisotry(tb: Taskboard, date: date, time_remaining: int):
