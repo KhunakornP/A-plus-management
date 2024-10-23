@@ -130,6 +130,15 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    ),
+    'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S.%fZ",
+}
+
 SITE_ID = 3
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'manager:taskboard_index'
