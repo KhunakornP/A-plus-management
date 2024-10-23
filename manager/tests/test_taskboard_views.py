@@ -1,18 +1,30 @@
 """Test taskboard creation, deletion, modification and redirections."""
 
 from django.test import TestCase
-from django.urls import reverse
-
 from manager.models import Taskboard
+from typing import Any, Optional
+from rest_framework import status
 
 
-def create_taskboard(tb_name: str) -> Taskboard:
-    """Create a new taskboard.
+def create_taskboard(name: str = "Today") -> Taskboard:
+    """Create a taskboard with the given name.
 
-    :param tb_name: taskboard name
-    :return: a Taskboard object.
+    :returns: A Taskboard object with the given name.
     """
-    return Taskboard.objects.create(name=tb_name)
+    return Taskboard.objects.create(name=name)
+
+
+def create_taskboard_json(
+    name: str = "Today", id: Optional[int] = None
+) -> dict[str, Any]:
+    """Create a dict with the given name.
+
+    :returns: A Dictionary containing taskboard data.
+    """
+    data = {"name": name}
+    if id is not None:
+        data["id"] = id
+    return data
 
 
 class TaskboardTests(TestCase):
@@ -20,65 +32,69 @@ class TaskboardTests(TestCase):
 
     def test_create_valid_taskboard(self):
         """Test creating valid taskboard."""
-        url = reverse("manager:create_taskboard")
-        tb_name = "Test Taskboard"
-        tb_data = {"name": tb_name}
-        response = self.client.post(url, tb_data)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
-        taskboard = Taskboard.objects.filter(name=tb_name)
-        self.assertEqual(taskboard.count(), 1)
+        tb = create_taskboard_json("Hello")
+        self.client.post("/api/taskboards/", tb, format="json")
+        self.assertEqual(Taskboard.objects.count(), 1)
+        self.assertEqual(Taskboard.objects.first().name, "Hello")
 
     def test_create_invalid_taskboard(self):
         """Test creating valid taskboard."""
-        url = reverse("manager:create_taskboard")
-        taskboard_data = {}
-        response = self.client.post(url, taskboard_data)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
+        self.client.post("/api/taskboards/", {}, format="json")
         self.assertEqual(Taskboard.objects.count(), 0)
 
     def test_delete_valid_taskboard(self):
         """Test deleting valid taskboard."""
-        tb_name = "Taskboard1"
-        tb = create_taskboard(tb_name)
+        tb = create_taskboard()
         self.assertEqual(Taskboard.objects.count(), 1)
-        url = reverse("manager:delete_taskboard", args=(tb.id,))
-        response = self.client.get(url)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
+        self.client.delete(f"/api/taskboards/{tb.id}/")
         self.assertEqual(Taskboard.objects.count(), 0)
 
     def test_delete_invalid_taskboard(self):
         """Test deleting invalid taskboard."""
-        self.assertEqual(Taskboard.objects.count(), 0)
-        url = reverse("manager:delete_taskboard", args=(400,))
-        response = self.client.get(url)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
-        self.assertEqual(Taskboard.objects.count(), 0)
+        tb = create_taskboard()
+        self.client.delete(f"/api/taskboards/{tb.id * 727}/")
+        self.assertEqual(Taskboard.objects.count(), 1)
 
     def test_updating_taskboard(self):
         """Test updating the taskboard's attributes."""
-        tb = create_taskboard("Taskboard 1")
-        new_name = "Event Generator 3000"
-        new_data = {"name": new_name}
-        url = reverse("manager:update_taskboard", args=(tb.id,))
-        response = self.client.post(url, new_data)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
-        self.assertEqual(Taskboard.objects.filter(name=new_name).count(), 1)
+        tb = create_taskboard("goodbye")
+        new_tb = create_taskboard_json(name="yahallo", id=tb.id)
+        response = self.client.put(
+            f"/api/taskboards/{tb.id}/",
+            new_tb,
+            format="json",
+            content_type="application/json",
+        )
+        tb.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Taskboard.objects.count(), 1)
+        self.assertEqual(tb.name, "yahallo")
 
     def test_updating_non_existent_taskboard(self):
         """Test updating non-existent taskboard with valid attributes."""
-        new_name = "Event Generator 3000"
-        new_data = {"name": new_name}
-        url = reverse("manager:update_taskboard", args=(3000,))
-        response = self.client.post(url, new_data)
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
-        self.assertEqual(Taskboard.objects.count(), 0)
+        tb = create_taskboard("goodbye")
+        new_tb = create_taskboard_json("yahallo")
+        response = self.client.put(
+            f"/api/taskboards/{tb.id * 420 // 69}/",
+            new_tb,
+            format="json",
+            content_type="application/json",
+        )
+        tb.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(Taskboard.objects.count(), 1)
+        self.assertEqual(tb.name, "goodbye")
 
     def test_updating_taskboard_with_invalid_data(self):
         """Test updating a taskboard with invalid data."""
-        old_name = "Taskboard 1"
-        tb = create_taskboard(old_name)
-        url = reverse("manager:update_taskboard", args=(tb.id,))
-        response = self.client.post(url, {})
-        self.assertRedirects(response, reverse("manager:taskboard_index"))
+        tb = create_taskboard("goodbye")
+        new_tb = {"skibidi": "toilet", "id": tb.id}
+        self.client.put(
+            f"/api/taskboards/{tb.id}/",
+            new_tb,
+            format="json",
+            content_type="application/json",
+        )
+        tb.refresh_from_db()
         self.assertEqual(Taskboard.objects.count(), 1)
-        self.assertEqual(Taskboard.objects.filter(name=old_name).count(), 1)
+        self.assertEqual(tb.name, "goodbye")
