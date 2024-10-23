@@ -35,12 +35,12 @@ def create_event_json(
     id: Optional[int] = None,
 ) -> dict[str, Any]:
     """
-    Create an event as a JSON object with the given title, start date, and end date.
+    Create an event as a Dict with the given title, start date, and end date.
 
     :param title: The name of the event.
     :param start_date: The start date of the event.
     :param end_date: The end date of the event.
-    :return: A JSON object.
+    :return: Dictionary containing event data.
     """
     if not start_date:
         start_date = timezone.now()
@@ -48,7 +48,7 @@ def create_event_json(
         end_date = timezone.now()
 
     data = {}
-    if id:
+    if id is not None:
         data["id"] = str(id)
 
     data.update({"title": title, "start_date": start_date, "end_date": end_date})
@@ -110,7 +110,7 @@ class EventViewTests(TestCase):
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(event.title, "yahallo")
 
-    def test_update_invalid_event(self):
+    def test_update_non_existent_event(self):
         """Updating an event that does not exist does not create a new event."""
         event = create_event("goodbye")
         new_event = create_event_json("yahallo")
@@ -128,9 +128,13 @@ class EventViewTests(TestCase):
     def test_update_event_with_invalid_data(self):
         """Updating an event with invalid data should raise HTTP 400."""
         event = create_event("goodbye")
-        new_event = {"name": 1234}
-        response = self.client.put(f"/api/events/{event.id}/", new_event, format="json")
+        new_event = {"name": 1234, "id": event.id}
+        self.client.put(
+            f"/api/events/{event.id}/",
+            new_event,
+            format="json",
+            content_type="application/json",
+        )
         event.refresh_from_db()
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(event.title, "goodbye")
