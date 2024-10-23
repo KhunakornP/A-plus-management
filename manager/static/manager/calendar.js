@@ -1,5 +1,3 @@
-const allEvents = JSON.parse(document.getElementById('events-data').textContent);
-const allTasks = JSON.parse(document.getElementById('tasks-data').textContent);
 const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'), {
   focus: true
 });
@@ -22,7 +20,19 @@ document.addEventListener('DOMContentLoaded', () => {
     selectable: true,
     dayMaxEvents: true,
     timeZone: 'UTC',
-    events: allEvents.concat(allTasks),
+    eventSources: [
+      {
+        url: '/api/events/',
+        color: '#6767fe',
+        editable: true,
+        lazyFetching: true,
+      },
+      {
+        url: '/api/tasks/',
+        color: '#FF00FF',
+        lazyFetching: true,
+      }
+    ],
     eventClick: (eventClickInfo) => {
       var eventObj = eventClickInfo.event;
       var popover = document.querySelector('.fc-popover');
