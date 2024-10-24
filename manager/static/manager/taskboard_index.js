@@ -22,7 +22,6 @@ function generateTaskboardCard(taskboard) {
       </div>
     </div>
   `;
-  const deleteButton = document.getElementById('del-btn-'.concat(taskboard.id));
   return card;
 }
 

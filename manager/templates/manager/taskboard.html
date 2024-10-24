@@ -8,146 +8,63 @@
 {% block content %}
 <div class="container-fluid py-4">
   <h1 class="text-center md-6">{{taskboard.name}}</h1>
+
   <div class="row gx-4 mt-3">
     <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 text-success-emphasis bg-success-subtle text-center rounded">To-Do</h4>
         <div class="drop_area pb-5" id="todo">
-          {% for task in taskboard.task_set.all %}
-            {% if task.status == "TODO" %}
-              <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3 draggable text-center py-2" draggable="true">
-                  <a href="" class="my-0 py-0 link-light" data-bs-toggle="offcanvas" data-bs-target="#detail{{task.id}}"" aria-controls="detail{{task.id}}">
-                    {{task.title}}
-                  </a>
-              </div>
-
-              <div class="offcanvas offcanvas-end" tabindex="-1" id="detail{{task.id}}" aria-labelledby="detail{{task.id}}Label">
-                <div class="offcanvas-header">
-                  <h5 class="offcanvas-title" id="detail{{task.id}}Label">
-                    Task Details
-                  </h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                </div>
-                <div class="offcanvas-body">
-                  <form>
-                    <div class="mb-3">
-                      <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
-                      <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
-                    </div>
-  
-                    <div class="mb-3">
-                      <h6 class="form-label fw-bold">Due Date :</h6>
-                      <p>{{task.end_date}}</p>
-                    </div>
-  
-                    <div class="mb-3">
-                      <label for="task{{task.id}}Details" class="form-label fw-bold">Details :</label>
-                      <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
-                    </div>
-  
-                    <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="#" class="btn btn-sm btn-danger">Delete</a>
-                  </form>
-                </div>
-              </div>
-            {% endif %}
-          {% endfor %}
         </div>
       </div>
     </div>
+
     <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded" id="in-progress">
         <h4 class="py-3 text-warning bg-warning-subtle text-center rounded">In Progress</h4>
         <div class="drop_area pb-5" id="in-progress">
-          {% for task in taskboard.task_set.all %}
-          {% if task.status == "IN PROGRESS" %}
-          <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3 draggable text-center py-2" draggable="true">
-            <a href="" class="my-0 py-0 link-light" data-bs-toggle="offcanvas" data-bs-target="#detail{{task.id}}"" aria-controls="detail{{task.id}}">
-              {{task.title}}
-            </a>
-          </div>
-
-          <div class="offcanvas offcanvas-end" tabindex="-1" id="detail{{task.id}}" aria-labelledby="detail{{task.id}}Label">
-            <div class="offcanvas-header">
-              <h5 class="offcanvas-title" id="detail{{task.id}}Label">
-                {{task.title}}
-              </h5>
-              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-              <form>
-                <div class="mb-3">
-                  <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
-                  <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
-                </div>
-
-                <div class="mb-3">
-                  <h6 class="form-label fw-bold">Due Date :</h6>
-                  <p>{{task.end_date}}</p>
-                </div>
-
-                <div class="mb-3">
-                  <label for="task{{task.id}}Details" class="form-label fw-bold">Details :</label>
-                  <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
-                </div>
-
-                <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                <a href="#" class="btn btn-sm btn-danger">Delete</a>
-              </form>
-            </div>
-          </div>
-          {% endif %}
-          {% endfor %}
         </div>
       </div>
     </div>
+
     <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 bg-black bg-gradient text-center rounded">Done</h4>
         <div class="drop_area pb-5" id="done">
-          {% for task in taskboard.task_set.all %}
-          {% if task.status == "DONE" %}
-          <div class="bg-body border border-white shadow-lg rounded overflow-hidden m-3 draggable text-center py-2" draggable="true">
-            <a href="" class="my-0 py-0 link-light" data-bs-toggle="offcanvas" data-bs-target="#detail{{task.id}}"" aria-controls="detail{{task.id}}">
-              {{task.title}}
-            </a>
-          </div>
-
-          <div class="offcanvas offcanvas-end" tabindex="-1" id="detail{{task.id}}" aria-labelledby="detail{{task.id}}Label">
-            <div class="offcanvas-header">
-              <h5 class="offcanvas-title" id="detail{{task.id}}Label">
-                {{task.title}}
-              </h5>
-              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-              <form>
-                <div class="mb-3">
-                  <label for="task{{task.id}}Title" class="form-label fw-bold">Title :</label>
-                  <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Title" value="{{task.title}}">
-                </div>
-
-                <div class="mb-3">
-                  <h6 class="form-label fw-bold">Due Date :</h6>
-                  <p>{{task.end_date}}</p>
-                </div>
-
-                <div class="mb-3">
-                  <label for="task{{task.id}}Details" class="form-label fw-bold">Details :</label>
-                  <input type="text" readonly class="form-control-plaintext" id="task{{task.id}}Details" value="{{task.details}}">
-                </div>
-
-                <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                <a href="#" class="btn btn-sm btn-danger">Delete</a>
-              </form>
-            </div>
-          </div>
-          {% endif %}
-          {% endfor %}
         </div>
       </div>
     </div>
   </div>
+
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="task-offcanvas">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvas-label">
+        Task Title
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <form>
+        <div class="mb-3">
+          <label for="offcanvas-task-title" class="form-label fw-bold">Title :</label>
+          <input type="text" readonly class="form-control-plaintext" id="task-title" value="Placeholder">
+        </div>
+
+        <div class="mb-3">
+          <h6 class="form-label fw-bold">Due Date :</h6>
+          <p>The end of Time</p>
+        </div>
+
+        <div class="mb-3">
+          <label for="offcanvas-task-detail" class="form-label fw-bold">Details :</label>
+          <input type="text" readonly class="form-control-plaintext" id="task-details" value="Lorem Ipsum">
+        </div>
+
+        <a href="#" class="btn btn-sm btn-primary">Edit</a>
+        <a href="#" class="btn btn-sm btn-danger">Delete</a>
+      </form>
+    </div>
+  </div>
+
 
   <button class="btn btn-primary btn-sm w-100 position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#addTask">
     Add Task
