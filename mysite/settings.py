@@ -143,6 +143,9 @@ SITE_ID = 3
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'manager:taskboard_index'
 
+#  The maximum difference between the iat and server time allowed in second
+ABSOLUTE_TOLERATED_TIME_DIFF = config('DELTA_TIME', cast=int, default=1)
+
 SOCIALACCOUNT_STORE_TOKENS = True
 
 

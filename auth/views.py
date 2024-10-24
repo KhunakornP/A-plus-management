@@ -14,10 +14,7 @@ from django.contrib import messages
 from rest_framework.views import APIView
 import jwt
 from time import sleep, time
-
-
-#  The maximum difference between the iat and server time allowed in seconds
-ABSOLUTE_TOLERATED_TIME_DIFF = 5  # the lower the value the more secure
+from django.conf import settings
 
 
 class GoogleOAuth2IatValidationAdapter(GoogleOAuth2Adapter):
@@ -48,7 +45,7 @@ class GoogleOAuth2IatValidationAdapter(GoogleOAuth2Adapter):
         # difference, not the most elegant solution to this since
         # using a JS library to handle authentication would be better but,
         # it's the best I can do since we have no front end.
-        if 0 < delta_time <= ABSOLUTE_TOLERATED_TIME_DIFF:
+        if 0 < delta_time <= settings.ABSOLUTE_TOLERATED_TIME_DIFF:
             sleep(delta_time)
         else:
             print(delta_time)
