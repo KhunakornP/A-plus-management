@@ -10,6 +10,7 @@ from django.contrib.auth import login
 from django.shortcuts import redirect
 import requests
 from django.urls import reverse
+from django.contrib import messages
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -38,13 +39,20 @@ class GoogleLoginCallback(APIView):
         response = requests.post(
             url=token_endpoint_url, data={"code": code}, params=params
         )
-        key = response.json()["key"]
-        user_id = Token.objects.get(key=key).user_id
-        user = User.objects.get(pk=user_id)
-        login(
-            request, user, backend="allauth.account.auth_backends.AuthenticationBackend"
-        )
-        return redirect(reverse("manager:taskboard_index"))
+        try:
+            key = response.json()["key"]
+            user_id = Token.objects.get(key=key).user_id
+            user = User.objects.get(pk=user_id)
+            login(
+                request,
+                user,
+                backend="allauth.account.auth_backends.AuthenticationBackend",
+            )
+            return redirect(reverse("manager:taskboard_index"))
+        except (ValueError, IndexError):
+            messages.error(request, "Authentication Error: Please login again.")
+            #  change this to the login page after it is created
+            return redirect(reverse("manager:taskboard_index"))
 
 
 class GoogleLogin(SocialLoginView):
