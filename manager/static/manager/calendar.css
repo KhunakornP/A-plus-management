@@ -2,3 +2,7 @@
   max-width: 90vw;
   margin: 10px auto;
 }
+
+textarea {
+  resize: none;
+}

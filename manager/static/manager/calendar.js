@@ -4,23 +4,40 @@ const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDeta
 const taskDetailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'), {
   focus: true
 });
-var deleteButton = document.getElementById('deleteButton');
+const addEventModal = new bootstrap.Modal(document.getElementById('addEventModal'), {
+  focus: true
+});
+const newTitle = document.getElementById('newTitle');
+const newStart = document.getElementById('newStart');
+const newEnd = document.getElementById('newEnd');
+const newDetails = document.getElementById('newDetails');
+const addButton = document.getElementById('addButton');
+let deleteButton = document.getElementById('deleteButton');
 
 document.addEventListener('DOMContentLoaded', () => {
-  var calendarElement = document.getElementById('calendar');
-  var calendar = new FullCalendar.Calendar(calendarElement, {
+  const calendarElement = document.getElementById('calendar');
+  let calendar = new FullCalendar.Calendar(calendarElement, {
     initialView: 'dayGridMonth',
     nowIndicator: true,
+    allDaySlot: false,
+    customButtons: {
+      addEvent: {
+        text: 'Add Event',
+        click: () => {
+          addEventModal.show();
+        }
+      },
+    },
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+      right: 'addEvent dayGridMonth,timeGridWeek,timeGridDay,listWeek'
     },
     height: '90vh',
     navLinks: true,
     selectable: true,
     dayMaxEvents: true,
-    timeZone: 'UTC',
+    timeZone: 'local',
     eventSources: [
       {
         id: 420,
@@ -36,24 +53,28 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     ],
     eventClick: (eventClickInfo) => {
-      var eventObj = eventClickInfo.event;
-      var popover = document.querySelector('.fc-popover');
+      const eventObj = eventClickInfo.event;
+      const popover = document.querySelector('.fc-popover');
       if (popover !== null) {
         popover.style.display = 'none';
       }
       if (eventObj.extendedProps.type == "event") {
+        const eventStart = formatLocalISO(eventObj.start);
+        const eventEnd = formatLocalISO(eventObj.end);
+        console.log(eventObj.start.toISOString());
         document.getElementById('eventDetailsModalTitle').innerHTML = eventObj.title;
-        document.getElementById('eventStart').value = eventObj.start.toISOString().slice(0, 16);
-        document.getElementById('eventEnd').value = eventObj.end.toISOString().slice(0, 16);
+        document.getElementById('eventStart').value = eventStart;
+        document.getElementById('eventEnd').value = eventEnd;
         document.getElementById('eventDetails').value = eventObj.extendedProps.details;
         eventDetailsModal.show();
       } else if (eventObj.extendedProps.type == "task") {
+        const taskDue = formatLocalISO(eventObj.start);
         document.getElementById('taskDetailsModalTitle').innerHTML = eventObj.title;
-        document.getElementById('taskDue').value = eventObj.start.toISOString().slice(0, 16);
+        document.getElementById('taskDue').value = taskDue;
         document.getElementById('taskDetails').value = eventObj.extendedProps.details;
         taskDetailsModal.show();
       }
-      var deleteButtonClone = deleteButton.cloneNode(true);
+      const deleteButtonClone = deleteButton.cloneNode(true);
       deleteButton.parentNode.replaceChild(deleteButtonClone, deleteButton);
       deleteButton = deleteButtonClone;
       deleteButton.addEventListener('click', async () => {
@@ -65,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
         calendar.getEventSourceById(420).refetch();
+        eventDetailsModal.hide();
       });
     },
     eventDrop: (eventDropInfo) => {
@@ -73,12 +95,40 @@ document.addEventListener('DOMContentLoaded', () => {
     eventResize: (eventResizeInfo) => {
       updateEventTime(eventResizeInfo);
     },
+    select: (selectionInfo) => {
+      newStart.value = formatLocalISO(selectionInfo.start);
+      newEnd.value = formatLocalISO(selectionInfo.end);
+    }
   });
+
+  addButton.addEventListener('click', async () => {
+    const startDate = new Date(newStart.value);
+    const endDate = new Date(newEnd.value);
+    await fetch('/api/events/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken')
+      },
+      body: JSON.stringify({
+        'title': newTitle.value,
+        'start': startDate.toISOString(),
+        'end': endDate.toISOString(),
+        'details': newDetails.value
+      })
+    });
+    newTitle.value = '';
+    newStart.value = '';
+    newEnd.value = '';
+    newDetails.value = '';
+    calendar.getEventSourceById(420).refetch();
+  });
+
   calendar.render();
 });
 
 async function updateEventTime(eventInfo) {
-  var eventObj = eventInfo.event;
+  let eventObj = eventInfo.event;
   await fetch('/api/events/'.concat(eventObj.id).concat('/'), {
     method: 'PUT',
     headers: {
@@ -87,8 +137,19 @@ async function updateEventTime(eventInfo) {
     },
     body: JSON.stringify({
       'title': eventObj.title,
-      'start_date': eventObj.start.toISOString(),
-      'end_date': eventObj.end.toISOString()
+      'start': eventObj.start.toISOString(),
+      'end': eventObj.end.toISOString()
     })
   });
+}
+
+function formatLocalISO(dateUTC) {
+  const dateTime = new Date(dateUTC.toISOString());
+  const timeZoneOffSet = dateTime.getTimezoneOffset() * 60 * 1000;
+  let dateTimeLocal = dateTime - timeZoneOffSet;
+  dateTimeLocal = new Date(dateTimeLocal);
+  let iso = dateTimeLocal.toISOString();
+  iso = iso.split('.')[0];
+  iso = iso.replace('T', ' ');
+  return iso;
 }
