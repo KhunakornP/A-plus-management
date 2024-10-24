@@ -3,7 +3,7 @@
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
-from urllib.parse import urljoin, urlparse, parse_qs
+from urllib.parse import urljoin
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import login
@@ -15,17 +15,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-def extract_access_token_from_url(url):
-    """"""
-    parsed_url = urlparse(url)
-    query_set = parse_qs(parsed_url.query)
-    return query_set
-
-
 class GoogleLoginCallback(APIView):
-    def get(self, request, *args, **kwargs):
-        """Callback for exchanging Google Tokens."""
+    """Class for handling token exchange between Google and Server."""
 
+    def get(self, request, *args, **kwargs):
+        """
+        Get the access code from Oauth and exchange it for a  Google Token.
+
+        After getting the token, this function saves the token to the database
+        and authenticates the user.
+        """
         code = request.GET.get("code")
 
         if code is None:
