@@ -4,7 +4,65 @@
 {% endblock %}
 {% block content %}
 
-<div class="container-fluid">
+<div class="col-8 offset-2 my-5">
+  <div class="card">
+    <div class="card-body">
+
+      <h5>Burndown Chart</h5>
+      <hr>
+      <canvas id="myChart"></canvas>
+
+    </div>
+  </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const taskboardId = 1; // Replace with the actual taskboard_id
+  const url = `/taskboard/${taskboardId}/burndown/data/`;
+
+  fetch(url)
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return response.json();
+      })
+      .then(data => {
+
+        const dates = data.map(item => item.date);
+        const timeRemaining = data.map(item => item.time_remaining);
+
+        const ctx = document.getElementById('myChart');
+
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: date,
+              datasets: [{
+                label: 'Time Remaining',
+                  data: time_remaining,
+                  borderWidth: 1
+                }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            }
+          }
+        });
+
+      })
+      .catch(error => {
+          console.error('Error fetching burndown data:', error);
+      });
+</script>
+
+<!-- <div class="container-fluid">
   <a href="#" class="btn btn-secondary my-3">
     Back to Taskboard
   </a>
@@ -42,6 +100,6 @@
     
   </div>
 
-</div>
+</div> -->
 
 {% endblock %}

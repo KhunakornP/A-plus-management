@@ -1,7 +1,6 @@
 """Module for views relating to burndown chart pages."""
 
 from django.shortcuts import render
-from django.http import JsonResponse
 from manager.serializers import EstimateHistorySerialzer
 from manager.models import EstimateHistory
 from django.views import generic
@@ -11,7 +10,7 @@ from typing import Optional
 from manager.models import Taskboard
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 
 
 def get_taskboard(taskboard_id: int) -> Optional[Taskboard]:
@@ -64,6 +63,21 @@ class BurndownView(generic.View):
         kwargs["events"] = request.POST.getlist("events")
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
+
+class EstimateHistoryData(generics.ListAPIView):
+    """A view getting EstimateHistory data."""
+    
+    serializer_class = EstimateHistorySerialzer
+
+    def get_queryset(self):
+        taskboard_id = self.kwargs['taskboard_id']
+        return EstimateHistory.objects.filter(taskboard_id=taskboard_id).order_by('date')
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(['GET', 'POST'])
 def estimate_histories_json(request, taskboard_id):
