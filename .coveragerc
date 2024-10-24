@@ -19,12 +19,12 @@ omit =
     admin.py
     # app configurations
     apps.py
+    # don't include auth since you can't really sign in to google using test cases
+    auth/*
 
 include =
     # include the main app files
     manager/*
-    # include auth app files
-    auth/*
 
 [report]
 # dont test __str__ and __repr__ methods
