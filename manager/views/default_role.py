@@ -5,6 +5,13 @@ from manager.models import StudentInfo
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
+from django.views.generic import TemplateView
+
+
+class LoginView(TemplateView):
+    """View for rendering the login page"""
+
+    template_name = "manager/login.html"
 
 
 @receiver(post_save, sender=User)
