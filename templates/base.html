@@ -12,10 +12,10 @@
   <button type="submit">Log Out</button>
 </form>
     {% else %}
-    <form action="{% provider_login_url 'google' action='reauthenticate'%}" method="post">
-   {% csrf_token %}
-  <button type="submit">Login with Google account</button>
-</form>
+    <form action="https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:8000/api/auth/google-oauth2/callback/&prompt=consent&response_type=code&client_id=98486058115-aqjg1b4pcqobn4rb0if7pqf42jb9hlb2.apps.googleusercontent.com&scope=openid%20email%20profile&access_type=offline" method="post">
+      {% csrf_token %}
+      <button type="submit">Login</button>
+    </form>
     {% endif %}
     {% block headcontent %}
     {% endblock %}
