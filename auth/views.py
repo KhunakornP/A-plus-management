@@ -1,7 +1,7 @@
 """Module for redirecting users to authentication page."""
 
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client, OAuth2Error
 from dj_rest_auth.registration.views import SocialLoginView
 from urllib.parse import urljoin
 from rest_framework.authtoken.models import Token
@@ -11,9 +11,49 @@ from django.shortcuts import redirect
 import requests
 from django.urls import reverse
 from django.contrib import messages
-from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.views import APIView
+import jwt
+from time import sleep, time
+
+
+#  The maximum difference between the iat and server time allowed in seconds
+ABSOLUTE_TOLERATED_TIME_DIFF = 5  # the lower the value the more secure
+
+
+class GoogleOAuth2IatValidationAdapter(GoogleOAuth2Adapter):
+    """Custom adapter for Google authentication."""
+
+    def complete_login(self, request, app, token, response, **kwargs):
+        """
+        Override the complete_login method and make the iat check more lenient.
+
+        This method stalls the server time until the token is ready to be
+        validated. Then calls the allauth complete_login to validate the token.
+        """
+        try:
+            delta_time = (
+                jwt.decode(
+                    response.get("id_token"),
+                    options={"verify_signature": False},
+                    algorithms=["RS256"],
+                )["iat"]
+                - time()
+            )
+        except jwt.PyJWTError as e:
+            raise OAuth2Error("Invalid id_token during 'iat' validation") from e
+        except KeyError as e:
+            raise OAuth2Error("Failed to get 'iat' from id_token") from e
+
+        # check if the iat is in the future and if it is within acceptable
+        # difference, not the most elegant solution to this since
+        # using a JS library to handle authentication would be better but,
+        # it's the best I can do since we have no front end.
+        if 0 < delta_time <= ABSOLUTE_TOLERATED_TIME_DIFF:
+            sleep(delta_time)
+        else:
+            print(delta_time)
+
+        return super().complete_login(request, app, token, response, **kwargs)
 
 
 class GoogleLoginCallback(APIView):
@@ -23,13 +63,15 @@ class GoogleLoginCallback(APIView):
         """
         Get the access code from Oauth and exchange it for a  Google Token.
 
-        After getting the token, this function saves the token to the database
+        After getting the token, this method saves the token to the database
         and authenticates the user.
         """
         code = request.GET.get("code")
 
         if code is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            messages.error(request, "Google sign in failed: Please login again.")
+            #  change this to the login page after it is created as well
+            return redirect(reverse("manager:taskboard_index"))
 
         token_endpoint_url = urljoin("http://localhost:8000", reverse("google_login"))
         params = {
@@ -58,6 +100,6 @@ class GoogleLoginCallback(APIView):
 class GoogleLogin(SocialLoginView):
     """Social Login View for Google OAuth."""
 
-    adapter_class = GoogleOAuth2Adapter
+    adapter_class = GoogleOAuth2IatValidationAdapter
     callback_url = "http://localhost:8000/api/auth/google-oauth2/callback/"
     client_class = OAuth2Client
