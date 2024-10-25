@@ -6,3 +6,7 @@
 textarea {
   resize: none;
 }
+
+.hidden {
+  display: none;
+}

@@ -1,3 +1,4 @@
+const eventModalElement = document.getElementById('eventDetailsModal')
 const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'), {
   focus: true
 });
@@ -12,6 +13,14 @@ const newStart = document.getElementById('newStart');
 const newEnd = document.getElementById('newEnd');
 const newDetails = document.getElementById('newDetails');
 const addButton = document.getElementById('addButton');
+const eventModalTitle = document.getElementById('eventDetailsModalTitle');
+const eventTitle = document.getElementById('eventTitle');
+const eventStart = document.getElementById('eventStart');
+const eventEnd = document.getElementById('eventEnd');
+const eventDetails = document.getElementById('eventDetails')
+const editButton = document.getElementById('editButton');
+const cancelButton = document.getElementById('cancelButton');
+let doneButton = document.getElementById('doneButton');
 let deleteButton = document.getElementById('deleteButton');
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -58,14 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (popover !== null) {
         popover.style.display = 'none';
       }
+
       if (eventObj.extendedProps.type == "event") {
-        const eventStart = formatLocalISO(eventObj.start);
-        const eventEnd = formatLocalISO(eventObj.end);
-        console.log(eventObj.start.toISOString());
-        document.getElementById('eventDetailsModalTitle').innerHTML = eventObj.title;
-        document.getElementById('eventStart').value = eventStart;
-        document.getElementById('eventEnd').value = eventEnd;
-        document.getElementById('eventDetails').value = eventObj.extendedProps.details;
+        updateEventModalInfo(eventObj);
         eventDetailsModal.show();
       } else if (eventObj.extendedProps.type == "task") {
         const taskDue = formatLocalISO(eventObj.start);
@@ -74,11 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('taskDetails').value = eventObj.extendedProps.details;
         taskDetailsModal.show();
       }
+
       const deleteButtonClone = deleteButton.cloneNode(true);
       deleteButton.parentNode.replaceChild(deleteButtonClone, deleteButton);
       deleteButton = deleteButtonClone;
       deleteButton.addEventListener('click', async () => {
-        await fetch('/api/events/'.concat(eventObj.id).concat('/'), {
+        await fetch(`/api/events/${eventObj.id}/`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -87,6 +92,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         calendar.getEventSourceById(420).refetch();
         eventDetailsModal.hide();
+      });
+
+      const doneButtonClone = doneButton.cloneNode(true);
+      doneButton.parentNode.replaceChild(doneButtonClone, doneButton);
+      doneButton = doneButtonClone;
+      doneButton.addEventListener('click', async () => {
+        const startDate = new Date(eventStart.value)
+        const endDate = new Date(eventEnd.value)
+        await fetch(`/api/events/${eventObj.id}/`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': Cookies.get('csrftoken')
+          },
+          body: JSON.stringify({
+            'title': eventTitle.value,
+            'start': startDate.toISOString(),
+            'end': endDate.toISOString(),
+            'details': eventDetails.value
+          })
+        });
+        calendar.getEventSourceById(420).refetch();
+        toggleEventInput(false);
+      });
+
+      cancelButton.addEventListener('click', () => {
+        updateEventModalInfo(eventObj);
+        toggleEventInput(false);
       });
     },
     eventDrop: (eventDropInfo) => {
@@ -124,12 +157,20 @@ document.addEventListener('DOMContentLoaded', () => {
     calendar.getEventSourceById(420).refetch();
   });
 
+  editButton.addEventListener('click', () => {
+    toggleEventInput(true);
+  })
+
+  eventModalElement.addEventListener('hide.bs.modal', () => {
+    toggleEventInput(false);
+  })
+
   calendar.render();
 });
 
 async function updateEventTime(eventInfo) {
   let eventObj = eventInfo.event;
-  await fetch('/api/events/'.concat(eventObj.id).concat('/'), {
+  await fetch(`/api/events/${eventObj.id}/`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -152,4 +193,42 @@ function formatLocalISO(dateUTC) {
   iso = iso.split('.')[0];
   iso = iso.replace('T', ' ');
   return iso;
+}
+
+function updateEventModalInfo(eventObj) {
+  const eventStartLocal = formatLocalISO(eventObj.start);
+  const eventEndLocal = formatLocalISO(eventObj.end);
+  eventModalTitle.innerHTML = eventObj.title;
+  eventTitle.value = eventObj.title;
+  eventStart.value = eventStartLocal;
+  eventEnd.value = eventEndLocal;
+  eventDetails.value = eventObj.extendedProps.details;
+}
+
+function toggleEventInput(on) {
+  if (on) {
+    editButton.classList.add('hidden');
+    deleteButton.classList.add('hidden');
+    doneButton.classList.remove('hidden');
+    cancelButton.classList.remove('hidden');
+    eventTitle.parentNode.classList.remove('hidden');
+    eventStart.removeAttribute('readonly');
+    eventStart.setAttribute('class', 'form-control');
+    eventEnd.removeAttribute('readonly');
+    eventEnd.setAttribute('class', 'form-control');
+    eventDetails.removeAttribute('readonly');
+    eventDetails.setAttribute('class', 'form-control');
+  } else {
+    editButton.classList.remove('hidden');
+    deleteButton.classList.remove('hidden');
+    doneButton.classList.add('hidden');
+    cancelButton.classList.add('hidden');
+    eventTitle.parentNode.classList.add('hidden');
+    eventStart.setAttribute('readonly', true);
+    eventStart.setAttribute('class', 'form-control-plaintext');
+    eventEnd.setAttribute('readonly', true);
+    eventEnd.setAttribute('class', 'form-control-plaintext');
+    eventDetails.setAttribute('readonly', true);
+    eventDetails.setAttribute('class', 'form-control-plaintext');
+  }
 }

@@ -17,6 +17,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
         <div class="modal-body">
+          <div class="mb-3 hidden">
+            <label for="eventTitle" class="form-label fw-bold"> New title :</label>
+            <input type="text" class="form-control" id="eventTitle">
+          </div>
+
           <div class="mb-3">
             <label for="eventStart" class="form-label fw-bold"> Start :</label>
             <input type="datetime-local" readonly class="form-control-plaintext" id="eventStart">
@@ -36,6 +41,8 @@
         <div class="modal-footer">
           <button class="btn btn-sm btn-primary" id="editButton">Edit</a>
           <button class="btn btn-sm btn-danger" id="deleteButton">Delete</a>
+          <button class="btn btn-sm btn-primary hidden" id="doneButton">Done</a>
+          <button class="btn btn-sm btn-danger hidden" id="cancelButton">Cancel</a>
         </div>
     </div>
   </div>
