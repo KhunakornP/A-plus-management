@@ -1,5 +1,5 @@
 const columns = document.querySelectorAll('.drop_area')
-const offcanvas = document.getElementById('task-offcanvas')
+const offcanvas = new bootstrap.Offcanvas('#task-offcanvas')
 
 async function fetchTasksJSON() {
   const response = await fetch('/api/tasks/');
@@ -15,9 +15,16 @@ function generateTaskCard(task) {
 
   const innerCard = document.createElement('div')
   innerCard.classList.add("my-0", "py-0", "link-light", "task-card")
-  innerCard.innerHTML = `${task.title}`
+  innerCard.innerHTML = `<u>${task.title}</u>`
   innerCard.addEventListener('click', () => {
-    console.log('clicked')
+    offcanvas.show();
+    document.getElementById('task-title').value = `${task.title}`;
+    if (task.details !== null) {
+      document.getElementById('task-details').value = `${task.details}`;
+    }
+    else {
+      document.getElementById('task-details').value = "No Details";
+    }
   })
   card.appendChild(innerCard);
   card.addEventListener('dragstart', () => {
@@ -28,7 +35,6 @@ function generateTaskCard(task) {
     card.classList.remove('dragging');
   });
   return card
-  
 }
 
 async function appendColumnChildren(children, column) {
@@ -50,8 +56,6 @@ async function renderColumns() {
   appendColumnChildren(doneTasks, document.getElementById('done'))
 }
 
-renderColumns()
-
 // code for drag-and-drop stuffs
 
 function appendCardAfterDrop(dropArea, draggable) {
@@ -67,7 +71,7 @@ columns.forEach(dropArea => {
   dropArea.addEventListener('dragover', event => {
     event.preventDefault();
   });
-
+  
   dropArea.addEventListener('drop', event => {
     event.preventDefault();
     const draggable = document.querySelector('.dragging');
@@ -81,7 +85,7 @@ columns.forEach(dropArea => {
 
 function getDragAfterElement(dropArea, y) {
   const draggableElements = [...dropArea.querySelectorAll('.draggable:not(.dragging)')]
-
+  
   return draggableElements.reduce((closest, child) => {
     const box = child.getBoundingClientRect()
     const offset = y - box.top - box.height / 2
@@ -92,3 +96,6 @@ function getDragAfterElement(dropArea, y) {
     }
   }, { offset: Number.NEGATIVE_INFINITY }).element
 }
+
+
+renderColumns()
