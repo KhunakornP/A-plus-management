@@ -53,13 +53,11 @@ def create_event_json(
     if id is not None:
         data["id"] = str(id)
 
-    data.update({"title": title, "start_date": start_date, "end_date": end_date})
+    data.update({"title": title, "start": start_date, "end": end_date})
 
     return data
 
 
-# to the group who's working on the taskboard could you please
-# refactor this to your test suit. While we're here shall we also do codecov?
 class EventViewSetTests(TestCase):
     """Tests for the Event API viewset."""
 
@@ -152,10 +150,10 @@ class EventViewSetTests(TestCase):
         request = self.client.get(f"/api/events/{event.id}/")
         self.assertEqual(request.data["title"], event_json["title"])
         self.assertEqual(
-            datetime.fromisoformat(request.data["start_date"]), event_json["start_date"]
+            datetime.fromisoformat(request.data["start_date"]), event_json["start"]
         )
         self.assertEqual(
-            datetime.fromisoformat(request.data["end_date"]), event_json["end_date"]
+            datetime.fromisoformat(request.data["end_date"]), event_json["end"]
         )
         self.assertEqual(request.data["details"], event_json["details"])
 
