@@ -36,7 +36,7 @@ def create_task_json(
         {
             "title": title,
             "status": task_status.upper(),
-            "end_date": end_date,
+            "start": end_date,
             "taskboard": taskboard.id,
         }
     )
@@ -62,12 +62,31 @@ class TaskViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
 
-    def test_get_one_tasks(self):
+    def test_get_one_task(self):
         """Test getting a specific task info."""
         response = self.client.get(f"/api/tasks/{self.task_2.id}/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["title"], self.task_2.title)
         self.assertEqual(response.data["status"], self.task_2.status)
+
+    def test_get_all_status_not_done(self):
+        """Test getting tasks with status not equal to DONE."""
+        create_task("Done Task", "DONE", self.taskboard_1)
+        response = self.client.get("/api/tasks/?exclude=DONE")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+
+    def test_get_all_status_not_in_progress(self):
+        """Test getting tasks with status not equal to INPROGRESS."""
+        response = self.client.get("/api/tasks/?exclude=INPROGRESS")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_get_all_status_not_todo(self):
+        """Test getting tasks with status not equal to TODO."""
+        response = self.client.get("/api/tasks/?exclude=TODO")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
 
     def test_create_valid_task(self):
         """Test creating a Task."""
