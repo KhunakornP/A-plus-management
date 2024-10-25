@@ -19,7 +19,7 @@ class TaskViewSet(viewsets.ViewSet):
         :return: Response with tasks.
         """
         queryset = Task.objects.all()
-        ignore_status = request.query_params.get('exclude')
+        ignore_status = request.query_params.get("exclude")
         if ignore_status:
             queryset = Task.objects.filter(~Q(status=ignore_status))
         serializer = TaskSerializer(queryset, many=True)

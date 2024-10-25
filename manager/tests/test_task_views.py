@@ -36,7 +36,7 @@ def create_task_json(
         {
             "title": title,
             "status": task_status.upper(),
-            "end_date": end_date,
+            "start": end_date,
             "taskboard": taskboard.id,
         }
     )
