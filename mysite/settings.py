@@ -42,9 +42,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'manager.apps.ManagerConfig',
     'rest_framework',
+    'rest_framework.authtoken',
     'django.contrib.sites',
+    'dj_rest_auth',
     'allauth',
     'allauth.account',
+    'dj_rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 ]
@@ -121,19 +124,30 @@ SOCIALACCOUNT_PROVIDERS = {
             'profile',
             'email'
         ],
-        'APP': {
-            'client_id': config('CLIENT_ID', ""),
-            'secret': config('SECRET', ""),
-        },
         'AUTH_PARAMS': {
             'access_type':'online',
         }
     }
 }
 
-SITE_ID = 2
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    ),
+    'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S.%fZ",
+}
+
+SITE_ID = 3
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'manager:taskboard_index'
+
+#  The maximum difference between the iat and server time allowed in second
+ABSOLUTE_TOLERATED_TIME_DIFF = config('DELTA_TIME', cast=int, default=1)
+
+SOCIALACCOUNT_STORE_TOKENS = True
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

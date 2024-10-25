@@ -4,32 +4,16 @@
   <title>Taskboard</title>
 
   {% load static %}
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
   <script src="{% static 'manager/taskboard_index.js' %}" defer></script>
 {% endblock %}
 
 {% block content %}
 <div class="container py-5">
-  <div class="row justify-content-center">
-    {% if taskboard_list %}
-      {% for taskboard in taskboard_list %}
-          <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card h-100 bg-light-subtle border-0 shadow-lg rounded-lg overflow-hidden">
-              <div class="card-header bg-warning text-white text-center py-4">
-                  <h4 class="mb-0">{{taskboard.name}}</h4>
-              </div>
-              <div class="card-body">
-                <div class="d-grid gap-2 d-md-block">
-                    <a href="{% url 'manager:taskboard' taskboard.id %}" class="btn btn-info mx-2">Go to board</a>
-                    <a href="https://www.google.com" class="btn btn-danger mx-2">Delete</a>
-                </div>
-              </div>
-            </div>
-          </div>
-      {% endfor %}
-    {% else %}
-      <h4 class="text-white text-center">You have no taskboard</h4>
-    {% endif %}
+  <div class="row justify-content-center" id="taskboard-container"></div>
 
+
+  <div class="justify-content-center row">
     <button type="button" class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="center">
       Create a taskboard
     </button>
@@ -42,17 +26,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <form action="https://www.google.com" method="post">
-              {% csrf_token %}
-              <div class="mb-3">
-                <label for="taskboard_name" class="form-label">Taskboard name</label>
-                <input type="text" name="name" class="form-control" id="taskboard_title" placeholder="New taskboard name">
-              </div>
+            <div class="mb-3">
+              <label for="taskboard_name" class="form-label">Taskboard name</label>
+              <input type="text" name="name" class="form-control" id="taskboard-title" placeholder="New taskboard name">
+            </div>
 
-              <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Create</button>
-              </div>
-            </form>
+            <div class="modal-footer">
+              <button class="btn btn-primary" id = "create-tb-btn">Create</button>
+            </div>
         </div>
       </div>
     </div>
