@@ -21,7 +21,7 @@
 
 <script>
   const taskboardId = 1; // Replace with the actual taskboard_id
-  const url = 'manager/taskboard/${taskboardId}/burndown/data/';
+  const url = `/manager/taskboard/${taskboardId}/burndown/data/`;
 
   fetch(url)
       .then(response => {
@@ -32,8 +32,14 @@
       })
       .then(data => {
 
-        const dates = data.map(item => item.date);
-        const timeRemaining = data.map(item => item.time_remaining);
+        const date = data.map(item => item.date);
+        const time_remaining = data.map(item => item.time_remaining);
+
+        const firstTR = time_remaining[0];
+        const lastTR = time_remaining[time_remaining.length - 1];
+        const velocity_trend = time_remaining.map((_, index, array) => {
+          return firstTR + ((lastTR - firstTR) / (array.length - 1)) * index;
+        });
 
         const ctx = document.getElementById('myChart');
 
@@ -41,11 +47,19 @@
           type: 'bar',
           data: {
             labels: date,
-              datasets: [{
+            datasets: [
+              {
                 label: 'Time Remaining',
-                  data: time_remaining,
-                  borderWidth: 1
-                }]
+                data: time_remaining,
+                borderWidth: 1,
+              },
+              {
+                label: 'Velocity Trend',
+                data: velocity_trend,
+                borderWidth: 1,
+                type: 'line'
+              }
+              ]
           },
           options: {
             scales: {
