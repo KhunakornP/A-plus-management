@@ -4,23 +4,31 @@
 {% endblock %}
 {% block content %}
 
-<div class="col-8 offset-2 my-5">
-  <div class="card">
-    <div class="card-body">
+<div class="row my-5 px-5">
+  <div class="col-md-6 col-12">
+    <div class="card">
+      <div class="card-body">
+        <h5>Burndown Chart</h5>
+        <hr>
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+  </div>
 
-      <h5>Burndown Chart</h5>
-      <hr>
-      <canvas id="myChart"></canvas>
-
+  <div class="col-md-6 col-12">
+    <div class="card">
+      <div class="card-body">
+        <h5>Information</h5>
+        <hr>
+      </div>
     </div>
   </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  const taskboardId = 1; // Replace with the actual taskboard_id
+  const taskboardId = {{ taskboard_id }};
   const url = `/manager/taskboard/${taskboardId}/burndown/data/`;
 
   fetch(url)
@@ -32,34 +40,76 @@
       })
       .then(data => {
 
-        const date = data.map(item => item.date);
-        const time_remaining = data.map(item => item.time_remaining);
+        function daysUntilZero(d1, d2, t1, t2) {
+          const startDate = new Date(d1);
+          const endDate = new Date(d2);
+          const daysBetween = (endDate - startDate) / (1000 * 60 * 60 * 24);
+          const slope = (t2 - t1) / daysBetween;
+          const daysToZero = t1 / -slope;
+          const result = [];
+        
+          for (let i = 0; i <= Math.ceil(daysToZero); i++) {
+              const newDate = new Date(startDate);
+              newDate.setDate(startDate.getDate() + i);
+              result.push(newDate.toISOString().split('T')[0]);  // Format as YYYY-MM-DD
+          }
 
-        const firstTR = time_remaining[0];
-        const lastTR = time_remaining[time_remaining.length - 1];
-        const velocity_trend = time_remaining.map((_, index, array) => {
-          return firstTR + ((lastTR - firstTR) / (array.length - 1)) * index;
-        });
+          return result;
+      }
 
-        const ctx = document.getElementById('myChart');
-
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: date,
-            datasets: [
-              {
-                label: 'Time Remaining',
-                data: time_remaining,
-                borderWidth: 1,
-              },
-              {
-                label: 'Velocity Trend',
-                data: velocity_trend,
-                borderWidth: 1,
-                type: 'line'
+        function fillTimeRemaining(data) {
+          const result = [];
+          for (let i = 0; i < data.length; i++) {
+            const currentDate = new Date(data[i].date);
+            const currentTimeRemaining = data[i].time_remaining;
+            result.push(currentTimeRemaining);
+            if (i < data.length - 1) {
+              const nextDate = new Date(data[i + 1].date);
+              const daysDiff = (nextDate - currentDate) / (1000 * 60 * 60 * 24);
+              for (let j = 1; j < daysDiff; j++) {
+                  result.push(currentTimeRemaining);
               }
-              ]
+            }
+          }
+          return result;
+      }
+
+      const date = data.map(item => item.date);
+      const firstD = date[0];
+      const lastD = date[date.length - 1];
+
+      const time_remaining = data.map(item => item.time_remaining);
+      const firstTR = time_remaining[0];
+      const lastTR = time_remaining[time_remaining.length - 1];
+
+      const total_dates = daysUntilZero(firstD, lastD, firstTR, lastTR)
+      const total_time_remaining = fillTimeRemaining(data);
+
+      const firstTTR = total_time_remaining[0];
+      const lastTTR = total_time_remaining[total_time_remaining.length - 1];
+
+      const velocity_trend = total_time_remaining.map((_, index, array) => {
+        return firstTTR + ((lastTTR - firstTTR) / (array.length - 1)) * index;
+      });
+
+      const ctx = document.getElementById('myChart');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: total_dates,
+          datasets: [
+            {
+              label: 'Time Remaining',
+              data: total_time_remaining,
+              borderWidth: 1,
+            },
+            {
+              label: 'Velocity Trend',
+              data: velocity_trend,
+              borderWidth: 1,
+              type: 'line'
+            }
+            ]
           },
           options: {
             scales: {
