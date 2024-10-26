@@ -13,7 +13,7 @@ deleteBtn.addEventListener('click', async () => {
       'Content-Type': 'application/json',
     }
   });
-  reRenderColumns();
+  renderColumns();
 })
 
 editBtn.addEventListener('click', () => {
@@ -38,30 +38,28 @@ async function updateTask(){
     body: JSON.stringify({
       'title': taskOffcanvasTitle.value,
       'details': taskOffcanvasDetails.value,
-      'end_date': turnLocalTimeToUTC(taskOffcanvasEndDate.value)
+      'end_date': new Date(taskOffcanvasEndDate.value).toISOString()
     })
   });
-  reRenderColumns()
-}
-
-function turnLocalTimeToUTC(timeLocalstr) {
-  const localTime = new Date(timeLocalstr)
-  const utcTime = new Date(Date.UTC(localTime.getUTCFullYear(), localTime.getUTCMonth(),
-                  localTime.getUTCDate(), localTime.getUTCHours(),
-                  localTime.getUTCMinutes(), localTime.getUTCSeconds()));
-  return utcTime.toISOString()
+  renderColumns()
 }
 
 function toggleOffcanvasFields(on) {
   if(on) {
     taskOffcanvasTitle.removeAttribute('readonly');
+    taskOffcanvasTitle.setAttribute('class', 'form-control');
     taskOffcanvasDetails.removeAttribute('readonly');
+    taskOffcanvasDetails.setAttribute('class', 'form-control');
     taskOffcanvasEndDate.removeAttribute('readonly');
+    taskOffcanvasEndDate.setAttribute('class', 'form-control');
   }
   else {
     taskOffcanvasTitle.setAttribute('readonly', true);
+    taskOffcanvasTitle.setAttribute('class', 'form-control-plaintext');
     taskOffcanvasDetails.setAttribute('readonly', true);
+    taskOffcanvasDetails.setAttribute('class', 'form-control-plaintext');
     taskOffcanvasEndDate.setAttribute('readonly', true);
+    taskOffcanvasEndDate.setAttribute('class', 'form-control-plaintext');
   }
 }
 
@@ -89,7 +87,7 @@ function generateTaskCard(task) {
       taskOffcanvasDetails.value = `${task.details}`;
     }
     else {
-      taskOffcanvasDetails.value = "No Details";
+      taskOffcanvasDetails.value = "";
     }
   })
   card.appendChild(innerCard);
@@ -112,6 +110,9 @@ async function appendColumnChildren(children, column) {
 }
 
 async function renderColumns() {
+  for (const column of columns) {
+    column.innerHTML = '';
+  };
   const tasks = await fetchTasksJSON()
   const toDoTasks = tasks.filter(task => task.status === 'TODO')
   const inProgressTasks = tasks.filter(task => task.status === 'IN PROGRESS')
@@ -121,36 +122,15 @@ async function renderColumns() {
   appendColumnChildren(doneTasks, document.getElementById('done'))
 }
 
-async function reRenderColumns() {
-  for (const column of columns) {
-    column.innerHTML = '';
-  }
-  await renderColumns();
-}
-
-
-// code for drag-and-drop stuffs
-
-function appendCardAfterDrop(dropArea, draggable) {
-  const afterElement = getDragAfterElement(dropArea, event.clientY)
-  if (afterElement == null) {
-    dropArea.appendChild(draggable)
-  } else {
-    dropArea.insertBefore(draggable, afterElement)
-  }
-}
-
 columns.forEach(dropArea => {
   dropArea.addEventListener('dragover', event => {
-    event.preventDefault();
-  });
-  
-  dropArea.addEventListener('drop', event => {
-    event.preventDefault();
-    const draggable = document.querySelector('.dragging');
-    if (draggable) {
-      appendCardAfterDrop(dropArea, draggable);
-      draggable.classList.remove('dragging');
+    event.preventDefault()
+    const afterElement = getDragAfterElement(dropArea, event.clientY)
+    const draggable = document.querySelector('.dragging')
+    if (afterElement == null) {
+      dropArea.appendChild(draggable)
+    } else {
+      dropArea.insertBefore(draggable, afterElement)
     }
   });
 });

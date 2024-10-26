@@ -3,6 +3,7 @@
 <title>{{taskboard.name}}</title>
 {% load static %}
 <link rel="stylesheet" href="{% static 'manager/taskboard.css' %}">
+<link rel="stylesheet" href="{% static 'manager/calendar.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
 <script src="{% static 'manager/taskboard.js' %}" defer></script>
 {% endblock %}
@@ -15,24 +16,21 @@
     <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 text-success-emphasis bg-success-subtle text-center rounded">To-Do</h4>
-        <div class="drop_area pb-5" id="todo">
-        </div>
+        <div class="drop_area pb-5" id="todo"></div>
       </div>
     </div>
 
     <div class="col-lg-4 mb-4 mb-lg-0">
-      <div class="p-4 bg-light-subtle rounded" id="in-progress">
+      <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 text-warning bg-warning-subtle text-center rounded">In Progress</h4>
-        <div class="drop_area pb-5" id="in-progress">
-        </div>
+        <div class="drop_area pb-5" id="in-progress"></div>
       </div>
     </div>
 
     <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 bg-black bg-gradient text-center rounded">Done</h4>
-        <div class="drop_area pb-5" id="done">
-        </div>
+        <div class="drop_area pb-5" id="done"></div>
       </div>
     </div>
   </div>
@@ -48,17 +46,17 @@
       <form>
         <div class="mb-3">
           <label for="offcanvas-task-title" class="form-label fw-bold">Title :</label>
-          <input type="text" readonly class="form-control-plaintext" id="task-title" value="Placeholder">
+          <input type="text" readonly class="form-control-plaintext" id="task-title">
         </div>
 
         <div class="mb-3">
           <h6 class="form-label fw-bold">Due Date :</h6>
-          <input type="datetime-local" readonly class="form-control" id="task-enddate">
+          <input type="datetime-local" readonly class="form-control-plaintext" id="task-enddate">
         </div>
 
         <div class="mb-3">
           <label for="offcanvas-task-detail" class="form-label fw-bold">Details :</label>
-          <input type="text" readonly class="form-control-plaintext" id="task-details" value="Lorem Ipsum">
+          <textarea readonly class="form-control-plaintext" id="task-details" rows="4" placeholder="No Details"></textarea>
         </div>
 
         <input type="button" value="Edit" class="btn btn-sm btn-primary" id="edit-task-btn">
