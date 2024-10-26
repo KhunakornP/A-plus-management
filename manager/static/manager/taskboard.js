@@ -60,7 +60,7 @@ function generateTaskCard(task) {
   innerCard.innerHTML = `<u>${task.title}</u>`
   innerCard.addEventListener('click', () => {
     offcanvas.show();
-    currentTaskID = task.id
+    currentTaskID = task.id;
     taskOffcanvasTitle.value = `${task.title}`;
     taskOffcanvasEndDate.value = formatLocalISOFromString(task.end_date);
     if (task.details !== null) {
@@ -72,11 +72,22 @@ function generateTaskCard(task) {
   })
   card.appendChild(innerCard);
   card.addEventListener('dragstart', () => {
+    currentTaskID = task.id;
     card.classList.add('dragging');
   });
 
-  card.addEventListener('dragend', () => {
+  card.addEventListener('dragend', async () => {
     card.classList.remove('dragging');
+    await fetch(`/api/tasks/${currentTaskID}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken')
+      },
+      body: JSON.stringify({
+        'status': card.parentNode.id
+      })
+    });
   });
   return card
 }
@@ -98,13 +109,13 @@ async function renderColumns() {
   const toDoTasks = tasks.filter(task => task.status === 'TODO')
   const inProgressTasks = tasks.filter(task => task.status === 'IN PROGRESS')
   const doneTasks = tasks.filter(task => task.status === 'DONE')
-  appendColumnChildren(toDoTasks, document.getElementById('todo'))
-  appendColumnChildren(inProgressTasks, document.getElementById('in-progress'))
-  appendColumnChildren(doneTasks, document.getElementById('done'))
+  appendColumnChildren(toDoTasks, document.getElementById('TODO'))
+  appendColumnChildren(inProgressTasks, document.getElementById('IN PROGRESS'))
+  appendColumnChildren(doneTasks, document.getElementById('DONE'))
 }
 
 columns.forEach(dropArea => {
-  dropArea.addEventListener('dragover', event => {
+  dropArea.addEventListener('dragover', async event => {
     event.preventDefault()
     const afterElement = getDragAfterElement(dropArea, event.clientY)
     const draggable = document.querySelector('.dragging')
