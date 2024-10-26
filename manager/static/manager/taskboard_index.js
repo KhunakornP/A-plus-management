@@ -72,6 +72,7 @@ async function bindDeleteButtons() {
 }
 
 const btn = document.getElementById('create-tb-btn')
+const userID = JSON.parse(document.getElementById('user_id').textContent);
 btn.addEventListener('click', async () => {
   await fetch('/api/taskboards/', {
     method : 'POST',
@@ -81,7 +82,8 @@ btn.addEventListener('click', async () => {
     },
     body: JSON.stringify(
       {
-        'name': document.getElementById('taskboard-title').value
+        'name': document.getElementById('taskboard-title').value,
+        'user': userID
       }
     )
 
