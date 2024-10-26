@@ -10,8 +10,11 @@ from manager.serializers import TaskboardSerializer
 class TaskboardViewSet(viewsets.ModelViewSet):
     """A viewset to handle create/update/delete operations for Taskboard."""
 
-    queryset = Taskboard.objects.all()
     serializer_class = TaskboardSerializer
+
+    def get_queryset(self):
+        """Return all Taskboards related to the user."""
+        return Taskboard.objects.filter(user=self.request.user)
 
 
 class TaskboardIndexView(generic.ListView):
