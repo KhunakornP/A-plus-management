@@ -14,16 +14,13 @@ class TaskboardViewSet(viewsets.ModelViewSet):
     serializer_class = TaskboardSerializer
 
 
-class TaskboardIndexView(generic.ListView):
+class TaskboardIndexView(generic.TemplateView):
     """A view that displays all task boards."""
 
     template_name = "manager/taskboard_index.html"
-    context_object_name = "taskboard_list"
-    model = Taskboard
 
 
-class TaskboardView(generic.DetailView):
+class TaskboardView(generic.TemplateView):
     """A view that display a specific taskboard."""
 
     template_name = "manager/taskboard.html"
-    model = Taskboard

@@ -6,31 +6,10 @@ const taskOffcanvasTitle = document.getElementById('task-title')
 const taskOffcanvasDetails = document.getElementById('task-details');
 const taskOffcanvasEndDate = document.getElementById('task-enddate');
 const taskboardID = window.location.href.split('/').slice(-2)[0];
-
-deleteBtn.addEventListener('click', async () => {
-  await fetch(`/api/tasks/${deleteBtn.value}/`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  });
-  renderColumns();
-})
-
-editBtn.addEventListener('click', () => {
-  if(editBtn.value === 'Edit'){
-    toggleOffcanvasFields(true);
-    editBtn.value = 'Done';
-  }
-  else{
-    toggleOffcanvasFields(false);
-    updateTask();
-    editBtn.value = 'Edit'
-  }
-})
+let currentTaskID = 0;
 
 async function updateTask(){
-  await fetch(`/api/tasks/${deleteBtn.value}/`, {
+  await fetch(`/api/tasks/${currentTaskID}/`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
@@ -81,8 +60,8 @@ function generateTaskCard(task) {
   innerCard.innerHTML = `<u>${task.title}</u>`
   innerCard.addEventListener('click', () => {
     offcanvas.show();
+    currentTaskID = task.id
     taskOffcanvasTitle.value = `${task.title}`;
-    deleteBtn.value = `${task.id}`;
     taskOffcanvasEndDate.value = formatLocalISOFromString(task.end_date);
     if (task.details !== null) {
       taskOffcanvasDetails.value = `${task.details}`;
@@ -163,5 +142,26 @@ function formatLocalISOFromString(dateUTCString) {
   return iso;
 }
 
-
 renderColumns()
+
+deleteBtn.addEventListener('click', async () => {
+  await fetch(`/api/tasks/${currentTaskID}/`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+  renderColumns();
+})
+
+editBtn.addEventListener('click', () => {
+  if(editBtn.value === 'Edit'){
+    toggleOffcanvasFields(true);
+    editBtn.value = 'Done';
+  }
+  else{
+    toggleOffcanvasFields(false);
+    updateTask();
+    editBtn.value = 'Edit'
+  }
+})
