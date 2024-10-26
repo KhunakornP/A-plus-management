@@ -5,6 +5,7 @@ from django.utils import timezone
 from .functions import today_midnight
 from .taskboard import Taskboard
 from .estimate_history import EstimateHistory
+from django.contrib.auth.models import User
 
 
 class Task(models.Model):
@@ -14,6 +15,7 @@ class Task(models.Model):
     A task has a title, status, end date and details.
     Each task belongs to only one taskboard but each taskboard
     can have multiple tasks.
+    A task at any given moment belongs to exactly one user.
     """
 
     title: models.CharField = models.CharField(max_length=300)
@@ -26,6 +28,7 @@ class Task(models.Model):
         Taskboard, on_delete=models.CASCADE
     )
     time_estimate = models.IntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __compute_time_diff(self, new_time: int) -> int:
         """Compute the difference between old and new time estimate."""
