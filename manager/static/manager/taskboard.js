@@ -1,5 +1,6 @@
 const columns = document.querySelectorAll('.drop_area')
 const offcanvas = new bootstrap.Offcanvas('#task-offcanvas')
+let deleteBtn = document.getElementById('del-task-btn')
 
 async function fetchTasksJSON() {
   const response = await fetch('/api/tasks/');
@@ -19,6 +20,7 @@ function generateTaskCard(task) {
   innerCard.addEventListener('click', () => {
     offcanvas.show();
     document.getElementById('task-title').value = `${task.title}`;
+    deleteBtn.value = `${task.id}`;
     if (task.details !== null) {
       document.getElementById('task-details').value = `${task.details}`;
     }
@@ -40,7 +42,6 @@ function generateTaskCard(task) {
 async function appendColumnChildren(children, column) {
   if(column !== null) {
     for (const child of children) {
-      // console.log(child.title)
       column.appendChild(generateTaskCard(child));
     }
   }
@@ -55,6 +56,23 @@ async function renderColumns() {
   appendColumnChildren(inProgressTasks, document.getElementById('in-progress'))
   appendColumnChildren(doneTasks, document.getElementById('done'))
 }
+
+async function reRenderColumns() {
+  for (const column of columns) {
+    column.innerHTML = '';
+  }
+  await renderColumns();
+}
+
+deleteBtn.addEventListener('click', async () => {
+  await fetch(`/api/tasks/${deleteBtn.value}/`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+  reRenderColumns();
+})
 
 // code for drag-and-drop stuffs
 
