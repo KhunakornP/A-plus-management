@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="{% static 'manager/calendar.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
+{{ request.user.id|json_script:"user_id" }}
 <script src="{% static 'manager/calendar.js' %}" defer></script>
 {% endblock %}
 {% block content %}
