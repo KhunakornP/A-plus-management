@@ -10,7 +10,4 @@ urlpatterns = [
 
     path("taskboard/<int:taskboard_id>/burndown/", views.BurndownView.as_view(), name="burndown_chart"),
     path("taskboard/<int:taskboard_id>/burndown/data/", views.EstimateHistoryData.as_view(), name="est_hist_data"),
-
-    # path("taskboard/<int:taskboard_id>/burndown/response/", views.estimate_histories_json, name="est_hist_json"),
-    # path("taskboard/<int:taskboard_id>/burndown/response/<int:eh_id>", views.estimate_histories_detail, name="est_hist_detail")
 ]

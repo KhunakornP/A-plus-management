@@ -24,7 +24,7 @@ function generateDateRange(startDate, daysToZero) {
 function daysUntilZero(d1, d2, t1, t2) {
   const daysBetween = calculateDaysBetween(d1, d2);
   const slope = calculateSlope(t1, t2, daysBetween);
-  document.getElementById("slope").innerText = `Average Velocity: ${-slope} hr/day`;
+  document.getElementById("slope").innerText = `Average Velocity: ${-slope.toFixed(2)} hr/day`;
   const daysToZero = t1 / -slope;
   const result = generateDateRange(new Date(d1), daysToZero);
   document.getElementById("done-by").innerText = `Done-by Estimate: ${result[result.length - 1]}`;
@@ -51,23 +51,52 @@ function fillTimeRemaining(data, total_dates) {
   return result;
 }
 
-fetch(url)
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response.json();
-  })
-  .then(data => {
-    const dates = data.map(item => item.date);
-    const timeRemaining = data.map(item => item.time_remaining);
+async function fetchEventJson(){
+  const response = await fetch('/api/tasks/')
+  const events = await response.json()
+  return events
+}
+
+async function fetchEstimateHistoryData() {
+  const response = await fetch(url);
+  const estimate_histories = await response.json();
+  return estimate_histories;
+}
+
+Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
+  .then(([tasksData, otherData]) => {
+    // Process tasksData
+    const endDates = tasksData.map(item => {
+      const date = new Date(item.end_date);
+      return date.toISOString().split('T')[0];
+    });
+    const titles = tasksData.map(item => item.title);
+    console.log(endDates)
+
+    // Process estimateHistoryData
+    const dates = otherData.map(item => item.date);
+    const timeRemaining = otherData.map(item => item.time_remaining);
 
     const total_dates = daysUntilZero(dates[0], dates[dates.length - 1], timeRemaining[0], timeRemaining[timeRemaining.length - 1]);
-    const total_time_remaining = fillTimeRemaining(data, total_dates);
+    const total_time_remaining = fillTimeRemaining(otherData, total_dates);
 
     const velocity_trend = total_time_remaining.map((_, index, array) => {
       return total_time_remaining[0] + ((total_time_remaining[total_time_remaining.length - 1] - total_time_remaining[0]) / (array.length - 1)) * index;
     });
+
+    const annotations = endDates.map((endDate, index) => ({
+      type: 'line',
+      mode: 'vertical',
+      scaleID: 'x',
+      value: endDate,
+      borderColor: 'red',
+      borderWidth: 1,
+      label: {
+        content: titles[index],
+        enabled: true,
+        position: 'top'
+      }
+    }));
 
     const ctx = document.getElementById('myChart');
     new Chart(ctx, {
@@ -93,10 +122,15 @@ fetch(url)
           y: {
             beginAtZero: true
           }
+        },
+        plugins: {
+          annotation: {
+            annotations: annotations
+          }
         }
       }
     });
   })
   .catch(error => {
-    console.error('Error fetching burndown data:', error);
+    console.error('Error fetching data:', error);
   });
