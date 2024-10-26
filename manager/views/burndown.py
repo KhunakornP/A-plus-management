@@ -61,7 +61,8 @@ class EstimateHistoryData(generics.ListAPIView):
     def get_queryset(self):
         """Return the all EstimateHistory objects sorted by date."""
         taskboard_id = self.kwargs['taskboard_id']
-        return EstimateHistory.objects.filter(taskboard_id=taskboard_id).order_by('date')
+        return EstimateHistory.objects.filter(
+            taskboard_id=taskboard_id).order_by('date')
     
     def list(self, request, *args, **kwargs):
         """Return serialized EstimateHistory data."""
@@ -86,7 +87,8 @@ class EstimateHistoryData(generics.ListAPIView):
 
 # @api_view(['GET', 'PUT', 'DELETE'])
 # def estimate_histories_detail(request, taskboard_id, eh_id):
-#     """Return or update data of, or delete a specific EstimateHistory as a json file."""
+#     """Return or update data of, or delete a specific 
+# EstimateHistory as a json file."""
 #     try:
 #         eh = EstimateHistory.objects.get(pk=eh_id)
 #     except EstimateHistory.DoesNotExist:
