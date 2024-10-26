@@ -47,17 +47,22 @@
         <label for="offcanvas-task-title" class="form-label fw-bold">Title :</label>
         <input type="text" readonly class="form-control-plaintext" id="task-title">
       </div>
-
+      
       <div class="mb-3">
         <h6 class="form-label fw-bold">Due Date :</h6>
         <input type="datetime-local" readonly class="form-control-plaintext" id="task-enddate">
       </div>
 
       <div class="mb-3">
+        <label for="offcanvas-task-title" class="form-label fw-bold">Estimated Time (Hours):</label>
+        <input type="number" min="0" readonly class="form-control-plaintext" id="task-et">
+      </div>
+
+      <div class="mb-3">
         <label for="offcanvas-task-detail" class="form-label fw-bold">Details :</label>
         <textarea readonly class="form-control-plaintext" id="task-details" rows="4" placeholder="No Details"></textarea>
       </div>
-
+      
       <input type="button" value="Edit" class="btn btn-sm btn-primary" id="edit-task-btn">
       <button class="btn btn-sm btn-danger" id="del-task-btn">Delete</button>
     </div>
@@ -105,7 +110,7 @@
 
           <div class="mb-3">
             <label for="modal-task-details" class="form-label">Details</label>
-            <input type="text" name="details" class="form-control" id="modal-task-details" placeholder="New task details (Optional)" aria-describedby="detailsHelp">
+            <textarea name="details" rows="4" class="form-control" id="modal-task-details" placeholder="New task details (Optional)"></textarea>
           </div>
         </div>
         <div class="modal-footer">

@@ -1,11 +1,13 @@
 const columns = document.querySelectorAll('.drop_area')
 const offcanvas = new bootstrap.Offcanvas('#task-offcanvas')
+const createTaskModal = new bootstrap.Modal('#addTask')
 const deleteBtn = document.getElementById('del-task-btn')
 const editBtn = document.getElementById('edit-task-btn')
 const createBtn = document.getElementById('create-task-btn')
 const taskOffcanvasTitle = document.getElementById('task-title')
 const taskOffcanvasDetails = document.getElementById('task-details');
 const taskOffcanvasEndDate = document.getElementById('task-enddate');
+const taskOffcanvasET = document.getElementById('task-et');
 const taskboardID = window.location.href.split('/').slice(-2)[0];
 let currentTaskID = 0;
 
@@ -19,7 +21,8 @@ async function updateTask(){
     body: JSON.stringify({
       'title': taskOffcanvasTitle.value,
       'details': taskOffcanvasDetails.value,
-      'end_date': getValidDateISOString(taskOffcanvasEndDate.value)
+      'end_date': getValidDateISOString(taskOffcanvasEndDate.value),
+      'time_estimate': getValidEstimatedTime(taskOffcanvasET.value)
     })
   });
   renderColumns()
@@ -33,6 +36,8 @@ function toggleOffcanvasFields(on) {
     taskOffcanvasDetails.setAttribute('class', 'form-control');
     taskOffcanvasEndDate.removeAttribute('readonly');
     taskOffcanvasEndDate.setAttribute('class', 'form-control');
+    taskOffcanvasET.removeAttribute('readonly');
+    taskOffcanvasET.setAttribute('class', 'form-control');
   }
   else {
     taskOffcanvasTitle.setAttribute('readonly', true);
@@ -41,6 +46,8 @@ function toggleOffcanvasFields(on) {
     taskOffcanvasDetails.setAttribute('class', 'form-control-plaintext');
     taskOffcanvasEndDate.setAttribute('readonly', true);
     taskOffcanvasEndDate.setAttribute('class', 'form-control-plaintext');
+    taskOffcanvasET.setAttribute('readonly', true);
+    taskOffcanvasET.setAttribute('class', 'form-control-plaintext');
   }
 }
 
@@ -63,6 +70,7 @@ function generateTaskCard(task) {
     offcanvas.show();
     currentTaskID = task.id;
     taskOffcanvasTitle.value = `${task.title}`;
+    taskOffcanvasET.value = `${task.time_estimate}`;
     taskOffcanvasEndDate.value = formatLocalISOFromString(task.end_date);
     if (task.details !== null) {
       taskOffcanvasDetails.value = `${task.details}`;
@@ -211,5 +219,6 @@ createBtn.addEventListener('click', async () => {
       'time_estimate': getValidEstimatedTime(document.getElementById('modal-task-et').value)
     })
   });
-  renderColumns()
+  createTaskModal.hide();
+  renderColumns();
 });
