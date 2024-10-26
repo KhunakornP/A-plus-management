@@ -8,6 +8,11 @@ const taskOffcanvasTitle = document.getElementById('task-title')
 const taskOffcanvasDetails = document.getElementById('task-details');
 const taskOffcanvasEndDate = document.getElementById('task-enddate');
 const taskOffcanvasET = document.getElementById('task-et');
+const taskModalTitle = document.getElementById('modal-task-title');
+const taskModalEndDate = document.getElementById('modal-task-enddate');
+const taskModalStatus = document.getElementById('modal-task-status');
+const taskModalDetails = document.getElementById('modal-task-details')
+const taskModalET = document.getElementById('modal-task-et');
 const taskboardID = window.location.href.split('/').slice(-2)[0];
 let currentTaskID = 0;
 
@@ -211,14 +216,22 @@ createBtn.addEventListener('click', async () => {
       'X-CSRFToken': Cookies.get('csrftoken')
     },
     body: JSON.stringify({
-      'title': document.getElementById('modal-task-title').value,
-      'start': getValidDateISOString(document.getElementById('modal-task-enddate').value),
+      'title': taskModalTitle.value,
+      'start': getValidDateISOString(taskModalEndDate.value),
       'taskboard': taskboardID,
-      'status': document.getElementById('modal-task-status').value,
-      'details': document.getElementById('modal-task-details').value,
-      'time_estimate': getValidEstimatedTime(document.getElementById('modal-task-et').value)
+      'status': taskModalStatus.value,
+      'details': taskModalDetails.value,
+      'time_estimate': getValidEstimatedTime(taskModalET.value)
     })
   });
   createTaskModal.hide();
   renderColumns();
+});
+
+document.getElementById('addTask').addEventListener('hidden.bs.modal', () => {
+  taskModalTitle.value = '';
+  taskModalEndDate.value = '';
+  taskModalET.value = '';
+  taskModalStatus.selectedIndex = 0;
+  taskModalDetails.value = '';
 });
