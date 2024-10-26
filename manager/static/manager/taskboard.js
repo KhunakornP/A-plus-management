@@ -5,6 +5,7 @@ const editBtn = document.getElementById('edit-task-btn')
 const taskOffcanvasTitle = document.getElementById('task-title')
 const taskOffcanvasDetails = document.getElementById('task-details');
 const taskOffcanvasEndDate = document.getElementById('task-enddate');
+const taskboardID = window.location.href.split('/').slice(-2)[0];
 
 deleteBtn.addEventListener('click', async () => {
   await fetch(`/api/tasks/${deleteBtn.value}/`, {
@@ -64,7 +65,7 @@ function toggleOffcanvasFields(on) {
 }
 
 async function fetchTasksJSON() {
-  const response = await fetch('/api/tasks/');
+  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`);
   const tasks = await response.json();
   return tasks;
 }
@@ -113,7 +114,8 @@ async function renderColumns() {
   for (const column of columns) {
     column.innerHTML = '';
   };
-  const tasks = await fetchTasksJSON()
+  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`);
+  const tasks = await response.json();
   const toDoTasks = tasks.filter(task => task.status === 'TODO')
   const inProgressTasks = tasks.filter(task => task.status === 'IN PROGRESS')
   const doneTasks = tasks.filter(task => task.status === 'DONE')
