@@ -75,40 +75,42 @@
           <h1 class="modal-title fs-5" id="addTaskLabel">Create a Task</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form action="#" method="post">
-          {% csrf_token %}
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="task_title" class="form-label">Task title</label>
-              <input type="text" name="title" class="form-control" id="task_title" placeholder="New task title">
-            </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modal-task-title" class="form-label">Task title</label>
+            <input type="text" name="title" class="form-control" id="modal-task-title" placeholder="New task title">
+          </div>
+          
+          <div class="mb-3">
+            <label for="modal-task-status" class="form-label">Task status</label>
+            <select name="status" class="form-control" id="modal-task-status">
+              <option value="TODO">To-Do</option>
+              <option value="IN PROGRESS">In Progress</option>
+              <option value="DONE">Done</option>
+            </select>
+          </div>
 
-            <div class="mb-3">
-              <label for="task_status" class="form-label">Task status</label>
-              <select name="status" class="form-control" id="task_status">
-                <option value="TODO">To-Do</option>
-                <option value="IN PROGRESS">In Progress</option>
-                <option value="DONE">Done</option>
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label for="task_enddate" class="form-label">Due date</label>
-              <input type="datetime-local" readonly name="end-date" class="form-control" id="task-enddate">
-              <div id="enddateHelp" class="form-text text-center">
-                The due date is set to today, midnight if no value is provided.
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="task_details" class="form-label">Details</label>
-              <input type="text" name="details" class="form-control" id="task_details" placeholder="New task details (Optional)" aria-describedby="detailsHelp">
+          <div class="mb-3">
+            <label for="modal-task-enddate" class="form-label">Due date</label>
+            <input type="datetime-local" name="end-date" class="form-control" id="modal-task-enddate">
+            <div id="enddateHelp" class="form-text text-center">
+              The due date is set to today, midnight if no value is provided.
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Create</button>
+          
+          <div class="mb-3">
+            <label for="modal-task-et" class="form-label">Estimated Time (Hours)</label>
+            <input type="number" min="0" name="estimated-time" class="form-control" id="modal-task-et" placeholder="Estimated time to finish the task (Optional)">
           </div>
-        </form>
+
+          <div class="mb-3">
+            <label for="modal-task-details" class="form-label">Details</label>
+            <input type="text" name="details" class="form-control" id="modal-task-details" placeholder="New task details (Optional)" aria-describedby="detailsHelp">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary" id="create-task-btn">Create</button>
+        </div>
       </div>
     </div>
   </div>

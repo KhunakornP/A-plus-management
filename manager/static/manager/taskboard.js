@@ -2,6 +2,7 @@ const columns = document.querySelectorAll('.drop_area')
 const offcanvas = new bootstrap.Offcanvas('#task-offcanvas')
 const deleteBtn = document.getElementById('del-task-btn')
 const editBtn = document.getElementById('edit-task-btn')
+const createBtn = document.getElementById('create-task-btn')
 const taskOffcanvasTitle = document.getElementById('task-title')
 const taskOffcanvasDetails = document.getElementById('task-details');
 const taskOffcanvasEndDate = document.getElementById('task-enddate');
@@ -18,7 +19,7 @@ async function updateTask(){
     body: JSON.stringify({
       'title': taskOffcanvasTitle.value,
       'details': taskOffcanvasDetails.value,
-      'end_date': new Date(taskOffcanvasEndDate.value).toISOString()
+      'end_date': getValidDateISOString(taskOffcanvasEndDate.value)
     })
   });
   renderColumns()
@@ -153,6 +154,23 @@ function formatLocalISOFromString(dateUTCString) {
   return iso;
 }
 
+function getValidDateISOString(dateLocalStr) {
+  if(dateLocalStr !== "") {
+    return new Date(dateLocalStr).toISOString()
+  }
+  let defaultDate =  new Date()
+  defaultDate.setHours(0,0,0,0)
+  defaultDate.setDate(defaultDate.getDate() + 1)
+  return defaultDate.toISOString()
+}
+
+function getValidEstimatedTime(time) {
+  if(time === "") {
+    return 0;
+  }
+  return Number(time);
+}
+
 renderColumns()
 
 deleteBtn.addEventListener('click', async () => {
@@ -176,3 +194,22 @@ editBtn.addEventListener('click', () => {
     editBtn.value = 'Edit'
   }
 })
+
+createBtn.addEventListener('click', async () => {
+  await fetch('/api/tasks/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': Cookies.get('csrftoken')
+    },
+    body: JSON.stringify({
+      'title': document.getElementById('modal-task-title').value,
+      'start': getValidDateISOString(document.getElementById('modal-task-enddate').value),
+      'taskboard': taskboardID,
+      'status': document.getElementById('modal-task-status').value,
+      'details': document.getElementById('modal-task-details').value,
+      'time_estimate': getValidEstimatedTime(document.getElementById('modal-task-et').value)
+    })
+  });
+  renderColumns()
+});
