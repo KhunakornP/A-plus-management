@@ -1,6 +1,69 @@
 const columns = document.querySelectorAll('.drop_area')
 const offcanvas = new bootstrap.Offcanvas('#task-offcanvas')
-let deleteBtn = document.getElementById('del-task-btn')
+const deleteBtn = document.getElementById('del-task-btn')
+const editBtn = document.getElementById('edit-task-btn')
+const taskOffcanvasTitle = document.getElementById('task-title')
+const taskOffcanvasDetails = document.getElementById('task-details');
+const taskOffcanvasEndDate = document.getElementById('task-enddate');
+
+deleteBtn.addEventListener('click', async () => {
+  await fetch(`/api/tasks/${deleteBtn.value}/`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  });
+  reRenderColumns();
+})
+
+editBtn.addEventListener('click', () => {
+  if(editBtn.value === 'Edit'){
+    toggleOffcanvasFields(true);
+    editBtn.value = 'Done';
+  }
+  else{
+    toggleOffcanvasFields(false);
+    updateTask();
+    editBtn.value = 'Edit'
+  }
+})
+
+async function updateTask(){
+  await fetch(`/api/tasks/${deleteBtn.value}/`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': Cookies.get('csrftoken')
+    },
+    body: JSON.stringify({
+      'title': taskOffcanvasTitle.value,
+      'details': taskOffcanvasDetails.value,
+      'end_date': turnLocalTimeToUTC(taskOffcanvasEndDate.value)
+    })
+  });
+  reRenderColumns()
+}
+
+function turnLocalTimeToUTC(timeLocalstr) {
+  const localTime = new Date(timeLocalstr)
+  const utcTime = new Date(Date.UTC(localTime.getUTCFullYear(), localTime.getUTCMonth(),
+                  localTime.getUTCDate(), localTime.getUTCHours(),
+                  localTime.getUTCMinutes(), localTime.getUTCSeconds()));
+  return utcTime.toISOString()
+}
+
+function toggleOffcanvasFields(on) {
+  if(on) {
+    taskOffcanvasTitle.removeAttribute('readonly');
+    taskOffcanvasDetails.removeAttribute('readonly');
+    taskOffcanvasEndDate.removeAttribute('readonly');
+  }
+  else {
+    taskOffcanvasTitle.setAttribute('readonly', true);
+    taskOffcanvasDetails.setAttribute('readonly', true);
+    taskOffcanvasEndDate.setAttribute('readonly', true);
+  }
+}
 
 async function fetchTasksJSON() {
   const response = await fetch('/api/tasks/');
@@ -19,13 +82,14 @@ function generateTaskCard(task) {
   innerCard.innerHTML = `<u>${task.title}</u>`
   innerCard.addEventListener('click', () => {
     offcanvas.show();
-    document.getElementById('task-title').value = `${task.title}`;
+    taskOffcanvasTitle.value = `${task.title}`;
     deleteBtn.value = `${task.id}`;
+    taskOffcanvasEndDate.value = formatLocalISOFromString(task.end_date);
     if (task.details !== null) {
-      document.getElementById('task-details').value = `${task.details}`;
+      taskOffcanvasDetails.value = `${task.details}`;
     }
     else {
-      document.getElementById('task-details').value = "No Details";
+      taskOffcanvasDetails.value = "No Details";
     }
   })
   card.appendChild(innerCard);
@@ -64,15 +128,6 @@ async function reRenderColumns() {
   await renderColumns();
 }
 
-deleteBtn.addEventListener('click', async () => {
-  await fetch(`/api/tasks/${deleteBtn.value}/`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  });
-  reRenderColumns();
-})
 
 // code for drag-and-drop stuffs
 
@@ -113,6 +168,17 @@ function getDragAfterElement(dropArea, y) {
       return closest
     }
   }, { offset: Number.NEGATIVE_INFINITY }).element
+}
+
+function formatLocalISOFromString(dateUTCString) {
+  const dateTime = new Date(dateUTCString);
+  const timeZoneOffSet = dateTime.getTimezoneOffset() * 60 * 1000;
+  let dateTimeLocal = dateTime - timeZoneOffSet;
+  dateTimeLocal = new Date(dateTimeLocal);
+  let iso = dateTimeLocal.toISOString();
+  iso = iso.split('.')[0];
+  iso = iso.replace('T', ' ');
+  return iso;
 }
 
 

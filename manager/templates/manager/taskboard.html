@@ -3,8 +3,10 @@
 <title>{{taskboard.name}}</title>
 {% load static %}
 <link rel="stylesheet" href="{% static 'manager/taskboard.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
 <script src="{% static 'manager/taskboard.js' %}" defer></script>
 {% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
   <h1 class="text-center md-6">{{taskboard.name}}</h1>
@@ -51,7 +53,7 @@
 
         <div class="mb-3">
           <h6 class="form-label fw-bold">Due Date :</h6>
-          <p>The end of Time</p>
+          <input type="datetime-local" readonly class="form-control" id="task-enddate">
         </div>
 
         <div class="mb-3">
@@ -59,7 +61,7 @@
           <input type="text" readonly class="form-control-plaintext" id="task-details" value="Lorem Ipsum">
         </div>
 
-        <a href="#" class="btn btn-sm btn-primary">Edit</a>
+        <input type="button" value="Edit" class="btn btn-sm btn-primary" id="edit-task-btn">
         <button class="btn btn-sm btn-danger" id="del-task-btn">Delete</button>
       </form>
     </div>
@@ -96,7 +98,7 @@
 
             <div class="mb-3">
               <label for="task_enddate" class="form-label">Due date</label>
-              <input type="datetime-local" name="end_date" class="form-control" id="task_enddate" aria-describedby="enddateHelp">
+              <input type="datetime-local" readonly name="end-date" class="form-control" id="task-enddate">
               <div id="enddateHelp" class="form-text text-center">
                 The due date is set to today, midnight if no value is provided.
               </div>
