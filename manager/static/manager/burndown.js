@@ -1,4 +1,6 @@
 const taskboardID = Number(window.location.href.split('/').slice(-3)[0]);
+
+// Back to Taskboard button
 const taskboardLink = document.getElementById('taskboard-link');
 taskboardLink.href = `/manager/taskboard/${taskboardID}`;
 
@@ -53,13 +55,13 @@ function fillTimeRemaining(data, total_dates) {
 }
 
 async function fetchEventJson(){
-  const response = await fetch('/api/tasks/')
+  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`)
   const events = await response.json()
   return events
 }
 
 async function fetchEstimateHistoryData() {
-  const response = await fetch('/api/estimate_history/');
+  const response = await fetch(`/api/estimate_history/?taskboard=${taskboardID}`);
   const estimate_histories = await response.json();
   return estimate_histories;
 }

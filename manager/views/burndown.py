@@ -36,5 +36,12 @@ class BurndownView(generic.TemplateView):
 class EstimateHistoryViewset(viewsets.ModelViewSet):
     """A viewset for EstimateHistory."""
 
-    queryset = EstimateHistory.objects.order_by('date')
     serializer_class = EstimateHistorySerializer
+
+    def get_queryset(self):
+        """Return EstimateHistory objects based on taskboard id."""
+        taskboard_id = self.request.query_params.get('taskboard')
+        if taskboard_id is not None:
+            return EstimateHistory.objects.filter(
+                taskboard_id=taskboard_id).order_by('date')
+        return EstimateHistory.objects.none()
