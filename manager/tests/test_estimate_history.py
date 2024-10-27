@@ -2,7 +2,6 @@
 
 from datetime import date
 from freezegun import freeze_time
-from django.test import TestCase
 from manager.models import Task, EstimateHistory
 from .templates_for_tests import create_taskboard, BaseTestCase
 

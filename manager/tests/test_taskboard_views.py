@@ -1,6 +1,5 @@
 """Test taskboard creation, deletion, modification and redirections."""
 
-from django.test import TestCase
 from manager.models import Taskboard
 from typing import Any, Optional
 from rest_framework import status

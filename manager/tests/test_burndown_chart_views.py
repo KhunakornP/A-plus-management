@@ -1,6 +1,5 @@
 """Test Burndown chart views."""
 
-from django.test import TestCase
 from django.urls import reverse
 
 from .templates_for_tests import create_taskboard, BaseTestCase

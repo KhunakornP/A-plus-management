@@ -2,7 +2,6 @@
 
 from datetime import date, timedelta
 from manager.models import Taskboard, EstimateHistory
-from django.test import TestCase
 from django.urls import reverse
 from .templates_for_tests import create_taskboard, BaseTestCase
 

@@ -6,10 +6,10 @@ from django.test import TestCase
 
 
 class BaseTestCase(TestCase):
-    """The base test suite for testcases"""
+    """The base test suite for testcases."""
 
     def setUp(self):
-        """Create some objects for tests"""
+        """Create and login user for tests."""
         super().setUp()
         self.username = "Tester"
         self.password = "Bestbytest!123"
@@ -20,7 +20,7 @@ class BaseTestCase(TestCase):
         self.user1.save()
         self.client.login(username=self.username, password=self.password)
         # for the people who want to rework their tests to be faster
-        # add some more objects here
+        # extend this clss
 
 
 def create_taskboard(user: User, name: str = "Today") -> Taskboard:

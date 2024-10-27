@@ -1,7 +1,6 @@
 """Test cases for models."""
 
 from datetime import datetime, time, date
-from django.contrib.auth.models import User
 from django.utils import timezone
 from manager.models import Task
 from .templates_for_tests import create_task, create_taskboard, BaseTestCase
