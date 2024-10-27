@@ -3,8 +3,11 @@
 <title>{{taskboard.name}}</title>
 {% load static %}
 <link rel="stylesheet" href="{% static 'manager/taskboard.css' %}">
+<link rel="stylesheet" href="{% static 'manager/calendar.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
 <script src="{% static 'manager/taskboard.js' %}" defer></script>
 {% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
   <h1 class="text-center md-6">{{taskboard.name}}</h1>
@@ -13,24 +16,21 @@
     <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 text-success-emphasis bg-success-subtle text-center rounded">To-Do</h4>
-        <div class="drop_area pb-5" id="todo">
-        </div>
+        <div class="drop_area pb-5" id="TODO"></div>
       </div>
     </div>
 
     <div class="col-lg-4 mb-4 mb-lg-0">
-      <div class="p-4 bg-light-subtle rounded" id="in-progress">
+      <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 text-warning bg-warning-subtle text-center rounded">In Progress</h4>
-        <div class="drop_area pb-5" id="in-progress">
-        </div>
+        <div class="drop_area pb-5" id="IN PROGRESS"></div>
       </div>
     </div>
 
     <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 bg-light-subtle rounded">
         <h4 class="py-3 bg-black bg-gradient text-center rounded">Done</h4>
-        <div class="drop_area pb-5" id="done">
-        </div>
+        <div class="drop_area pb-5" id="DONE"></div>
       </div>
     </div>
   </div>
@@ -38,30 +38,33 @@
   <div class="offcanvas offcanvas-end" tabindex="-1" id="task-offcanvas">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="offcanvas-label">
-        Task Title
+        Task Details
       </h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
-      <form>
-        <div class="mb-3">
-          <label for="offcanvas-task-title" class="form-label fw-bold">Title :</label>
-          <input type="text" readonly class="form-control-plaintext" id="task-title" value="Placeholder">
-        </div>
+      <div class="mb-3">
+        <label for="offcanvas-task-title" class="form-label fw-bold">Title :</label>
+        <input type="text" readonly class="form-control-plaintext" id="task-title">
+      </div>
+      
+      <div class="mb-3">
+        <h6 class="form-label fw-bold">Due Date :</h6>
+        <input type="datetime-local" readonly class="form-control-plaintext" id="task-enddate">
+      </div>
 
-        <div class="mb-3">
-          <h6 class="form-label fw-bold">Due Date :</h6>
-          <p>The end of Time</p>
-        </div>
+      <div class="mb-3">
+        <label for="offcanvas-task-title" class="form-label fw-bold">Estimated Time (Hours):</label>
+        <input type="number" min="0" readonly class="form-control-plaintext" id="task-et">
+      </div>
 
-        <div class="mb-3">
-          <label for="offcanvas-task-detail" class="form-label fw-bold">Details :</label>
-          <input type="text" readonly class="form-control-plaintext" id="task-details" value="Lorem Ipsum">
-        </div>
-
-        <a href="#" class="btn btn-sm btn-primary">Edit</a>
-        <a href="#" class="btn btn-sm btn-danger">Delete</a>
-      </form>
+      <div class="mb-3">
+        <label for="offcanvas-task-detail" class="form-label fw-bold">Details :</label>
+        <textarea readonly class="form-control-plaintext" id="task-details" rows="4" placeholder="No Details"></textarea>
+      </div>
+      
+      <input type="button" value="Edit" class="btn btn-sm btn-primary" id="edit-task-btn">
+      <button class="btn btn-sm btn-danger" id="del-task-btn">Delete</button>
     </div>
   </div>
 
@@ -77,40 +80,42 @@
           <h1 class="modal-title fs-5" id="addTaskLabel">Create a Task</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form action="#" method="post">
-          {% csrf_token %}
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="task_title" class="form-label">Task title</label>
-              <input type="text" name="title" class="form-control" id="task_title" placeholder="New task title">
-            </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="modal-task-title" class="form-label">Task title</label>
+            <input type="text" name="title" class="form-control" id="modal-task-title" placeholder="New task title">
+          </div>
+          
+          <div class="mb-3">
+            <label for="modal-task-status" class="form-label">Task status</label>
+            <select name="status" class="form-control" id="modal-task-status">
+              <option value="TODO">To-Do</option>
+              <option value="IN PROGRESS">In Progress</option>
+              <option value="DONE">Done</option>
+            </select>
+          </div>
 
-            <div class="mb-3">
-              <label for="task_status" class="form-label">Task status</label>
-              <select name="status" class="form-control" id="task_status">
-                <option value="TODO">To-Do</option>
-                <option value="IN PROGRESS">In Progress</option>
-                <option value="DONE">Done</option>
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label for="task_enddate" class="form-label">Due date</label>
-              <input type="datetime-local" name="end_date" class="form-control" id="task_enddate" aria-describedby="enddateHelp">
-              <div id="enddateHelp" class="form-text text-center">
-                The due date is set to today, midnight if no value is provided.
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label for="task_details" class="form-label">Details</label>
-              <input type="text" name="details" class="form-control" id="task_details" placeholder="New task details (Optional)" aria-describedby="detailsHelp">
+          <div class="mb-3">
+            <label for="modal-task-enddate" class="form-label">Due date</label>
+            <input type="datetime-local" name="end-date" class="form-control" id="modal-task-enddate">
+            <div id="enddateHelp" class="form-text text-center">
+              The due date is set to today, midnight if no value is provided.
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Create</button>
+          
+          <div class="mb-3">
+            <label for="modal-task-et" class="form-label">Estimated Time (Hours)</label>
+            <input type="number" min="0" name="estimated-time" class="form-control" id="modal-task-et" placeholder="Estimated time to finish the task (Optional)">
           </div>
-        </form>
+
+          <div class="mb-3">
+            <label for="modal-task-details" class="form-label">Details</label>
+            <textarea name="details" rows="4" class="form-control" id="modal-task-details" placeholder="New task details (Optional)"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary" id="create-task-btn">Create</button>
+        </div>
       </div>
     </div>
   </div>
