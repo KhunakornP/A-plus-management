@@ -191,6 +191,7 @@ deleteBtn.addEventListener('click', async () => {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
+      'X-CSRFToken': Cookies.get('csrftoken'),
     }
   });
   renderColumns();
