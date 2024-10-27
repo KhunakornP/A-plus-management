@@ -1,5 +1,4 @@
 function formatLocalISOFromString(dateUTCString) {
-  console.log(dateUTCString)
   const dateTime = new Date(dateUTCString);
   const timeZoneOffSet = dateTime.getTimezoneOffset() * 60 * 1000;
   let dateTimeLocal = dateTime - timeZoneOffSet;
