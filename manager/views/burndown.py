@@ -9,7 +9,7 @@ from django.http import Http404
 from typing import Optional
 from manager.models import Taskboard
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status, generics, viewsets
 
 
 def get_taskboard(taskboard_id: int) -> Optional[Taskboard]:
@@ -52,6 +52,12 @@ class BurndownView(generic.View):
     #     kwargs["events"] = request.POST.getlist("events")
     #     context = self.get_context_data(**kwargs)
     #     return render(request, self.template_name, context)
+
+class EstimateHistoryViewset(viewsets.ModelViewSet):
+    """A viewset for EstimateHistory."""
+
+    queryset = EstimateHistory.objects.order_by('date')
+    serializer_class = EstimateHistorySerializer
 
 class EstimateHistoryData(generics.ListAPIView):
     """A view getting EstimateHistory data."""
