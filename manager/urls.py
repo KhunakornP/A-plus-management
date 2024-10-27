@@ -9,5 +9,4 @@ urlpatterns = [
     path("calendar/", views.CalendarView.as_view(), name="calendar"),
 
     path("taskboard/<int:taskboard_id>/burndown/", views.BurndownView.as_view(), name="burndown_chart"),
-    path("taskboard/<int:taskboard_id>/burndown/data/", views.EstimateHistoryData.as_view(), name="est_hist_data"),
 ]

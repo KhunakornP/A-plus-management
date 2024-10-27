@@ -17,25 +17,32 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
         <div class="modal-body">
+          <div class="mb-3 hidden">
+            <label for="eventTitle" class="form-label fw-bold"> New title :</label>
+            <input type="text" class="form-control" id="eventTitle">
+          </div>
+
           <div class="mb-3">
             <label for="eventStart" class="form-label fw-bold"> Start :</label>
             <input type="datetime-local" readonly class="form-control-plaintext" id="eventStart">
           </div>
-  
+
           <div class="mb-3">
             <label for="eventEnd" class="form-label fw-bold"> End :</label>
             <input type="datetime-local" readonly class="form-control-plaintext" id="eventEnd">
           </div>
-  
+
           <div class="mb-3">
             <label for="eventDetails" class="form-label fw-bold">Details :</label>
-            <input type="text" readonly class="form-control-plaintext" id="eventDetails">
+            <textarea readonly class="form-control-plaintext" id="eventDetails" rows="4"></textarea>
           </div>
 
         </div>
         <div class="modal-footer">
           <button class="btn btn-sm btn-primary" id="editButton">Edit</a>
           <button class="btn btn-sm btn-danger" id="deleteButton">Delete</a>
+          <button class="btn btn-sm btn-primary hidden" id="doneButton">Done</a>
+          <button class="btn btn-sm btn-danger hidden" id="cancelButton">Cancel</a>
         </div>
     </div>
   </div>
@@ -53,15 +60,50 @@
             <label for="taskDue" class="form-label fw-bold"> Due :</label>
             <input type="datetime-local" readonly class="form-control-plaintext" id="taskDue">
           </div>
-  
+
           <div class="mb-3">
             <label for="taskDetails" class="form-label fw-bold">Details :</label>
-            <input type="text" readonly class="form-control-plaintext" id="taskDetails">
+            <textarea readonly class="form-control-plaintext" id="taskDetails" rows="4"></textarea>
           </div>
       </div>
     </div>
   </div>
 </div>
-{{ events|json_script:"events-data" }}
-{{ tasks|json_script:"tasks-data" }}
+
+<div class="modal fade" id="addEventModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Add a new event</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+            <label for="newTitle" class="form-label fw-bold"> Title :</label>
+            <input type="text" class="form-control" id="newTitle">
+          </div>
+
+          <div class="mb-3">
+            <label for="newStart" class="form-label fw-bold"> Start :</label>
+            <input type="datetime-local" class="form-control" id="newStart">
+          </div>
+
+          <div class="mb-3">
+            <label for="newEnd" class="form-label fw-bold"> End :</label>
+            <input type="datetime-local" class="form-control" id="newEnd">
+          </div>
+
+          <div class="mb-3">
+            <label for="newDetails" class="form-label fw-bold">Details :</label>
+            <textarea class="form-control" id="newDetails" placeholder="optional" rows="4"></textarea>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-sm btn-primary" id="addButton">Add</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

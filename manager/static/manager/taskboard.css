@@ -5,3 +5,7 @@
 .draggable.dragging {
   opacity: .5;
 }
+
+u {
+  cursor: pointer;
+}
