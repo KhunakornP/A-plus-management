@@ -108,7 +108,7 @@ Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
     }));
 
     const ctx = document.getElementById('myChart');
-    new Chart(ctx, {
+    const chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: total_dates,
@@ -139,6 +139,34 @@ Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
         }
       }
     });
+
+    function updateAnnotations() {
+      annotations.forEach((annotation, index) => {
+        const checkbox = document.getElementById(`task-checkbox-${index}`);
+        annotation.display = checkbox.checked;
+      });
+      chart.update();
+    }
+
+    const checkboxContainer = document.getElementById('task-checkboxes');
+    tasksData.forEach((task, index) => {
+      const checkboxDiv = document.createElement('div');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `task-checkbox-${index}`;
+      checkbox.checked = true;
+
+      const label = document.createElement('label');
+      label.htmlFor = `task-checkbox-${index}`;
+      label.innerText = task.title;
+
+      checkbox.addEventListener('change', updateAnnotations);
+
+      checkboxDiv.appendChild(checkbox);
+      checkboxDiv.appendChild(label);
+      checkboxContainer.appendChild(checkboxDiv);
+    });
+
   })
   .catch(error => {
     console.error('Error fetching data:', error);
