@@ -69,6 +69,11 @@ class TaskViewTests(TestCase):
         self.assertEqual(response.data["title"], self.task_2.title)
         self.assertEqual(response.data["status"], self.task_2.status)
 
+    def test_get_invalid_task(self):
+        """Test getting a non-existent task info."""
+        response = self.client.get("/api/tasks/9999/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     def test_get_all_status_not_done(self):
         """Test getting tasks with status not equal to DONE."""
         create_task("Done Task", "DONE", self.taskboard_1)
@@ -87,6 +92,20 @@ class TaskViewTests(TestCase):
         response = self.client.get("/api/tasks/?exclude=TODO")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
+
+    def test_get_tasks_in_one_taskboard(self):
+        """Test getting tasks in a specific taskboard."""
+        response = self.client.get(
+            f"/api/tasks/?taskboard={self.taskboard_1.id}&exclude=TODO"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_tasks_in_one_taskboard_exclude_status(self):
+        """Test getting tasks except those with the given status in a taskboard."""
+        response = self.client.get(f"/api/tasks/?taskboard={self.taskboard_1.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
 
     def test_create_valid_task(self):
         """Test creating a Task."""
