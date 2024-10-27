@@ -16,6 +16,8 @@ const taskModalET = document.getElementById('modal-task-et');
 const taskboardID = window.location.href.split('/').slice(-2)[0];
 let currentTaskID = 0;
 
+import { formatLocalISOFromString } from "./utils.js"
+
 async function updateTask(){
   await fetch(`/api/tasks/${currentTaskID}/`, {
     method: 'PUT',
@@ -156,16 +158,7 @@ function getDragAfterElement(dropArea, y) {
   }, { offset: Number.NEGATIVE_INFINITY }).element
 }
 
-function formatLocalISOFromString(dateUTCString) {
-  const dateTime = new Date(dateUTCString);
-  const timeZoneOffSet = dateTime.getTimezoneOffset() * 60 * 1000;
-  let dateTimeLocal = dateTime - timeZoneOffSet;
-  dateTimeLocal = new Date(dateTimeLocal);
-  let iso = dateTimeLocal.toISOString();
-  iso = iso.split('.')[0];
-  iso = iso.replace('T', ' ');
-  return iso;
-}
+
 
 function getValidDateISOString(dateLocalStr) {
   if(dateLocalStr !== "") {
@@ -186,52 +179,54 @@ function getValidEstimatedTime(time) {
 
 renderColumns()
 
-deleteBtn.addEventListener('click', async () => {
-  await fetch(`/api/tasks/${currentTaskID}/`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
+document.addEventListener('DOMContentLoaded', () => {
+  deleteBtn.addEventListener('click', async () => {
+    await fetch(`/api/tasks/${currentTaskID}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    renderColumns();
+  })
+  
+  editBtn.addEventListener('click', () => {
+    if(editBtn.value === 'Edit'){
+      toggleOffcanvasFields(true);
+      editBtn.value = 'Done';
     }
+    else{
+      toggleOffcanvasFields(false);
+      updateTask();
+      editBtn.value = 'Edit'
+    }
+  })
+
+  createBtn.addEventListener('click', async () => {
+    await fetch('/api/tasks/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken')
+      },
+      body: JSON.stringify({
+        'title': taskModalTitle.value,
+        'start': getValidDateISOString(taskModalEndDate.value),
+        'taskboard': taskboardID,
+        'status': taskModalStatus.value,
+        'details': taskModalDetails.value,
+        'time_estimate': getValidEstimatedTime(taskModalET.value)
+      })
+    });
+    createTaskModal.hide();
+    renderColumns();
   });
-  renderColumns();
-})
 
-editBtn.addEventListener('click', () => {
-  if(editBtn.value === 'Edit'){
-    toggleOffcanvasFields(true);
-    editBtn.value = 'Done';
-  }
-  else{
-    toggleOffcanvasFields(false);
-    updateTask();
-    editBtn.value = 'Edit'
-  }
-})
-
-createBtn.addEventListener('click', async () => {
-  await fetch('/api/tasks/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': Cookies.get('csrftoken')
-    },
-    body: JSON.stringify({
-      'title': taskModalTitle.value,
-      'start': getValidDateISOString(taskModalEndDate.value),
-      'taskboard': taskboardID,
-      'status': taskModalStatus.value,
-      'details': taskModalDetails.value,
-      'time_estimate': getValidEstimatedTime(taskModalET.value)
-    })
+  document.getElementById('addTask').addEventListener('hidden.bs.modal', () => {
+    taskModalTitle.value = '';
+    taskModalEndDate.value = '';
+    taskModalET.value = '';
+    taskModalStatus.selectedIndex = 0;
+    taskModalDetails.value = '';
   });
-  createTaskModal.hide();
-  renderColumns();
-});
-
-document.getElementById('addTask').addEventListener('hidden.bs.modal', () => {
-  taskModalTitle.value = '';
-  taskModalEndDate.value = '';
-  taskModalET.value = '';
-  taskModalStatus.selectedIndex = 0;
-  taskModalDetails.value = '';
-});
+})
