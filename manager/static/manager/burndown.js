@@ -83,9 +83,14 @@ Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
     const total_dates = daysUntilZero(dates[0], dates[dates.length - 1], timeRemaining[0], timeRemaining[timeRemaining.length - 1]);
     const total_time_remaining = fillTimeRemaining(estimateHistoryData, total_dates);
 
-    const velocity_trend = total_time_remaining.map((_, index, array) => {
-      return total_time_remaining[0] + ((total_time_remaining[total_time_remaining.length - 1] - total_time_remaining[0]) / (array.length - 1)) * index;
-    });
+    let velocity_trend;
+    if (estimateHistoryData.length > 1){
+       velocity_trend = total_time_remaining.map((_, index, array) => {
+        return total_time_remaining[0] + ((total_time_remaining[total_time_remaining.length - 1] - total_time_remaining[0]) / (array.length - 1)) * index;
+      });
+    } else {
+      velocity_trend = []
+    }
 
     const annotations = endDates.map((endDate, index) => ({
       type: 'line',
@@ -98,7 +103,8 @@ Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
         content: titles[index],
         enabled: true,
         position: 'top'
-      }
+      },
+      display: true
     }));
 
     const ctx = document.getElementById('myChart');
