@@ -61,7 +61,7 @@ class TaskViewSet(viewsets.ViewSet):
             event = Task.objects.get(id=pk)
         except ObjectDoesNotExist:
             return Response(
-                {"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND
             )
         serializer = TaskSerializer(event)
         return Response(serializer.data, status=status.HTTP_200_OK)
