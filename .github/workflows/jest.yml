@@ -1,0 +1,17 @@
+name: Js test with Jest
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: "*"
+
+jobs:
+  Jest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Run JavaScript Tests with Jest
+        run: |
+          npm install 
+          npm test
