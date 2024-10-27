@@ -23,6 +23,8 @@ const cancelButton = document.getElementById('cancelButton');
 let doneButton = document.getElementById('doneButton');
 let deleteButton = document.getElementById('deleteButton');
 
+import { formatLocalISO } from './utils.js'
+
 document.addEventListener('DOMContentLoaded', () => {
   const calendarElement = document.getElementById('calendar');
   let calendar = new FullCalendar.Calendar(calendarElement, {
@@ -184,16 +186,6 @@ async function updateEventTime(eventInfo) {
   });
 }
 
-function formatLocalISO(dateUTC) {
-  const dateTime = new Date(dateUTC.toISOString());
-  const timeZoneOffSet = dateTime.getTimezoneOffset() * 60 * 1000;
-  let dateTimeLocal = dateTime - timeZoneOffSet;
-  dateTimeLocal = new Date(dateTimeLocal);
-  let iso = dateTimeLocal.toISOString();
-  iso = iso.split('.')[0];
-  iso = iso.replace('T', ' ');
-  return iso;
-}
 
 function updateEventModalInfo(eventObj) {
   const eventStartLocal = formatLocalISO(eventObj.start);

@@ -16,7 +16,7 @@ const taskModalET = document.getElementById('modal-task-et');
 const taskboardID = window.location.href.split('/').slice(-2)[0];
 let currentTaskID = 0;
 
-import { formatLocalISOFromString } from "./utils.js"
+import { formatLocalISO, getValidDateISOString, getValidEstimatedTime } from "./utils.js"
 
 async function updateTask(){
   await fetch(`/api/tasks/${currentTaskID}/`, {
@@ -58,12 +58,6 @@ function toggleOffcanvasFields(on) {
   }
 }
 
-async function fetchTasksJSON() {
-  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`);
-  const tasks = await response.json();
-  return tasks;
-}
-
 function generateTaskCard(task) {
   const card = document.createElement('div');
   card.classList.add("bg-body", "border", "border-white", "shadow-lg",
@@ -78,7 +72,7 @@ function generateTaskCard(task) {
     currentTaskID = task.id;
     taskOffcanvasTitle.value = `${task.title}`;
     taskOffcanvasET.value = `${task.time_estimate}`;
-    taskOffcanvasEndDate.value = formatLocalISOFromString(task.end_date);
+    taskOffcanvasEndDate.value = formatLocalISO(task.end_date);
     if (task.details !== null) {
       taskOffcanvasDetails.value = `${task.details}`;
     }
@@ -158,28 +152,8 @@ function getDragAfterElement(dropArea, y) {
   }, { offset: Number.NEGATIVE_INFINITY }).element
 }
 
-
-
-function getValidDateISOString(dateLocalStr) {
-  if(dateLocalStr !== "") {
-    return new Date(dateLocalStr).toISOString()
-  }
-  let defaultDate =  new Date()
-  defaultDate.setHours(0,0,0,0)
-  defaultDate.setDate(defaultDate.getDate() + 1)
-  return defaultDate.toISOString()
-}
-
-function getValidEstimatedTime(time) {
-  if(time === "") {
-    return 0;
-  }
-  return Number(time);
-}
-
-renderColumns()
-
 document.addEventListener('DOMContentLoaded', () => {
+  renderColumns()
   deleteBtn.addEventListener('click', async () => {
     await fetch(`/api/tasks/${currentTaskID}/`, {
       method: 'DELETE',
