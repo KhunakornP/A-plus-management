@@ -58,27 +58,36 @@ async function fetchEventJson(){
 }
 
 async function fetchEstimateHistoryData() {
-  const response = await fetch(url);
+  const response = await fetch('/api/estimate_history/');
   const estimate_histories = await response.json();
   return estimate_histories;
 }
 
 Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
-  .then(([tasksData, otherData]) => {
+  .then(([tasksData, estimateHistoryData]) => {
+    const filteredTasksData = tasksData.filter(task => task.taskboard === taskboardId);
+    const filteredEstimateHistoryData = estimateHistoryData.filter(eh => eh.taskboard === taskboardId);
+
+    console.log(tasksData)
+    console.log(estimateHistoryData)
+    console.log(filteredTasksData) // why is this not working??
+    console.log(filteredEstimateHistoryData)
+
+    console.log(taskboardId)
+
     // Process tasksData
-    const endDates = tasksData.map(item => {
-      const date = new Date(item.end_date);
+    const endDates = tasksData.map(task => {
+      const date = new Date(task.end_date);
       return date.toISOString().split('T')[0];
     });
-    const titles = tasksData.map(item => item.title);
-    console.log(endDates)
+    const titles = tasksData.map(task => task.title);
 
     // Process estimateHistoryData
-    const dates = otherData.map(item => item.date);
-    const timeRemaining = otherData.map(item => item.time_remaining);
+    const dates = estimateHistoryData.map(eh => eh.date);
+    const timeRemaining = estimateHistoryData.map(eh => eh.time_remaining);
 
     const total_dates = daysUntilZero(dates[0], dates[dates.length - 1], timeRemaining[0], timeRemaining[timeRemaining.length - 1]);
-    const total_time_remaining = fillTimeRemaining(otherData, total_dates);
+    const total_time_remaining = fillTimeRemaining(estimateHistoryData, total_dates);
 
     const velocity_trend = total_time_remaining.map((_, index, array) => {
       return total_time_remaining[0] + ((total_time_remaining[total_time_remaining.length - 1] - total_time_remaining[0]) / (array.length - 1)) * index;
