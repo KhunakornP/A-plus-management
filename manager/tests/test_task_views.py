@@ -7,6 +7,7 @@ from django.test import TestCase
 from manager.models import Taskboard, Task
 from typing import Any, Optional
 from .templates_for_tests import create_taskboard, create_task
+from django.contrib.auth.models import User
 
 
 def create_task_json(
@@ -49,9 +50,19 @@ class TaskViewTests(TestCase):
 
     def setUp(self):
         """Create Taskboards with some tasks."""
+        super().setUp()
+        self.username = "Tester"
+        self.password = "Bestbytest!123"
+        self.user1 = User.objects.create_user(
+            username=self.username,
+            email="testuser@nowhere.com"
+        )
+        self.user1.set_password(self.password)
+        self.user1.save()
+        self.client.login(username=self.username, password=self.password)
         due_date = timezone.make_aware(datetime(2030, 10, 2, 10))
-        self.taskboard_1 = create_taskboard("Today")
-        self.taskboard_2 = create_taskboard("Today but number 2")
+        self.taskboard_1 = create_taskboard(self.user1, "Today")
+        self.taskboard_2 = create_taskboard(self.user1, "Today but number 2")
         self.task_1 = create_task("Task 1", "TODO", self.taskboard_1, due_date)
         self.task_2 = create_task("Task 2", "INPROGRESS", self.taskboard_1)
         self.task_3 = create_task("Task 3", "TODO", self.taskboard_2, due_date)

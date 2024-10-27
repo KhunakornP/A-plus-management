@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 
 
 class LoginView(TemplateView):
-    """View for rendering the login page"""
+    """View for rendering the login page."""
 
     template_name = "manager/login.html"
 
