@@ -14,8 +14,7 @@ class BaseTestCase(TestCase):
         self.username = "Tester"
         self.password = "Bestbytest!123"
         self.user1 = User.objects.create_user(
-            username=self.username,
-            email="testuser@nowhere.com"
+            username=self.username, email="testuser@nowhere.com"
         )
         self.user1.set_password(self.password)
         self.user1.save()

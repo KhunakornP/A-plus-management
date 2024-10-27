@@ -8,7 +8,9 @@ from .templates_for_tests import create_taskboard, BaseTestCase
 
 
 def create_taskboard_json(
-    user: int, name: str = "Today", id: Optional[int] = None,
+    user: int,
+    name: str = "Today",
+    id: Optional[int] = None,
 ) -> dict[str, Any]:
     """Create a dict with the given name.
 

@@ -28,7 +28,11 @@ def create_event(
     if not end_date:
         end_date = timezone.now()
     return Event.objects.create(
-        user=user, title=title, start_date=start_date, end_date=end_date, details="something"
+        user=user,
+        title=title,
+        start_date=start_date,
+        end_date=end_date,
+        details="something",
     )
 
 
@@ -57,7 +61,7 @@ def create_event_json(
     if id is not None:
         data["id"] = str(id)
 
-    data.update({"user":user, "title": title, "start": start_date, "end": end_date})
+    data.update({"user": user, "title": title, "start": start_date, "end": end_date})
 
     return data
 
@@ -150,7 +154,9 @@ class EventViewSetTests(BaseTestCase):
         create_event(self.user1, "ni hao")
         create_event(self.user1, "ni hao 2")
         event = create_event(self.user1, "zaijian", time1, time2)
-        event_json = create_event_json(self.user1.pk, event.title, time1, time2, event.id)
+        event_json = create_event_json(
+            self.user1.pk, event.title, time1, time2, event.id
+        )
         request = self.client.get(f"/api/events/{event.id}/")
         self.assertEqual(request.data["title"], event_json["title"])
         self.assertEqual(
