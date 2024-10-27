@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
 
-<div class="row my-5 px-5"data-taskboard-id="{{ taskboard_id }}">
+<div class="row my-5 px-5">
   <div class="col-md-6 col-12">
     <div class="card">
       <div class="card-body">
@@ -27,41 +27,12 @@
   </div>
 </div>
 
-<a href="{% url 'manager:taskboard' taskboard_id %}" class="btn btn-info mx-2">Go to board</a>
+<a id="taskboard-link" href="#" class="btn btn-info mx-2">Go to board</a>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
 
 {% load static %}
 <script src="{% static 'manager/burndown.js' %}" defer></script>
-
-<!-- <div class="container-fluid">
-  <div class="row align-items-start">
-    <div class="col">
-      Graph {{taskboard_id}}
-      {% for event in events %}
-      {{event}}
-      {% endfor %}
-    </div>
-    <div class="col">
-      <h2>Select Event</h2>
-      <form method="post">
-        {% csrf_token %}
-        <div class="form-check">
-          <input class="form-check-input" name="events" type="checkbox" value="a" id="flexCheckDefault">
-          <label class="form-check-label" for="flexCheckDefault">
-            Default checkbox
-          </label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" name="events" type="checkbox" value="c" id="flexCheckChecked">
-          <label class="form-check-label" for="flexCheckChecked">
-            Checked checkbox
-          </label>
-        </div>
-        <input type="submit" value="View event on graph">
-      </form>
-  </div>
-</div> -->
 
 {% endblock %}

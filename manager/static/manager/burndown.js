@@ -1,5 +1,6 @@
-const taskboardId = document.querySelector('.row[data-taskboard-id]').dataset.taskboardId;
-const url = `/manager/taskboard/${taskboardId}/burndown/data/`;
+const taskboardID = Number(window.location.href.split('/').slice(-3)[0]);
+const taskboardLink = document.getElementById('taskboard-link');
+taskboardLink.href = `/manager/taskboard/${taskboardID}`;
 
 function calculateDaysBetween(d1, d2) {
   const startDate = new Date(d1);
@@ -65,15 +66,6 @@ async function fetchEstimateHistoryData() {
 
 Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
   .then(([tasksData, estimateHistoryData]) => {
-    const filteredTasksData = tasksData.filter(task => task.taskboard === taskboardId);
-    const filteredEstimateHistoryData = estimateHistoryData.filter(eh => eh.taskboard === taskboardId);
-
-    console.log(tasksData)
-    console.log(estimateHistoryData)
-    console.log(filteredTasksData) // why is this not working??
-    console.log(filteredEstimateHistoryData)
-
-    console.log(taskboardId)
 
     // Process tasksData
     const endDates = tasksData.map(task => {

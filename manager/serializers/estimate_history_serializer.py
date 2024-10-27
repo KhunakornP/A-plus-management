@@ -11,4 +11,4 @@ class EstimateHistorySerializer(serializers.ModelSerializer):
         """Meta definition for EstimateHistory."""
 
         model = EstimateHistory
-        fields = ["id", "taskboard", "date", "time_remaining"]
+        fields = "__all__"
