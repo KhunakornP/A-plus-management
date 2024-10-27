@@ -33,6 +33,7 @@ class BurndownView(generic.TemplateView):
 
     template_name = "manager/burndown.html"
 
+
 class EstimateHistoryViewset(viewsets.ModelViewSet):
     """A viewset for EstimateHistory."""
 
@@ -40,8 +41,9 @@ class EstimateHistoryViewset(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return EstimateHistory objects based on taskboard id."""
-        taskboard_id = self.request.query_params.get('taskboard')
+        taskboard_id = self.request.query_params.get("taskboard")
         if taskboard_id is not None:
-            return EstimateHistory.objects.filter(
-                taskboard_id=taskboard_id).order_by('date')
+            return EstimateHistory.objects.filter(taskboard_id=taskboard_id).order_by(
+                "date"
+            )
         return EstimateHistory.objects.none()
