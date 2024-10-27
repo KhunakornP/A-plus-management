@@ -17,7 +17,7 @@ class EventViewSet(viewsets.ViewSet):
         :param request: The HTTP request.
         :return: Response with events.
         """
-        queryset = Event.objects.all()
+        queryset = Event.objects.filter(user=request.user)
         serializer = EventSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

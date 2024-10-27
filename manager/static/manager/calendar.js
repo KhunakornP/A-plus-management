@@ -137,6 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
   addButton.addEventListener('click', async () => {
     const startDate = new Date(newStart.value);
     const endDate = new Date(newEnd.value);
+    const userID = JSON.parse(document.getElementById('user_id').textContent);
     await fetch('/api/events/', {
       method: 'POST',
       headers: {
@@ -147,7 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'title': newTitle.value,
         'start': startDate.toISOString(),
         'end': endDate.toISOString(),
-        'details': newDetails.value
+        'details': newDetails.value,
+        'user': userID
       })
     });
     newTitle.value = '';

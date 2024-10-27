@@ -21,7 +21,7 @@ from .api_router import router
 
 
 urlpatterns = [
-    path('', RedirectView.as_view(url='manager/taskboard')),
+    path('', RedirectView.as_view(url='manager/login')),
     path('api/', include(router.urls)),
     path('admin/', admin.site.urls),
     path('rest-auth/', include('dj_rest_auth.urls')),
