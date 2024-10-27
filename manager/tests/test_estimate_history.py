@@ -4,15 +4,15 @@ from datetime import date
 from freezegun import freeze_time
 from django.test import TestCase
 from manager.models import Task, EstimateHistory
-from .templates_for_tests import create_taskboard
+from .templates_for_tests import create_taskboard, BaseTestCase
 
 
-class EstimateHistoryTest(TestCase):
+class EstimateHistoryTest(BaseTestCase):
     """Test Estimate History Class."""
 
     def test_adding_same_day_tasks(self):
         """Test adding multiple tasks within the same day."""
-        tb = create_taskboard("test")
+        tb = create_taskboard(self.user1, "test")
         Task.objects.create(title="someting", taskboard=tb, time_estimate=3)
         Task.objects.create(title="someting3", taskboard=tb, time_estimate=5)
         Task.objects.create(title="someting2", taskboard=tb, time_estimate=7)
@@ -22,7 +22,7 @@ class EstimateHistoryTest(TestCase):
 
     def test_changing_time_estimate(self):
         """Test changing time estimate of a task."""
-        tb = create_taskboard("test")
+        tb = create_taskboard(self.user1, "test")
         t = Task.objects.create(title="someting2", taskboard=tb, time_estimate=7)
         t.time_estimate = 6
         t.save()
@@ -34,7 +34,7 @@ class EstimateHistoryTest(TestCase):
 
         There should be multiple EstimateHistory objects.
         """
-        tb = create_taskboard("test")
+        tb = create_taskboard(self.user1, "test")
         day1 = date(2010, 10, 10)
         day2 = date(2011, 11, 11)
         with freeze_time(day1):
@@ -53,7 +53,7 @@ class EstimateHistoryTest(TestCase):
 
     def test_deleting_task_also_subtract_estimate_time(self):
         """If a task got deleted, the time estimate should go down as well."""
-        tb = create_taskboard("test")
+        tb = create_taskboard(self.user1, "test")
         t = Task.objects.create(title="someting2", taskboard=tb, time_estimate=7)
         eh = EstimateHistory.objects.first()
         self.assertEqual(eh.time_remaining, 7)

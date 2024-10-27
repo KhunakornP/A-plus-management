@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from manager.models import Taskboard, EstimateHistory
 from django.test import TestCase
 from django.urls import reverse
-from .templates_for_tests import create_taskboard
+from .templates_for_tests import create_taskboard, BaseTestCase
 
 
 def create_estimate_hisotry(tb: Taskboard, date: date, time_remaining: int):
@@ -19,12 +19,12 @@ def create_estimate_hisotry(tb: Taskboard, date: date, time_remaining: int):
     )
 
 
-class EstimateHistoryJsonTests(TestCase):
+class EstimateHistoryJsonTests(BaseTestCase):
     """Test the json response for EstimateHistory objects."""
 
     def test_estimate_histories_json(self):
         """Test json response."""
-        tb = create_taskboard("Taskboard 1")
+        tb = create_taskboard(self.user1, "Taskboard 1")
 
         create_estimate_hisotry(
             tb, date=date.today() - timedelta(days=3), time_remaining=50
