@@ -9,7 +9,6 @@ from django.views.generic import TemplateView
 from django.conf import settings
 
 
-
 class LoginView(TemplateView):
     """View for rendering the login page."""
 
