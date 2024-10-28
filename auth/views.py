@@ -98,5 +98,5 @@ class GoogleLogin(SocialLoginView):
     """Social Login View for Google OAuth."""
 
     adapter_class = GoogleOAuth2IatValidationAdapter
-    callback_url = "http://localhost:8000/api/auth/google-oauth2/callback/"
+    callback_url = settings.GOOGLE_CALLBACK_URI
     client_class = OAuth2Client
