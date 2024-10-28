@@ -54,8 +54,14 @@ function fillTimeRemaining(data, total_dates) {
   return result;
 }
 
-async function fetchEventJson(){
+async function fetchTaskJson(){
   const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`)
+  const tasks = await response.json()
+  return tasks
+}
+
+async function fetchEventJson(){
+  const response = await fetch(`/api/events/`)
   const events = await response.json()
   return events
 }
@@ -66,8 +72,8 @@ async function fetchEstimateHistoryData() {
   return estimate_histories;
 }
 
-Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
-  .then(([tasksData, estimateHistoryData]) => {
+Promise.all([fetchTaskJson(), fetchEventJson(), fetchEstimateHistoryData()])
+  .then(([tasksData, eventData, estimateHistoryData]) => {
 
     // Process tasksData
     const endDates = tasksData.map(task => {
@@ -75,6 +81,9 @@ Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
       return date.toISOString().split('T')[0];
     });
     const titles = tasksData.map(task => task.title);
+
+    // Process eventData
+    console.log(eventData)
 
     // Process estimateHistoryData
     const dates = estimateHistoryData.map(eh => eh.date);
@@ -121,7 +130,9 @@ Promise.all([fetchEventJson(), fetchEstimateHistoryData()])
           {
             label: 'Velocity Trend',
             data: velocity_trend,
+            borderDash: [5, 5],
             borderWidth: 1,
+            pointStyle: false,
             type: 'line'
           }
         ]
