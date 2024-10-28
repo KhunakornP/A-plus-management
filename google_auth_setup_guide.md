@@ -31,7 +31,8 @@
 12. Add `http://localhost:8000` to Authorised JavaScript origins
 13. Add `http://localhost:8000` and `http://localhost:8000/api/auth/google-oauth2/callback/` to Authorised redirect URIs and save
 <img src="./Wiki-images/google-Oauth-guide/auth-11.JPG" width="850"><br>
-14. Save the client id and secret and add them to your .env file
+14. Add `http://localhost:8000/api/auth/google-oauth2/callback/` to .evn as CALLBACK
+15. Save the client id and secret and add them to your .env file
     - If you forget your client id and secret click on the app name in credentials to view them again.
 <img src="./Wiki-images/google-Oauth-guide/auth-12.JPG" width="850"><br>
 
