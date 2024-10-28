@@ -139,7 +139,7 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S.%fZ",
 }
 
-SITE_ID = 3
+SITE_ID = config('SITE_ID', cast=int, defaut=3)
 LOGOUT_REDIRECT_URL = 'manager:main_login'
 
 #  The maximum difference between the iat and server time allowed in second

@@ -57,5 +57,5 @@
     - in a terminal run `python manage.py shell`
     - `from django.contrib.sites.models import Site`
     - `sorted([(site.id,site.name) for site in Site.objects.all()])`
-7. add the site id of `http://localhost:8000/` to .env
+7. add the site id of `http://localhost:8000/` to .env as SITE_ID
    - usually the id will be either 3 or 4
