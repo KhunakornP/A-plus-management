@@ -72,18 +72,8 @@ async function fetchEstimateHistoryData() {
   return estimate_histories;
 }
 
-Promise.all([fetchTaskJson(), fetchEventJson(), fetchEstimateHistoryData()])
-  .then(([tasksData, eventData, estimateHistoryData]) => {
-
-    // Process tasksData
-    const endDates = tasksData.map(task => {
-      const date = new Date(task.end_date);
-      return date.toISOString().split('T')[0];
-    });
-    const titles = tasksData.map(task => task.title);
-
-    // Process eventData
-    console.log(eventData)
+Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
+  .then(([estimateHistoryData, tasksData, eventData]) => {
 
     // Process estimateHistoryData
     const dates = estimateHistoryData.map(eh => eh.date);
@@ -92,15 +82,19 @@ Promise.all([fetchTaskJson(), fetchEventJson(), fetchEstimateHistoryData()])
     const total_dates = daysUntilZero(dates[0], dates[dates.length - 1], timeRemaining[0], timeRemaining[timeRemaining.length - 1]);
     const total_time_remaining = fillTimeRemaining(estimateHistoryData, total_dates);
 
-    let velocity_trend;
+    let velocity_trend = [];
     if (estimateHistoryData.length > 1){
-       velocity_trend = total_time_remaining.map((_, index, array) => {
+        velocity_trend = total_time_remaining.map((_, index, array) => {
         return total_time_remaining[0] + ((total_time_remaining[total_time_remaining.length - 1] - total_time_remaining[0]) / (array.length - 1)) * index;
       });
-    } else {
-      velocity_trend = []
     }
 
+    // Process tasksData
+    const endDates = tasksData.map(task => {
+      const date = new Date(task.end_date);
+      return date.toISOString().split('T')[0];
+    });
+    const titles = tasksData.map(task => task.title);
     const annotations = endDates.map((endDate, index) => ({
       type: 'line',
       mode: 'vertical',
@@ -115,6 +109,28 @@ Promise.all([fetchTaskJson(), fetchEventJson(), fetchEstimateHistoryData()])
       },
       display: true
     }));
+
+    // Process eventData
+    const eventAnnotations = eventData.map((event, index) => {
+      const startDate = new Date(event.start_date) >= new Date(total_dates[0]) ? event.start_date : total_dates[0];
+      const endDate = new Date(event.end_date) <= new Date(total_dates[total_dates.length - 1]) ? event.end_date : total_dates[total_dates.length - 1];
+      return {
+        type: 'box',
+        xScaleID: 'x',
+        yScaleID: 'y',
+        xMin: new Date(startDate).toISOString().split('T')[0],
+        xMax: new Date(endDate).toISOString().split('T')[0],
+        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+        borderColor: 'green',
+        borderWidth: 1,
+        label: {
+          content: event.title,
+          enabled: true,
+          position: 'top'
+        },
+        display: true
+      };
+    });
 
     const ctx = document.getElementById('myChart');
     const chart = new Chart(ctx, {
@@ -145,7 +161,7 @@ Promise.all([fetchTaskJson(), fetchEventJson(), fetchEstimateHistoryData()])
         },
         plugins: {
           annotation: {
-            annotations: annotations
+            annotations: [...annotations, ...eventAnnotations]
           }
         }
       }
@@ -154,6 +170,10 @@ Promise.all([fetchTaskJson(), fetchEventJson(), fetchEstimateHistoryData()])
     function updateAnnotations() {
       annotations.forEach((annotation, index) => {
         const checkbox = document.getElementById(`task-checkbox-${index}`);
+        annotation.display = checkbox.checked;
+      });
+      eventAnnotations.forEach((annotation, index) => {
+        const checkbox = document.getElementById(`event-checkbox-${index}`);
         annotation.display = checkbox.checked;
       });
       chart.update();
@@ -176,6 +196,25 @@ Promise.all([fetchTaskJson(), fetchEventJson(), fetchEstimateHistoryData()])
       checkboxDiv.appendChild(checkbox);
       checkboxDiv.appendChild(label);
       checkboxContainer.appendChild(checkboxDiv);
+    });
+
+    const eventCheckboxContainer = document.getElementById('event-checkboxes');
+    eventData.forEach((event, index) => {
+      const checkboxDiv = document.createElement('div');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `event-checkbox-${index}`;
+      checkbox.checked = true;
+
+      const label = document.createElement('label');
+      label.htmlFor = `event-checkbox-${index}`;
+      label.innerText = event.title;
+
+      checkbox.addEventListener('change', updateAnnotations);
+
+      checkboxDiv.appendChild(checkbox);
+      checkboxDiv.appendChild(label);
+      eventCheckboxContainer.appendChild(checkboxDiv);
     });
 
   })
