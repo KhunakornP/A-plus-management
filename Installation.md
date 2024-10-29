@@ -7,9 +7,9 @@
   - For mac/linux use ```python3 --version``` <br>
   if you don't have a suitable version of python or you don't have python
   installed visit https://www.python.org/downloads/
-- Git for running git commands (optional)<br>
-If you don't have git you can download it here: https://git-scm.com/downloads
-in order to use and run git commands
+- [Node.js](https://nodejs.org/en) to run Javascript tests (Optional)
+  - You can run the server without Node.js, but you won't have access to JavaScript tests for our project.
+- [Git](https://git-scm.com/downloads) for running git commands (Optional)<br>
 
 ## Installation instructions
 Depending on if you have git or not the instructions may differ. \
@@ -65,3 +65,14 @@ note: Decide if we want a sample.env or if we will use testing.env
 9. get your [google credentials](https://support.google.com/cloud/answer/6158849?hl=en) and put them into .env
     - detailed instructions [here](google_auth_setup_guide.md#Setting-up-Google-OAuth-2.0)
     - **DO NOT** publish your client id and secret on the internet.
+
+## How to run tests
+1. Django tests:
+  ```
+  python manage.py runserver
+  ```
+2. JavaScript tests:
+  ```
+  npm install
+  npm run test
+  ```
