@@ -16,9 +16,13 @@ const taskModalET = document.getElementById('modal-task-et');
 const taskboardID = window.location.href.split('/').slice(-2)[0];
 let currentTaskID = 0;
 
-import { formatLocalISO, getValidDateISOString, getValidEstimatedTime } from "./utils.js"
+import {
+  formatLocalISO,
+  getValidDateISOString,
+  getValidEstimatedTime,
+} from './utils.js';
 
-async function updateTask(){
+async function updateTask() {
   await fetch(`/api/tasks/${currentTaskID}/`, {
     method: 'PUT',
     headers: {
@@ -164,36 +168,35 @@ function getDragAfterElement(dropArea, y) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  renderColumns()
+  renderColumns();
   deleteBtn.addEventListener('click', async () => {
     await fetch(`/api/tasks/${currentTaskID}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': Cookies.get('csrftoken'),
-      }
+      },
     });
     renderColumns();
-  })
-  
+  });
+
   editBtn.addEventListener('click', () => {
-    if(editBtn.value === 'Edit'){
+    if (editBtn.value === 'Edit') {
       toggleOffcanvasFields(true);
       editBtn.value = 'Done';
-    }
-    else{
+    } else {
       toggleOffcanvasFields(false);
       updateTask();
-      editBtn.value = 'Edit'
+      editBtn.value = 'Edit';
     }
-  })
+  });
 
   createBtn.addEventListener('click', async () => {
     await fetch('/api/tasks/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': Cookies.get('csrftoken')
+        'X-CSRFToken': Cookies.get('csrftoken'),
       },
       body: JSON.stringify({
         'title': taskModalTitle.value,
@@ -201,8 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'taskboard': taskboardID,
         'status': taskModalStatus.value,
         'details': taskModalDetails.value,
-        'time_estimate': getValidEstimatedTime(taskModalET.value)
-      })
+        'time_estimate': getValidEstimatedTime(taskModalET.value),
+      }),
     });
     createTaskModal.hide();
     renderColumns();
@@ -215,4 +218,4 @@ document.addEventListener('DOMContentLoaded', () => {
     taskModalStatus.selectedIndex = 0;
     taskModalDetails.value = '';
   });
-})
+});

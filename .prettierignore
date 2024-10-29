@@ -17,6 +17,9 @@
 **/*.mjs
 **/*.yml
 
+# Ignore Jest config file:
+**/jest.setup.js
+
 # Environments
 .env
 .venv

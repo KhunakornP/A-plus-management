@@ -32,7 +32,7 @@ const cancelButton = document.getElementById('cancelButton');
 let doneButton = document.getElementById('doneButton');
 let deleteButton = document.getElementById('deleteButton');
 
-import { formatLocalISO } from './utils.js'
+import { formatLocalISO } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const calendarElement = document.getElementById('calendar');
@@ -198,7 +198,6 @@ async function updateEventTime(eventInfo) {
     }),
   });
 }
-
 
 function updateEventModalInfo(eventObj) {
   const eventStartLocal = formatLocalISO(eventObj.start);
