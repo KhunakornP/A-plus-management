@@ -4,8 +4,8 @@
 {% endblock %}
 {% block content %}
 
-<div class="row my-5 px-5">
-  <div class="col-md-6 col-12">
+<div class="row my-5 px-4">
+  <div class="col-md-8 col-12">
     <div class="card">
       <div class="card-body">
         <h5>Burndown Chart</h5>
@@ -15,7 +15,7 @@
     </div>
   </div>
 
-  <div class="col-md-6 col-12">
+  <div class="col-md-4 col-12">
     <div class="card">
       <div class="card-body">
         <h5>Information</h5>
@@ -28,10 +28,9 @@
         <div id="event-checkboxes"></div>
       </div>
     </div>
+    <a id="taskboard-link" href="#" class="btn btn-info mx-2">Go to board</a>
   </div>
 </div>
-
-<a id="taskboard-link" href="#" class="btn btn-info mx-2">Go to board</a>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
