@@ -25,8 +25,7 @@ function generateTaskboardCard(taskboard) {
   return card;
 }
 
-
-const taskboardContainer = document.getElementById('taskboard-container')
+const taskboardContainer = document.getElementById('taskboard-container');
 
 async function appendTaskboards(taskboards) {
   for (const taskboard of taskboards) {
@@ -40,55 +39,51 @@ async function reRenderTaskboardCards() {
 }
 
 async function renderTaskboard() {
-  const taskboards = await fetchTaskboardJSON()
-  if (taskboards!== null) {
-    appendTaskboards(taskboards)
-  }
-  else {
-    const noTaskboardMessage = '<h4 class="text-white text-center">You have no taskboard</h4>'
-    document.getElementById('taskboard-container').innerHTML = noTaskboardMessage
+  const taskboards = await fetchTaskboardJSON();
+  if (taskboards !== null) {
+    appendTaskboards(taskboards);
+  } else {
+    const noTaskboardMessage =
+      '<h4 class="text-white text-center">You have no taskboard</h4>';
+    document.getElementById('taskboard-container').innerHTML =
+      noTaskboardMessage;
   }
   bindDeleteButtons();
 }
 
-document.addEventListener('DOMContentLoaded', async ()=>{
+document.addEventListener('DOMContentLoaded', async () => {
   await renderTaskboard();
-})
-
+});
 
 async function bindDeleteButtons() {
   const buttons = document.querySelectorAll('.delete-btn');
-  buttons.forEach(btn => {
+  buttons.forEach((btn) => {
     btn.addEventListener('click', async () => {
       await fetch('/api/taskboards/'.concat(btn.id).concat('/'), {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRFToken': Cookies.get('csrftoken'),
-        }
+        },
       });
       reRenderTaskboardCards();
     });
-});
+  });
 }
 
-const btn = document.getElementById('create-tb-btn')
+const btn = document.getElementById('create-tb-btn');
 const userID = JSON.parse(document.getElementById('user_id').textContent);
 btn.addEventListener('click', async () => {
   await fetch('/api/taskboards/', {
-    method : 'POST',
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRFToken': Cookies.get('csrftoken')
+      'X-CSRFToken': Cookies.get('csrftoken'),
     },
-    body: JSON.stringify(
-      {
-        'name': document.getElementById('taskboard-title').value,
-        'user': userID
-      }
-    )
-
+    body: JSON.stringify({
+      'name': document.getElementById('taskboard-title').value,
+      'user': userID,
+    }),
   });
   reRenderTaskboardCards();
-})
-
+});

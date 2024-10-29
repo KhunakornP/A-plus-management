@@ -1,13 +1,22 @@
-const eventModalElement = document.getElementById('eventDetailsModal')
-const eventDetailsModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'), {
-  focus: true
-});
-const taskDetailsModal = new bootstrap.Modal(document.getElementById('taskDetailsModal'), {
-  focus: true
-});
-const addEventModal = new bootstrap.Modal(document.getElementById('addEventModal'), {
-  focus: true
-});
+const eventModalElement = document.getElementById('eventDetailsModal');
+const eventDetailsModal = new bootstrap.Modal(
+  document.getElementById('eventDetailsModal'),
+  {
+    focus: true,
+  }
+);
+const taskDetailsModal = new bootstrap.Modal(
+  document.getElementById('taskDetailsModal'),
+  {
+    focus: true,
+  }
+);
+const addEventModal = new bootstrap.Modal(
+  document.getElementById('addEventModal'),
+  {
+    focus: true,
+  }
+);
 const newTitle = document.getElementById('newTitle');
 const newStart = document.getElementById('newStart');
 const newEnd = document.getElementById('newEnd');
@@ -17,7 +26,7 @@ const eventModalTitle = document.getElementById('eventDetailsModalTitle');
 const eventTitle = document.getElementById('eventTitle');
 const eventStart = document.getElementById('eventStart');
 const eventEnd = document.getElementById('eventEnd');
-const eventDetails = document.getElementById('eventDetails')
+const eventDetails = document.getElementById('eventDetails');
 const editButton = document.getElementById('editButton');
 const cancelButton = document.getElementById('cancelButton');
 let doneButton = document.getElementById('doneButton');
@@ -34,13 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
         text: 'Add Event',
         click: () => {
           addEventModal.show();
-        }
+        },
       },
     },
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'addEvent dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+      right: 'addEvent dayGridMonth,timeGridWeek,timeGridDay,listWeek',
     },
     height: '90vh',
     navLinks: true,
@@ -59,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         url: '/api/tasks/?exclude=DONE',
         color: '#FF00FF',
         lazyFetching: true,
-      }
+      },
     ],
     eventClick: (eventClickInfo) => {
       const eventObj = eventClickInfo.event;
@@ -68,14 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
         popover.style.display = 'none';
       }
 
-      if (eventObj.extendedProps.type == "event") {
+      if (eventObj.extendedProps.type === 'event') {
         updateEventModalInfo(eventObj);
         eventDetailsModal.show();
-      } else if (eventObj.extendedProps.type == "task") {
+      } else if (eventObj.extendedProps.type === 'task') {
         const taskDue = formatLocalISO(eventObj.start);
-        document.getElementById('taskDetailsModalTitle').innerHTML = eventObj.title;
+        document.getElementById('taskDetailsModalTitle').innerHTML =
+          eventObj.title;
         document.getElementById('taskDue').value = taskDue;
-        document.getElementById('taskDetails').value = eventObj.extendedProps.details;
+        document.getElementById('taskDetails').value =
+          eventObj.extendedProps.details;
         taskDetailsModal.show();
       }
 
@@ -87,8 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': Cookies.get('csrftoken')
-          }
+            'X-CSRFToken': Cookies.get('csrftoken'),
+          },
         });
         calendar.getEventSourceById(420).refetch();
         eventDetailsModal.hide();
@@ -98,20 +109,20 @@ document.addEventListener('DOMContentLoaded', () => {
       doneButton.parentNode.replaceChild(doneButtonClone, doneButton);
       doneButton = doneButtonClone;
       doneButton.addEventListener('click', async () => {
-        const startDate = new Date(eventStart.value)
-        const endDate = new Date(eventEnd.value)
+        const startDate = new Date(eventStart.value);
+        const endDate = new Date(eventEnd.value);
         await fetch(`/api/events/${eventObj.id}/`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': Cookies.get('csrftoken')
+            'X-CSRFToken': Cookies.get('csrftoken'),
           },
           body: JSON.stringify({
             'title': eventTitle.value,
             'start': startDate.toISOString(),
             'end': endDate.toISOString(),
-            'details': eventDetails.value
-          })
+            'details': eventDetails.value,
+          }),
         });
         calendar.getEventSourceById(420).refetch();
         toggleEventInput(false);
@@ -131,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     select: (selectionInfo) => {
       newStart.value = formatLocalISO(selectionInfo.start);
       newEnd.value = formatLocalISO(selectionInfo.end);
-    }
+    },
   });
 
   addButton.addEventListener('click', async () => {
@@ -142,15 +153,15 @@ document.addEventListener('DOMContentLoaded', () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': Cookies.get('csrftoken')
+        'X-CSRFToken': Cookies.get('csrftoken'),
       },
       body: JSON.stringify({
         'title': newTitle.value,
         'start': startDate.toISOString(),
         'end': endDate.toISOString(),
         'details': newDetails.value,
-        'user': userID
-      })
+        'user': userID,
+      }),
     });
     newTitle.value = '';
     newStart.value = '';
@@ -161,11 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   editButton.addEventListener('click', () => {
     toggleEventInput(true);
-  })
+  });
 
   eventModalElement.addEventListener('hide.bs.modal', () => {
     toggleEventInput(false);
-  })
+  });
 
   calendar.render();
 });
@@ -176,13 +187,13 @@ async function updateEventTime(eventInfo) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'X-CSRFToken': Cookies.get('csrftoken')
+      'X-CSRFToken': Cookies.get('csrftoken'),
     },
     body: JSON.stringify({
       'title': eventObj.title,
       'start': eventObj.start.toISOString(),
-      'end': eventObj.end.toISOString()
-    })
+      'end': eventObj.end.toISOString(),
+    }),
   });
 }
 
