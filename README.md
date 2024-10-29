@@ -1,7 +1,8 @@
 # A-plus-management: Productivity and task manager
 [![Django CI](https://github.com/KhunakornP/A-plus-management/actions/workflows/django.yml/badge.svg)](https://github.com/KhunakornP/A-plus-management/actions/workflows/django.yml)
 [![Js test with Jest](https://github.com/KhunakornP/A-plus-management/actions/workflows/jest.yml/badge.svg)](https://github.com/KhunakornP/A-plus-management/actions/workflows/jest.yml)
-[![Lint with Ruff](https://github.com/KhunakornP/A-plus-management/actions/workflows/style-checking.yml/badge.svg)](https://github.com/KhunakornP/A-plus-management/actions/workflows/style-checking.yml) 
+[![Lint with Ruff](https://github.com/KhunakornP/A-plus-management/actions/workflows/style-checking.yml/badge.svg)](https://github.com/KhunakornP/A-plus-management/actions/workflows/style-checking.yml)
+[![Lint JavaScript with ESLint](https://github.com/KhunakornP/A-plus-management/actions/workflows/eslint.yml/badge.svg)](https://github.com/KhunakornP/A-plus-management/actions/workflows/eslint.yml)
 [![codecov](https://codecov.io/gh/KhunakornP/A-plus-management/graph/badge.svg?token=JDHENE1ET7)](https://codecov.io/gh/KhunakornP/A-plus-management)
 <br>
 
