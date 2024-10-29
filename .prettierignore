@@ -1,0 +1,27 @@
+# Ignore all HTML files:
+**/*.html
+
+# Ignore all CSS files:
+**/*.css
+
+# Ignore GitHub files:
+.github/
+
+# Ignore all MD files:
+**/*.md
+
+# Ignore all JSON files:
+**/*.json
+
+# Ignore all config files:
+**/*.mjs
+**/*.yml
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
