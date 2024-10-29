@@ -54,6 +54,7 @@ async function bindDeleteButtons() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRFToken': Cookies.get('csrftoken'),
         }
       });
       renderTaskboards();
@@ -64,6 +65,7 @@ async function bindDeleteButtons() {
 document.addEventListener('DOMContentLoaded', async () => {
   await renderTaskboards();
   const btn = document.getElementById('create-tb-btn')
+  const userID = JSON.parse(document.getElementById('user_id').textContent);
   btn.addEventListener('click', async () => {
     await fetch('/api/taskboards/', {
       method : 'POST',
@@ -73,7 +75,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       },
       body: JSON.stringify(
         {
-          'name': document.getElementById('taskboard-title').value
+          'name': document.getElementById('taskboard-title').value,
+          'user': userID
         }
       )
     });
