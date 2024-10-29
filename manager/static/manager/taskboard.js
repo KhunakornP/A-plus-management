@@ -159,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken'),
       }
     });
     renderColumns();
