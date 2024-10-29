@@ -16,6 +16,8 @@ const taskModalET = document.getElementById('modal-task-et');
 const taskboardID = window.location.href.split('/').slice(-2)[0];
 let currentTaskID = 0;
 
+import { formatLocalISO, getValidDateISOString, getValidEstimatedTime } from "./utils.js"
+
 async function updateTask(){
   await fetch(`/api/tasks/${currentTaskID}/`, {
     method: 'PUT',
@@ -56,12 +58,6 @@ function toggleOffcanvasFields(on) {
   }
 }
 
-async function fetchTasksJSON() {
-  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`);
-  const tasks = await response.json();
-  return tasks;
-}
-
 function generateTaskCard(task) {
   const card = document.createElement('div');
   card.classList.add("bg-body", "border", "border-white", "shadow-lg",
@@ -76,7 +72,7 @@ function generateTaskCard(task) {
     currentTaskID = task.id;
     taskOffcanvasTitle.value = `${task.title}`;
     taskOffcanvasET.value = `${task.time_estimate}`;
-    taskOffcanvasEndDate.value = formatLocalISOFromString(task.end_date);
+    taskOffcanvasEndDate.value = formatLocalISO(task.end_date);
     if (task.details !== null) {
       taskOffcanvasDetails.value = `${task.details}`;
     }
@@ -156,83 +152,56 @@ function getDragAfterElement(dropArea, y) {
   }, { offset: Number.NEGATIVE_INFINITY }).element
 }
 
-function formatLocalISOFromString(dateUTCString) {
-  const dateTime = new Date(dateUTCString);
-  const timeZoneOffSet = dateTime.getTimezoneOffset() * 60 * 1000;
-  let dateTimeLocal = dateTime - timeZoneOffSet;
-  dateTimeLocal = new Date(dateTimeLocal);
-  let iso = dateTimeLocal.toISOString();
-  iso = iso.split('.')[0];
-  iso = iso.replace('T', ' ');
-  return iso;
-}
-
-function getValidDateISOString(dateLocalStr) {
-  if(dateLocalStr !== "") {
-    return new Date(dateLocalStr).toISOString()
-  }
-  let defaultDate =  new Date()
-  defaultDate.setHours(0,0,0,0)
-  defaultDate.setDate(defaultDate.getDate() + 1)
-  return defaultDate.toISOString()
-}
-
-function getValidEstimatedTime(time) {
-  if(time === "") {
-    return 0;
-  }
-  return Number(time);
-}
-
-renderColumns()
-
-deleteBtn.addEventListener('click', async () => {
-  await fetch(`/api/tasks/${currentTaskID}/`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': Cookies.get('csrftoken'),
+document.addEventListener('DOMContentLoaded', () => {
+  renderColumns()
+  deleteBtn.addEventListener('click', async () => {
+    await fetch(`/api/tasks/${currentTaskID}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      }
+    });
+    renderColumns();
+  })
+  
+  editBtn.addEventListener('click', () => {
+    if(editBtn.value === 'Edit'){
+      toggleOffcanvasFields(true);
+      editBtn.value = 'Done';
     }
+    else{
+      toggleOffcanvasFields(false);
+      updateTask();
+      editBtn.value = 'Edit'
+    }
+  })
+
+  createBtn.addEventListener('click', async () => {
+    await fetch('/api/tasks/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken')
+      },
+      body: JSON.stringify({
+        'title': taskModalTitle.value,
+        'start': getValidDateISOString(taskModalEndDate.value),
+        'taskboard': taskboardID,
+        'status': taskModalStatus.value,
+        'details': taskModalDetails.value,
+        'time_estimate': getValidEstimatedTime(taskModalET.value)
+      })
+    });
+    createTaskModal.hide();
+    renderColumns();
   });
-  renderColumns();
-})
 
-editBtn.addEventListener('click', () => {
-  if(editBtn.value === 'Edit'){
-    toggleOffcanvasFields(true);
-    editBtn.value = 'Done';
-  }
-  else{
-    toggleOffcanvasFields(false);
-    updateTask();
-    editBtn.value = 'Edit'
-  }
-})
-
-createBtn.addEventListener('click', async () => {
-  await fetch('/api/tasks/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': Cookies.get('csrftoken')
-    },
-    body: JSON.stringify({
-      'title': taskModalTitle.value,
-      'start': getValidDateISOString(taskModalEndDate.value),
-      'taskboard': taskboardID,
-      'status': taskModalStatus.value,
-      'details': taskModalDetails.value,
-      'time_estimate': getValidEstimatedTime(taskModalET.value)
-    })
+  document.getElementById('addTask').addEventListener('hidden.bs.modal', () => {
+    taskModalTitle.value = '';
+    taskModalEndDate.value = '';
+    taskModalET.value = '';
+    taskModalStatus.selectedIndex = 0;
+    taskModalDetails.value = '';
   });
-  createTaskModal.hide();
-  renderColumns();
-});
-
-document.getElementById('addTask').addEventListener('hidden.bs.modal', () => {
-  taskModalTitle.value = '';
-  taskModalEndDate.value = '';
-  taskModalET.value = '';
-  taskModalStatus.selectedIndex = 0;
-  taskModalDetails.value = '';
-});
+})
