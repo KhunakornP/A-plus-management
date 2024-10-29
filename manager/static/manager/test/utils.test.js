@@ -28,5 +28,11 @@ describe('getValidDateISOString', () => {
     const date = new Date()
     expect(getValidDateISOString(date)).toEqual(date.toISOString())
   })
-  it.todo('returns today midnight if an empty string is provided')
+  it('returns today midnight if an empty string is provided', () => {
+    const answer = getValidDateISOString("");
+    const today_midnight = new Date()
+    today_midnight.setDate(today_midnight.getDate() + 1)
+    today_midnight.setHours(0,0,0,0)
+    expect(answer).toEqual(today_midnight.toISOString())
+  })
 })
