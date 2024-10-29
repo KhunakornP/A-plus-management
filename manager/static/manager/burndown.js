@@ -99,8 +99,9 @@ function processTasksData(tasksData) {
       mode: 'vertical',
       scaleID: 'x',
       value: endDate,
-      borderColor: 'red',
+      borderColor: 'rgba(255, 0, 0, 0.5)',
       borderWidth: 1,
+      borderDash: [5, 5],
       label: {
           content: titles[index],
           enabled: true,
@@ -138,6 +139,21 @@ function processEventData(eventData, total_dates) {
   return eventAnnotations;
 }
 
+const todayAnnotation = {
+  type: 'line',
+  mode: 'vertical',
+  scaleID: 'x',
+  value: new Date().toISOString().split('T')[0],
+  borderColor: 'rgba(0, 0, 255, 0.5)',
+  borderWidth: 2,
+  label: {
+      content: 'Today',
+      enabled: true,
+      position: 'top'
+  },
+  display: true
+};
+
 // Initialize chart
 function initializeChart(ctx, total_dates, total_time_remaining, velocity_trend, taskAnnotations, eventAnnotations) {
   return new Chart(ctx, {
@@ -168,7 +184,7 @@ function initializeChart(ctx, total_dates, total_time_remaining, velocity_trend,
           },
           plugins: {
               annotation: {
-                  annotations: [...taskAnnotations, ...eventAnnotations]
+                  annotations: [...taskAnnotations, ...eventAnnotations, todayAnnotation]
               }
           }
       }
