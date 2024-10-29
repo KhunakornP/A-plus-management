@@ -14,6 +14,7 @@ class Task(models.Model):
     A task has a title, status, end date and details.
     Each task belongs to only one taskboard but each taskboard
     can have multiple tasks.
+    A task at any given moment belongs to exactly one user.
     """
 
     title: models.CharField = models.CharField(max_length=300)

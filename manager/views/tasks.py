@@ -21,20 +21,25 @@ class TaskViewSet(viewsets.ViewSet):
         queryset = Task.objects.all()
         taskboard_id = request.query_params.get("taskboard")
         ignore_status = request.query_params.get("exclude")
+        # get all non-finished tasks from the taskboard.
         if ignore_status and taskboard_id:
             queryset = Task.objects.filter(
                 ~Q(status=ignore_status), taskboard=taskboard_id
             )
+        # get tasks in a taskboard.
         elif taskboard_id:
             queryset = Task.objects.filter(taskboard=taskboard_id)
+        # get non-finished tasks for the calendar.
         elif ignore_status:
-            queryset = Task.objects.filter(~Q(status=ignore_status))
+            queryset = Task.objects.filter(
+                ~Q(status=ignore_status), taskboard__user=request.user
+            )
         serializer = TaskSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request):
         """
-        Create a new Event object.
+        Create a new Task object.
 
         :param request: The HTTP request with event data.
         :return: Response with created event.
@@ -48,7 +53,7 @@ class TaskViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None, **kwargs):
         """
-        Retrieve an Event object data bt ID.
+        Retrieve a Task object data bt ID.
 
         :param request: The HTTP request.
         """
@@ -56,24 +61,24 @@ class TaskViewSet(viewsets.ViewSet):
             event = Task.objects.get(id=pk)
         except ObjectDoesNotExist:
             return Response(
-                {"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND
             )
         serializer = TaskSerializer(event)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, pk=None, **kwargs):
         """
-        Update an existing Event object by ID.
+        Update an existing Task object by ID.
 
         :param request: The HTTP request with updated data.
-        :param pk: Primary key of the Event to update.
+        :param pk: Primary key of the Task to update.
         :return: Response with updated event.
         """
         try:
             event = Task.objects.get(id=pk)
         except ObjectDoesNotExist:
             return Response(
-                {"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND
             )
         serializer = TaskSerializer(event, data=request.data, partial=True)
         if serializer.is_valid():
@@ -83,17 +88,17 @@ class TaskViewSet(viewsets.ViewSet):
 
     def destroy(self, request, pk=None, **kwargs):
         """
-        Delete an Event by ID.
+        Delete a Task by ID.
 
         :param request: The HTTP request.
-        :param pk: Primary key of the Event to delete
+        :param pk: Primary key of the Task to delete
         :return: Response indicating deletion status.
         """
         try:
             event = Task.objects.get(id=pk)
         except ObjectDoesNotExist:
             return Response(
-                {"error": "Event not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "Task not found"}, status=status.HTTP_404_NOT_FOUND
             )
         event.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
