@@ -87,11 +87,10 @@ class GoogleLoginCallback(APIView):
                 user,
                 backend="allauth.account.auth_backends.AuthenticationBackend",
             )
-            return redirect(reverse("manager:taskboard_index"))
+            return redirect(reverse("manager:main_login"))
         except (ValueError, IndexError):
             messages.error(request, "Authentication Error: Please login again.")
-            #  change this to the login page after it is created
-            return redirect(reverse("manager:taskboard_index"))
+            return redirect(reverse("manager:main_login"))
 
 
 class GoogleLogin(SocialLoginView):
