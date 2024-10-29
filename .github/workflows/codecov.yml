@@ -38,6 +38,7 @@ jobs:
           echo TIME_ZONE="${{ secrets.TIME_ZONE }}" >> .env
           echo CLIENT_ID="${{ secrets.CLIENT_ID }}" >> .env
           echo SECRET="${{ secrets.SECRET }}" >> .env
+          echo CALLBACK="${{ secrets.CALLBACK }}" >> .env
           cat .env
 
       - name: Run Migrations
