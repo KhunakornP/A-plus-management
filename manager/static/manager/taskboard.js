@@ -20,23 +20,46 @@ import {
   formatLocalISO,
   getValidDateISOString,
   getValidEstimatedTime,
+  getErrorDiv,
 } from './utils.js';
 
 async function updateTask() {
-  await fetch(`/api/tasks/${currentTaskID}/`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': Cookies.get('csrftoken'),
-    },
-    body: JSON.stringify({
-      'title': taskOffcanvasTitle.value,
-      'details': taskOffcanvasDetails.value,
-      'end_date': getValidDateISOString(taskOffcanvasEndDate.value),
-      'time_estimate': getValidEstimatedTime(taskOffcanvasET.value),
-    }),
-  });
-  renderColumns();
+  try {
+    const response = await fetch(`/api/tasks/${currentTaskID}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      },
+      body: JSON.stringify({
+        'title': taskOffcanvasTitle.value,
+        'details': taskOffcanvasDetails.value,
+        'end_date': getValidDateISOString(taskOffcanvasEndDate.value),
+        'time_estimate': getValidEstimatedTime(taskOffcanvasET.value),
+      }),
+    });
+    if (!response.ok) {
+      throw new Error('Title cannot be blanked.');
+    }
+    renderColumns();
+    toggleOffcanvasFields(false);
+    const errorText = document.getElementById('error-title-update');
+    if (errorText !== null) {
+      errorText.remove();
+    }
+    taskOffcanvasTitle.classList.remove('is-invalid');
+  } catch (error) {
+    taskOffcanvasTitle.classList.add('is-invalid');
+    let errorText = document.getElementById('error-title-update');
+    if (errorText === null) {
+      errorText = getErrorDiv(error.message);
+      errorText.id = 'error-title-update';
+      taskOffcanvasTitle.parentNode.insertBefore(
+        errorText,
+        taskOffcanvasTitle.nextSibling
+      );
+    }
+  }
 }
 
 function toggleOffcanvasFields(on) {
@@ -49,6 +72,7 @@ function toggleOffcanvasFields(on) {
     taskOffcanvasEndDate.setAttribute('class', 'form-control');
     taskOffcanvasET.removeAttribute('readonly');
     taskOffcanvasET.setAttribute('class', 'form-control');
+    editBtn.value = 'Done';
   } else {
     taskOffcanvasTitle.setAttribute('readonly', true);
     taskOffcanvasTitle.setAttribute('class', 'form-control-plaintext');
@@ -58,6 +82,7 @@ function toggleOffcanvasFields(on) {
     taskOffcanvasEndDate.setAttribute('class', 'form-control-plaintext');
     taskOffcanvasET.setAttribute('readonly', true);
     taskOffcanvasET.setAttribute('class', 'form-control-plaintext');
+    editBtn.value = 'Edit';
   }
 }
 
@@ -183,32 +208,45 @@ document.addEventListener('DOMContentLoaded', () => {
   editBtn.addEventListener('click', () => {
     if (editBtn.value === 'Edit') {
       toggleOffcanvasFields(true);
-      editBtn.value = 'Done';
     } else {
-      toggleOffcanvasFields(false);
       updateTask();
-      editBtn.value = 'Edit';
     }
   });
 
   createBtn.addEventListener('click', async () => {
-    await fetch('/api/tasks/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': Cookies.get('csrftoken'),
-      },
-      body: JSON.stringify({
-        'title': taskModalTitle.value,
-        'start': getValidDateISOString(taskModalEndDate.value),
-        'taskboard': taskboardID,
-        'status': taskModalStatus.value,
-        'details': taskModalDetails.value,
-        'time_estimate': getValidEstimatedTime(taskModalET.value),
-      }),
-    });
-    createTaskModal.hide();
-    renderColumns();
+    try {
+      const response = await fetch('/api/tasks/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': Cookies.get('csrftoken'),
+        },
+        body: JSON.stringify({
+          'title': taskModalTitle.value,
+          'start': getValidDateISOString(taskModalEndDate.value),
+          'taskboard': taskboardID,
+          'status': taskModalStatus.value,
+          'details': taskModalDetails.value,
+          'time_estimate': getValidEstimatedTime(taskModalET.value),
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Please input a title.');
+      }
+      renderColumns();
+      createTaskModal.hide();
+    } catch (error) {
+      taskModalTitle.classList.add('is-invalid');
+      let errorText = document.getElementById('error-title-create');
+      if (errorText === null) {
+        errorText = getErrorDiv(error.message);
+        errorText.id = 'error-title-create';
+        taskModalTitle.parentNode.insertBefore(
+          errorText,
+          taskModalTitle.nextSibling
+        );
+      }
+    }
   });
 
   document.getElementById('addTask').addEventListener('hidden.bs.modal', () => {
@@ -217,5 +255,21 @@ document.addEventListener('DOMContentLoaded', () => {
     taskModalET.value = '';
     taskModalStatus.selectedIndex = 0;
     taskModalDetails.value = '';
+    const errorText = document.getElementById('error-title-create');
+    if (errorText !== null) {
+      errorText.remove();
+    }
+    taskModalTitle.classList.remove('is-invalid');
   });
+
+  document
+    .getElementById('task-offcanvas')
+    .addEventListener('hidden.bs.offcanvas', () => {
+      toggleOffcanvasFields(false);
+      const errorText = document.getElementById('error-title-update');
+      if (errorText !== null) {
+        errorText.remove();
+      }
+      taskOffcanvasTitle.classList.remove('is-invalid');
+    });
 });

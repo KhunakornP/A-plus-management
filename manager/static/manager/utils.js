@@ -29,4 +29,16 @@ function getValidEstimatedTime(time) {
   return Number(time);
 }
 
-export { formatLocalISO, getValidDateISOString, getValidEstimatedTime };
+function getErrorDiv(message) {
+  const errorText = document.createElement('div');
+  errorText.setAttribute('class', 'text-center text-danger');
+  errorText.innerHTML = `<small>${message}</small>`;
+  return errorText;
+}
+
+export {
+  formatLocalISO,
+  getValidDateISOString,
+  getValidEstimatedTime,
+  getErrorDiv,
+};
