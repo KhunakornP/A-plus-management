@@ -11,7 +11,7 @@ from calculator.serializers import (
 )
 
 
-class CalculatorView(APIView):
+class CalculatorAPIView(APIView):
     """List all University, Faculty and Majors."""
 
     def get(self, request, format=None) -> Response:
