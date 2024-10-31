@@ -93,9 +93,24 @@ class EstimateHistoryTest(BaseTestCase):
         It should not add the time estimate.
         """
         tb = create_taskboard(self.user1)
-        t2 = Task.objects.create(
+        t = Task.objects.create(
             title="something2", taskboard=tb, time_estimate=3, status="DONE"
         )
-        t2.save()
+        t.save()
+        eh = EstimateHistory.objects.first()
+        self.assertEqual(eh.time_remaining, 0)
+
+    def test_changing_time_estimate_of_done_tasks(self):
+        """Test changing time estimate of tasks that are marked as done.
+
+        It should not affect time estimate of an estimate history object.
+        """
+        tb = create_taskboard(self.user1)
+        t = Task.objects.create(
+            title="something2", taskboard=tb, time_estimate=3000, status="DONE"
+        )
+        t.save()
+        t.time_estimate = 7
+        t.save()
         eh = EstimateHistory.objects.first()
         self.assertEqual(eh.time_remaining, 0)

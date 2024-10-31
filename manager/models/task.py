@@ -37,10 +37,9 @@ class Task(models.Model):
             return self.time_estimate
 
     def __status_changed_to_done(self) -> bool:
-        """Check whether status of tasks are changed to DONE.
+        """Check whether status of existing tasks are changed to DONE.
 
         :return: True if the task's status changed from something else to DONE.
-        Or the task is created with status=DONE.
         Otherwise, return false.
         """
         try:
@@ -49,10 +48,10 @@ class Task(models.Model):
                 return False
             return self.status == "DONE"
         except Task.DoesNotExist:
-            return self.status == "DONE"
+            return False
 
     def __status_changed_from_done(self) -> bool:
-        """Check whether status of tasks are changed from DONE.
+        """Check whether status of existing tasks are changed from DONE.
 
         :return: True if the task's status changed from DONE to something else.
         Otherwise, return false.
@@ -77,11 +76,12 @@ class Task(models.Model):
         eh = EstimateHistory.objects.get(
             date=timezone.localdate(), taskboard=self.taskboard
         )
-        eh.time_remaining += self.__compute_time_diff()
         if self.__status_changed_to_done():
             eh.time_remaining -= self.time_estimate
         elif self.__status_changed_from_done():
             eh.time_remaining += self.time_estimate
+        elif self.status != "DONE":
+            eh.time_remaining += self.__compute_time_diff()
         eh.save()
 
         super().save(*args, **kwargs)
