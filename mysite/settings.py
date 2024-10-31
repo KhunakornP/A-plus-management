@@ -143,7 +143,7 @@ SITE_ID = config('SITE_ID', cast=int, default=3)
 LOGOUT_REDIRECT_URL = 'manager:main_login'
 
 #  The maximum difference between the iat and server time allowed in seconds
-ABSOLUTE_TOLERATED_TIME_DIFF = config('DELTA_TIME', cast=float, default=1)
+ABSOLUTE_TOLERATED_TIME_DIFF = config('DELTA_TIME', cast=float, default=5)
 GOOGLE_CALLBACK_URI = config("CALLBACK", default="api/callmelater/")
 GOOGLE_CLIENT_ID = config("CLIENT_ID", default="bogusID.google.com")
 
