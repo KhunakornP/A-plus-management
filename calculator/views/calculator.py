@@ -9,9 +9,10 @@ from calculator.serializers import (
     FacultySerializer,
     MajorSerializer,
 )
+from django.views import generic
 
 
-class CalculatorView(APIView):
+class CalculatorViewSet(APIView):
     """List all University, Faculty and Majors."""
 
     def get(self, request, format=None) -> Response:
@@ -43,3 +44,9 @@ class CalculatorView(APIView):
         :return: Response with the calculated score data and admission statistics.
         """
         raise NotImplementedError("To be done when the criteria model is finalised.")
+
+
+class CalculatorView(generic.TemplateView):
+    """A view that displays the calculator."""
+
+    template_name = "calculator/calculator.html"
