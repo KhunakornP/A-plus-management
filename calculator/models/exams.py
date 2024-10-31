@@ -12,7 +12,7 @@ class Exams(models.Model):
     is issued by an outside authority, True if created by CUPT, False otherwise.
     """
 
-    name = models.Charfield(max_length=200)
+    name = models.CharField(max_length=200)
     max_score = models.FloatField(default=100.00)
     core = models.BooleanField(default=False)
 

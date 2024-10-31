@@ -1,1 +1,2 @@
-from admission_info import *
+from .admission_info import *
+from .exams import *
