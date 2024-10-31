@@ -18,7 +18,7 @@ class TaskViewSet(viewsets.ViewSet):
         :param request: The HTTP request.
         :return: Response with tasks.
         """
-        queryset = Task.objects.all()
+        queryset = Task.objects.all().order_by("end_date")
         taskboard_id = request.query_params.get("taskboard")
         ignore_status = request.query_params.get("exclude")
         # get all non-finished tasks from the taskboard.

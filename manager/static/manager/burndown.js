@@ -119,14 +119,13 @@ function processEventData(eventData, total_dates) {
       const startDate = new Date(event.start_date) >= new Date(total_dates[0]) ? event.start_date : total_dates[0];
       const endDate = new Date(event.end_date) <= new Date(total_dates[total_dates.length - 1]) ? event.end_date : total_dates[total_dates.length - 1];
       return {
-          type: 'box',
+          type: 'line',
           xScaleID: 'x',
-          yScaleID: 'y',
-          xMin: new Date(startDate).toISOString().split('T')[0],
-          xMax: new Date(endDate).toISOString().split('T')[0],
+          value: endDate,
           backgroundColor: 'rgba(0, 255, 0, 0.1)',
           borderColor: 'green',
           borderWidth: 1,
+          borderDash: [5, 5],
           label: {
               content: event.title,
               enabled: true,
@@ -191,7 +190,6 @@ function initializeChart(ctx, total_dates, total_time_remaining, velocity_trend,
   });
 }
 
-// Update annotations
 function updateAnnotations(taskAnnotations, eventAnnotations, chart) {
   taskAnnotations.forEach((annotation, index) => {
       const checkbox = document.getElementById(`task-checkbox-${index}`);
@@ -204,7 +202,6 @@ function updateAnnotations(taskAnnotations, eventAnnotations, chart) {
   chart.update();
 }
 
-// Create checkboxes
 function createCheckboxes(container, data, type, updateAnnotations) {
   data.forEach((item, index) => {
       const checkboxDiv = document.createElement('div');
