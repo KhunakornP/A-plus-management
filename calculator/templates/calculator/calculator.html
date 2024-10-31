@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<form>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm">
+        <label for="GPA">GPAX</label>
+        <input class="form-control" aria-describedby="GPA-help" id="GPA" placeholder="4.00">
+        <small id="GPA-help" class="form-text text-muted">สูงสุด 4.00</small>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+  </div>
+</form>
+{% endblock %}

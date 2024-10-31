@@ -1,5 +1,5 @@
 """An API View for A-Level Calculator page."""
-
+from django.views import generic
 from calculator.models import University, Faculty, Major
 from rest_framework.views import APIView
 from rest_framework import status
@@ -43,3 +43,9 @@ class CalculatorAPIView(APIView):
         :return: Response with the calculated score data and admission statistics.
         """
         raise NotImplementedError("To be done when the criteria model is finalised.")
+
+
+class CalculatorView(generic.TemplateView):
+    """A view that displays the calculator."""
+
+    template_name = "calculator/calculator.html"
