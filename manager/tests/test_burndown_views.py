@@ -11,7 +11,7 @@ class EstimateHistoryViewTests(TestCase):
     """Tests for TaskViewSet."""
 
     def setUp(self):
-        """Create EstimateHistory with some tasks."""
+        """Create EstimateHistory objects."""
         pass
 
     def test_get_all_estimate_history(self):
