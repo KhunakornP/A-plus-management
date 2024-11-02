@@ -29,5 +29,5 @@ urlpatterns = [
     path('manager/', include('manager.urls')),
     path('api/auth/', include('auth.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('calculator', include('calculator.urls'))
+    path('calculator/', include('calculator.urls'))
 ]
