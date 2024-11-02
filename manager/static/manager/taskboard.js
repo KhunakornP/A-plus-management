@@ -21,6 +21,7 @@ import {
   getValidDateISOString,
   getValidEstimatedTime,
   processAndAppend,
+  toggleFields
 } from './utils.js';
 
 async function updateTask() {
@@ -38,20 +39,6 @@ async function updateTask() {
     }),
   });
   renderColumns();
-}
-
-function toggleOffcanvasFields(on) {
-  if (on) {
-    for (const toggleable of document.querySelectorAll('.toggleable')) {
-      toggleable.removeAttribute('readonly');
-      toggleable.setAttribute('class', 'form-control');
-    }
-  } else {
-    for (const toggleable of document.querySelectorAll('.toggleable')) {
-      toggleable.setAttribute('readonly', true);
-      toggleable.setAttribute('class', 'form-control-plaintext');
-    }
-  }
 }
 
 function generateTaskCard(task) {
@@ -178,11 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   editBtn.addEventListener('click', () => {
+    const toggleables = document.querySelectorAll('.toggleable')
     if (editBtn.value === 'Edit') {
-      toggleOffcanvasFields(true);
+      toggleFields(toggleables, true);
       editBtn.value = 'Done';
     } else {
-      toggleOffcanvasFields(false);
+      toggleFields(toggleables, false);
       updateTask();
       editBtn.value = 'Edit';
     }

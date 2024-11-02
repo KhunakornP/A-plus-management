@@ -37,9 +37,26 @@ async function processAndAppend(children, parent, func) {
   }
 }
 
+function toggleFields(toggleables, on) {
+  if (on) {
+    for (const toggleable of toggleables) {
+      toggleable.removeAttribute('readonly');
+      toggleable.classList.remove('form-control-plaintext');
+      toggleable.classList.add('form-control');
+    }
+  } else {
+    for (const toggleable of toggleables) {
+      toggleable.setAttribute('readonly', true);
+      toggleable.classList.remove('form-control');
+      toggleable.classList.add('form-control-plaintext');
+    }
+  }
+}
+
 export {
   formatLocalISO,
   getValidDateISOString,
   getValidEstimatedTime,
   processAndAppend,
+  toggleFields
 };
