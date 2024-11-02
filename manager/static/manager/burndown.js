@@ -1,246 +1,253 @@
 const taskboardID = Number(window.location.href.split('/').slice(-3)[0]);
+const numberOfMiliseconds = 1000 * 60 * 60 * 24
 
+// Back to Taskboard button
 const taskboardLink = document.getElementById('taskboard-link');
 taskboardLink.href = `/manager/taskboard/${taskboardID}`;
 
-async function fetchTaskJson(){
-  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`)
-  const tasks = await response.json()
-  return tasks
+async function fetchEventJson(){
+    const response = await fetch(`/api/events/`)
+    const events = await response.json()
+    return events
 }
 
-async function fetchEventJson(){
-  const response = await fetch(`/api/events/`)
-  const events = await response.json()
-  return events
+async function fetchTaskJson(){
+    const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`)
+    const tasks = await response.json()
+    return tasks
 }
 
 async function fetchEstimateHistoryData() {
-  const response = await fetch(`/api/estimate_history/?taskboard=${taskboardID}`);
-  const estimate_histories = await response.json();
-  return estimate_histories;
+    const response = await fetch(`/api/estimate_history/?taskboard=${taskboardID}`);
+    const estimate_histories = await response.json();
+    return estimate_histories;
 }
 
 // Return the number of days between d1 and d2
+// par: Date, ret: Number
 function calculateDaysBetween(d1, d2) {
-  const startDate = new Date(d1);
-  const endDate = new Date(d2);
-  return (endDate - startDate) / (1000 * 60 * 60 * 24);
-}
+    const startDate = new Date(d1);
+    const endDate = new Date(d2);
+    return (endDate - startDate) / numberOfMiliseconds;
+  }
 
+// ret: num
 function calculateSlope(t1, t2, daysBetween) {
-  return (t2 - t1) / daysBetween;
+    return (t2 - t1) / daysBetween;
 }
 
-// Return a list of dates starting from startDate plus number of days
-function generateDateRange(startDate, nDays) {
-  const result = [];
-  for (let i = 0; i <= Math.ceil(nDays); i++) {
-    const newDate = new Date(startDate);
-    newDate.setDate(startDate.getDate() + i);
-    result.push(newDate.toISOString().split('T')[0]);
-  }
-  return result;
+function formatDate(date) {
+    return date.toISOString().split('T')[0];
 }
 
-// Return the list of dates from d1 to the day the trend reaches 0 based on t1 and t2.
+// Return the number days from d1 to the day the trend reaches 0 based on t1 and t2.
 function daysUntilZero(d1, d2, t1, t2) {
-  const daysBetween = calculateDaysBetween(d1, d2);
-  if (daysBetween === 0) {
-    const singleDayList = [new Date(d1).toISOString().split('T')[0]];
-    return singleDayList;
-  }
-  const slope = calculateSlope(t1, t2, daysBetween);
-  document.getElementById("slope").innerText = `Average Velocity: ${-slope.toFixed(2)} hr/day`;
-  const daysToZero = t1 / -slope;
-  const result = generateDateRange(new Date(d1), daysToZero);
-  document.getElementById("done-by").innerText = `Done-by Estimate: ${result[result.length - 1]}`;
-  return result;
+    const daysBetween = calculateDaysBetween(d1, d2);
+    const slope = calculateSlope(t1, t2, daysBetween);
+    document.getElementById("slope").innerText = `Average Velocity: ${-slope.toFixed(2)} hr/day`;
+    return t1/-slope;
 }
 
-// Return a dataset where the time remaining is filled with the last known time remaining
-// fill remaining dates with 0 time remaining
-function fillTimeRemaining(data, total_dates) {
-  const result = [];
-  data.forEach((item, i) => {
-    const currentDate = new Date(item.date);
-    const currentTimeRemaining = item.time_remaining;
-    result.push(currentTimeRemaining);
-    if (i < data.length - 1) {
-      const nextDate = new Date(data[i + 1].date);
-      const daysDiff = (nextDate - currentDate) / (1000 * 60 * 60 * 24);
-      for (let j = 1; j < daysDiff; j++) {
-        result.push(currentTimeRemaining);
-      }
+function drawLine(startTime, startDate, nDays) {
+    const points = [];
+    const start = new Date(startDate);
+    for (let i = 0; i <= nDays; i++) {
+        const currentDate = new Date(start);
+        currentDate.setDate(start.getDate() + i);
+        points.push({ x: formatDate(currentDate), y: startTime - (startTime / nDays) * i });
     }
-  });
-  while (result.length < total_dates.length) {
-    result.push(0);
-  }
-  return result;
+    return points;
 }
 
-function processEstimateHistoryData(estimateHistoryData) {
-  const dates = estimateHistoryData.map(eh => eh.date);
-  const timeRemaining = estimateHistoryData.map(eh => eh.time_remaining);
+//Return a list of dates from startDate to endDate
+function generateDateRange(startDate, endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const dateArray = [];
 
-  const total_dates = daysUntilZero(dates[0], dates[dates.length - 1], timeRemaining[0], timeRemaining[timeRemaining.length - 1]);
-  const total_time_remaining = fillTimeRemaining(estimateHistoryData, total_dates);
+    let currentDate = start;
+    while (currentDate <= end) {
+        dateArray.push(formatDate(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
 
-  let velocity_trend = [];
-  if (estimateHistoryData.length > 1) {
-      velocity_trend = total_time_remaining.map((_, index, array) => {
-          return total_time_remaining[0] + ((total_time_remaining[total_time_remaining.length - 1] - total_time_remaining[0]) / (array.length - 1)) * index;
-      });
-  }
-
-  return { total_dates, total_time_remaining, velocity_trend };
+    return dateArray;
 }
 
-function processTasksData(tasksData) {
-  const endDates = tasksData.map(task => new Date(task.end_date).toISOString().split('T')[0]);
-  const titles = tasksData.map(task => task.title);
-  const taskAnnotations = endDates.map((endDate, index) => ({
-      type: 'line',
-      mode: 'vertical',
-      scaleID: 'x',
-      value: endDate,
-      borderColor: 'rgba(255, 0, 0, 0.5)',
-      borderWidth: 1,
-      borderDash: [5, 5],
-      label: {
-          content: titles[index],
-          enabled: true,
-          position: 'top'
-      },
-      display: true
-  }));
+function fillEstHistData(data) {
+    const result = [];
+    let lastKnownTimeRemaining = null;
 
-  return taskAnnotations;
+    // Convert the date strings to Date objects for easier manipulation
+    data.forEach((entry, index) => {
+        const currentDate = new Date(entry.date);
+        const nextDate = index < data.length - 1 ? new Date(data[index + 1].date) : null;
+
+        // Add the current entry to the result
+        result.push({ x: entry.date, y: entry.time_remaining });
+        lastKnownTimeRemaining = entry.time_remaining;
+
+        // Fill in the gaps between the current date and the next date
+        if (nextDate) {
+            let gapDate = new Date(currentDate);
+            gapDate.setDate(gapDate.getDate() + 1);
+
+            while (gapDate < nextDate) {
+                result.push({ x: gapDate.toISOString().split('T')[0], y: lastKnownTimeRemaining });
+                gapDate.setDate(gapDate.getDate() + 1);
+            }
+        }
+    });
+
+    return result;
 }
 
-function processEventData(eventData) {
-  const endDates = eventData.map(event => new Date(event.end_date).toISOString().split('T')[0]);
-  const titles = eventData.map(event => event.title);
-  const taskAnnotations = endDates.map((endDate, index) => ({
-      type: 'line',
-      mode: 'vertical',
-      scaleID: 'x',
-      value: endDate,
-      borderColor: 'rgba(255, 255, 0, 0.5)',
-      borderWidth: 1,
-      borderDash: [5, 5],
-      label: {
-          content: titles[index],
-          enabled: true,
-          position: 'top'
-      },
-      display: true
-  }));
+function annotate(data, color){
+    const endDates = data.map(task => formatDate(new Date(task.end_date)));
+    const titles = data.map(item => item.title);
+    const annotations = endDates.map((endDate, index) => ({
+        type: 'line',
+        mode: 'vertical',
+        scaleID: 'x',
+        value: endDate,
+        borderColor: color,
+        borderWidth: 1,
+        borderDash: [5, 5],
+        label: {
+            content: titles[index],
+            enabled: true,
+            position: 'top'
+        },
+        display: true
+    }));
 
-  return taskAnnotations;
+    return annotations;
+      
 }
 
-const todayAnnotation = {
-  type: 'line',
-  mode: 'vertical',
-  scaleID: 'x',
-  value: new Date().toISOString().split('T')[0],
-  borderColor: 'rgba(0, 0, 255, 0.5)',
-  borderWidth: 2,
-  label: {
-      content: 'Today',
-      enabled: true,
-      position: 'top'
-  },
-  display: true
-};
-
-// Initialize chart
-function initializeChart(ctx, total_dates, total_time_remaining, velocity_trend, taskAnnotations, eventAnnotations) {
-  return new Chart(ctx, {
-      type: 'bar',
-      data: {
-          labels: total_dates,
-          datasets: [
-              {
-                  label: 'Time Remaining',
-                  data: total_time_remaining,
-                  borderWidth: 1,
-              },
-              {
-                  label: 'Velocity Trend',
-                  data: velocity_trend,
-                  borderDash: [5, 5],
-                  borderWidth: 1,
-                  pointStyle: false,
-                  type: 'line'
-              }
-          ]
-      },
-      options: {
-          scales: {
-              y: {
-                  beginAtZero: true
-              }
-          },
-          plugins: {
-              annotation: {
-                  annotations: [...taskAnnotations, ...eventAnnotations, todayAnnotation]
-              }
-          }
-      }
-  });
+function initializeChart(ctx, dates, est_hist_data, velocity_trend, required_trend, annotations) {
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dates,
+            datasets: [
+                {
+                    label: 'Time Remaining',
+                    data: est_hist_data,
+                    borderWidth: 1,
+                },
+                {
+                    label: 'Velocity Trend',
+                    data: velocity_trend,
+                    borderDash: [5, 5],
+                    borderWidth: 1,
+                    pointStyle: false,
+                    type: 'line'
+                },
+                {
+                    label: 'Required Trend',
+                    data: required_trend,
+                    borderDash: [5, 5],
+                    borderWidth: 1,
+                    pointStyle: false,
+                    type: 'line'
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                annotation: {
+                    annotations: annotations
+                }
+            }
+        }
+    });
 }
 
 function updateAnnotations(taskAnnotations, eventAnnotations, chart) {
-  taskAnnotations.forEach((annotation, index) => {
-      const checkbox = document.getElementById(`task-checkbox-${index}`);
-      annotation.display = checkbox.checked;
-  });
-  eventAnnotations.forEach((annotation, index) => {
-      const checkbox = document.getElementById(`event-checkbox-${index}`);
-      annotation.display = checkbox.checked;
-  });
-  chart.update();
+taskAnnotations.forEach((annotation, index) => {
+    const checkbox = document.getElementById(`task-checkbox-${index}`);
+    annotation.display = checkbox.checked;
+});
+eventAnnotations.forEach((annotation, index) => {
+    const checkbox = document.getElementById(`event-checkbox-${index}`);
+    annotation.display = checkbox.checked;
+});
+chart.update();
 }
 
 function createCheckboxes(container, data, type, updateAnnotations) {
-  data.forEach((item, index) => {
-      const checkboxDiv = document.createElement('div');
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = `${type}-checkbox-${index}`;
-      checkbox.checked = true;
+data.forEach((item, index) => {
+    const checkboxDiv = document.createElement('div');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = `${type}-checkbox-${index}`;
+    checkbox.checked = true;
 
-      const label = document.createElement('label');
-      label.htmlFor = `${type}-checkbox-${index}`;
-      label.innerText = item.title;
+    const label = document.createElement('label');
+    label.htmlFor = `${type}-checkbox-${index}`;
+    label.innerText = item.title;
 
-      checkbox.addEventListener('change', updateAnnotations);
+    checkbox.addEventListener('change', updateAnnotations);
 
-      checkboxDiv.appendChild(checkbox);
-      checkboxDiv.appendChild(label);
-      container.appendChild(checkboxDiv);
-  });
+    checkboxDiv.appendChild(checkbox);
+    checkboxDiv.appendChild(label);
+    container.appendChild(checkboxDiv);
+});
 }
+
 
 Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
   .then(([estimateHistoryData, tasksData, eventData]) => {
 
-    const { total_dates, total_time_remaining, velocity_trend } = processEstimateHistoryData(estimateHistoryData);
-    const taskAnnotations = processTasksData(tasksData);
-    const eventAnnotations = processEventData(eventData, total_dates);
+    // EstimateHistory data
+    est_hist_data = fillEstHistData(estimateHistoryData)
 
+    // Velocity Trend
+    let maxElement = est_hist_data.reduce((max, current) => current.y > max.y ? current : max, est_hist_data[0]);
+    eh_n_days = daysUntilZero(maxElement.x, est_hist_data[est_hist_data.length-1].x, maxElement.y, est_hist_data[est_hist_data.length-1].y)
+    velocity_trend = drawLine(maxElement.y, maxElement.x, eh_n_days)
+
+    if (velocity_trend.length > 0) {
+        document.getElementById("done-by").innerText = `Done-by Estimate: ${velocity_trend[velocity_trend.length - 1].x}`;
+    } else {
+        document.getElementById("done-by").innerText = 'Done-by Estimate: N/A';
+    }
+    
+    // Date range
+    const estimateDates = estimateHistoryData.map(item => new Date(item.date)); // TODO get smallest and largest
+    const taskEndDates = tasksData.map(item => new Date(item.end_date));
+    const eventEndDates = eventData.map(item => new Date(item.end_date));
+    const velocityEndDate = velocity_trend.map(item => new Date(item.x)) // TODO get largest
+
+    const allDates = [...estimateDates, ...taskEndDates, ...eventEndDates, ...velocityEndDate];
+
+    const min = new Date(Math.min(...estimateDates));
+    const max = new Date(Math.max(...allDates));
+    const dates = generateDateRange(min, max);
+
+
+    //Annotations
+    taskAnnotations = annotate(tasksData, 'red')
+    eventAnnotations = annotate(eventData, 'yellow')
+    todayAnnotation = annotate([{'end_date' : formatDate(new Date()), 'title' : 'Today'}], color = 'blue')
+    const annotations = [...taskAnnotations, ...eventAnnotations, ...todayAnnotation];
+
+    required_trend = {}
+    
     const ctx = document.getElementById('myChart');
-    const chart = initializeChart(ctx, total_dates, total_time_remaining, velocity_trend, taskAnnotations, eventAnnotations);
+    const chart = initializeChart(ctx, dates, est_hist_data, velocity_trend, required_trend, annotations);
 
     const checkboxContainer = document.getElementById('task-checkboxes');
     createCheckboxes(checkboxContainer, tasksData, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart));
 
     const eventCheckboxContainer = document.getElementById('event-checkboxes');
     createCheckboxes(eventCheckboxContainer, eventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart));
-
   })
   .catch(error => {
     console.error('Error fetching data:', error);
