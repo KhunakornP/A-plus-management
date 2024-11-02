@@ -6,7 +6,7 @@
         <div class="card shadow-2-strong" style="border-radius: 1rem;">
           <div class="card-body p-5 text-center">
             <h3 class="mb-5">Sign in to A+ management</h3>
-              <form action="https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http://localhost:8000/api/auth/google-oauth2/callback/&prompt=consent&response_type=code&client_id=98486058115-aqjg1b4pcqobn4rb0if7pqf42jb9hlb2.apps.googleusercontent.com&scope=openid%20email%20profile&access_type=offline" method="post">
+              <form action="https://accounts.google.com/o/oauth2/v2/auth?redirect_uri={{ callback_uri }}&prompt=consent&response_type=code&client_id={{ client_id }}&scope=openid%20email%20profile&access_type=offline" method="post">
                 {% csrf_token %}
                 <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block" type="submit">Login with Google account</button>
               </form>

@@ -87,16 +87,15 @@ class GoogleLoginCallback(APIView):
                 user,
                 backend="allauth.account.auth_backends.AuthenticationBackend",
             )
-            return redirect(reverse("manager:taskboard_index"))
+            return redirect(reverse("manager:main_login"))
         except (ValueError, IndexError):
             messages.error(request, "Authentication Error: Please login again.")
-            #  change this to the login page after it is created
-            return redirect(reverse("manager:taskboard_index"))
+            return redirect(reverse("manager:main_login"))
 
 
 class GoogleLogin(SocialLoginView):
     """Social Login View for Google OAuth."""
 
     adapter_class = GoogleOAuth2IatValidationAdapter
-    callback_url = "http://localhost:8000/api/auth/google-oauth2/callback/"
+    callback_url = settings.GOOGLE_CALLBACK_URI
     client_class = OAuth2Client
