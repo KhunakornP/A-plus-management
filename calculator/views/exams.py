@@ -12,7 +12,7 @@ class ExamsViewSet(viewsets.ViewSet):
     def list(self, request) -> Response:
         """List all Exam objects, based on the query parameters.
 
-        :param request: GET Request
+        :param request: GET Request.
         :return: Response with exams data.
         """
         queryset = Exams.objects.all()

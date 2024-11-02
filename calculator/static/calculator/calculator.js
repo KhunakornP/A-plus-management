@@ -1,3 +1,5 @@
+const examFieldContainer = document.getElementById('exam-field-container')
+
 async function fetchExamFieldsJSON() {
   const tgatResponse = await fetch('/api/exams/?exam_type=TGAT');
   const tgat = await tgatResponse.json();
@@ -7,7 +9,7 @@ async function fetchExamFieldsJSON() {
 function generateExamFields(exam){
   const examField = document.createElement('div')
   examField.innerHTML = `
-  <div class="card-body" style="width: 250px">
+  <div class="card-body">
         <label for="${exam.name}">${exam.name}</label>
         <input class="form-control" aria-describedby="${exam.name}-help" id="${exam.name}" placeholder="${exam.max_score}">
         <small id="${exam.name}-help" class="form-text text-muted">สูงสุด ${exam.max_score}</small>
@@ -15,8 +17,6 @@ function generateExamFields(exam){
   `
   return examField;
 }
-
-const examFieldContainer = document.getElementById('exam-field-container')
 
 async function appendExams(exams) {
   for (const exam of exams) {
@@ -31,4 +31,4 @@ async function renderExams() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     renderExams();
-  })
+})
