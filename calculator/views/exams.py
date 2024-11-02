@@ -9,9 +9,11 @@ from calculator.models import Exams
 class ExamsViewSet(viewsets.ViewSet):
     """ViewSet for handling getting Exam information."""
 
-    def list(self, request):
-        """
-        List all Exam objects, based on the query parameters.
+    def list(self, request) -> Response:
+        """List all Exam objects, based on the query parameters.
+
+        :param request: GET Request
+        :return: Response with exams data.
         """
         queryset = Exams.objects.all()
         exam_type = request.query_params.get("exam_type")
@@ -24,4 +26,3 @@ class ExamsViewSet(viewsets.ViewSet):
             queryset = Exams.objects.filter(name__contains=exam_type)
         serializer = ExamSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
