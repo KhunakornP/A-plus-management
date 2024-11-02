@@ -3,6 +3,24 @@ const taskboardID = Number(window.location.href.split('/').slice(-3)[0]);
 const taskboardLink = document.getElementById('taskboard-link');
 taskboardLink.href = `/manager/taskboard/${taskboardID}`;
 
+async function fetchTaskJson(){
+  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`)
+  const tasks = await response.json()
+  return tasks
+}
+
+async function fetchEventJson(){
+  const response = await fetch(`/api/events/`)
+  const events = await response.json()
+  return events
+}
+
+async function fetchEstimateHistoryData() {
+  const response = await fetch(`/api/estimate_history/?taskboard=${taskboardID}`);
+  const estimate_histories = await response.json();
+  return estimate_histories;
+}
+
 // Return the number of days between d1 and d2
 function calculateDaysBetween(d1, d2) {
   const startDate = new Date(d1);
@@ -15,9 +33,9 @@ function calculateSlope(t1, t2, daysBetween) {
 }
 
 // Return a list of dates starting from startDate plus number of days
-function generateDateRange(startDate, noDays) {
+function generateDateRange(startDate, nDays) {
   const result = [];
-  for (let i = 0; i <= Math.ceil(noDays); i++) {
+  for (let i = 0; i <= Math.ceil(nDays); i++) {
     const newDate = new Date(startDate);
     newDate.setDate(startDate.getDate() + i);
     result.push(newDate.toISOString().split('T')[0]);
@@ -25,9 +43,13 @@ function generateDateRange(startDate, noDays) {
   return result;
 }
 
-// Return the list of dates starting from d1 based on t1 and t2
+// Return the list of dates from d1 to the day the trend reaches 0 based on t1 and t2.
 function daysUntilZero(d1, d2, t1, t2) {
   const daysBetween = calculateDaysBetween(d1, d2);
+  if (daysBetween === 0) {
+    const singleDayList = [new Date(d1).toISOString().split('T')[0]];
+    return singleDayList;
+  }
   const slope = calculateSlope(t1, t2, daysBetween);
   document.getElementById("slope").innerText = `Average Velocity: ${-slope.toFixed(2)} hr/day`;
   const daysToZero = t1 / -slope;
@@ -56,24 +78,6 @@ function fillTimeRemaining(data, total_dates) {
     result.push(0);
   }
   return result;
-}
-
-async function fetchTaskJson(){
-  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`)
-  const tasks = await response.json()
-  return tasks
-}
-
-async function fetchEventJson(){
-  const response = await fetch(`/api/events/`)
-  const events = await response.json()
-  return events
-}
-
-async function fetchEstimateHistoryData() {
-  const response = await fetch(`/api/estimate_history/?taskboard=${taskboardID}`);
-  const estimate_histories = await response.json();
-  return estimate_histories;
 }
 
 function processEstimateHistoryData(estimateHistoryData) {

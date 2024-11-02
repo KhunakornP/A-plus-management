@@ -7,7 +7,8 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 from typing import Optional
 from manager.models import Taskboard
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.response import Response
 
 
 def get_taskboard(taskboard_id: int) -> Optional[Taskboard]:
@@ -42,8 +43,15 @@ class EstimateHistoryViewset(viewsets.ModelViewSet):
     def get_queryset(self):
         """Return EstimateHistory objects based on taskboard id."""
         taskboard_id = self.request.query_params.get("taskboard")
-        if taskboard_id is not None:
-            return EstimateHistory.objects.filter(taskboard_id=taskboard_id).order_by(
-                "date"
-            )
-        return EstimateHistory.objects.none()
+        return EstimateHistory.objects.filter(taskboard=taskboard_id).order_by("date")
+    
+    def list(self, request):
+        """
+        List EstimateHistory objects of a certain taskboard.
+
+        :param request: The HTTP request.
+        :return: Response with tasks.
+        """
+        queryset = self.get_queryset()
+        serializer = EstimateHistorySerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
