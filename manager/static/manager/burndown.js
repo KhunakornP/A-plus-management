@@ -46,6 +46,7 @@ function formatDate(date) {
 // ret: number
 function daysUntilZero(d1, d2, t1, t2) {
   if (d1 === d2 || t1 === t2) {
+      document.getElementById("slope").innerText = `Average Velocity: N/A`;
       return 0;
   }
   const daysBetween = calculateDaysBetween(d1, d2);
@@ -193,49 +194,45 @@ data.forEach((item, index) => {
 
 Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
   .then(([estimateHistoryData, tasksData, eventData]) => {
-
-    // EstimateHistory data
-    est_hist_data = fillEstHistData(estimateHistoryData)
+    const estHistData = fillEstHistData(estimateHistoryData);
 
     // Velocity Trend
-    let maxElement = est_hist_data.reduce((max, current) => current.y > max.y ? current : max, est_hist_data[0]);
-    let eh_n_days = daysUntilZero(maxElement.x, est_hist_data[est_hist_data.length - 1].x, maxElement.y, est_hist_data[est_hist_data.length - 1].y);
+    const maxElement = estHistData.reduce((max, current) => current.y > max.y ? current : max, estHistData[0]);
+    const ehNDays = daysUntilZero(maxElement.x, estHistData[estHistData.length - 1].x, maxElement.y, estHistData[estHistData.length - 1].y);
 
-    let velocityEndDate = []
+    let velocityEndDate = [];
+    let velocityTrend = [];
 
-    let velocityTrend;
-    if (eh_n_days === 0) {
-        velocityTrend = [];
-        document.getElementById("done-by").innerText = `Done-by Estimate: N/A`;
+    if (ehNDays === 0) {
+      document.getElementById("done-by").innerText = `Done-by Estimate: N/A`;
     } else {
-        let maxDate = new Date(maxElement.x);
-        maxDate.setDate(maxDate.getDate() + eh_n_days);
-        let eh_endDate = formatDate(maxDate);
-        velocityEndDate = [new Date(eh_endDate)]
-        document.getElementById("done-by").innerText = `Done-by Estimate: ${eh_endDate}`;
-        velocityTrend = trendAnnotation(maxElement.x, eh_endDate, maxElement.y);
+      const maxDate = new Date(maxElement.x);
+      maxDate.setDate(maxDate.getDate() + ehNDays);
+      const ehEndDate = formatDate(maxDate);
+      velocityEndDate = [new Date(ehEndDate)];
+      document.getElementById("done-by").innerText = `Done-by Estimate: ${ehEndDate}`;
+      velocityTrend = trendAnnotation(maxElement.x, ehEndDate, maxElement.y);
     }
-    
+
     // Date range
-    const estimateDates = estimateHistoryData.map(item => new Date(item.date)); // TODO get smallest and largest
+    const estimateDates = estimateHistoryData.map(item => new Date(item.date));
     const taskEndDates = tasksData.map(item => new Date(item.end_date));
     const eventEndDates = eventData.map(item => new Date(item.end_date));
 
     const allDates = [...estimateDates, ...taskEndDates, ...eventEndDates, ...velocityEndDate, estimateDates[estimateDates.length - 1]];
-    const min = new Date(estimateDates[0]);
-    const max = new Date(Math.max(...allDates));
-    const dates = generateDateRange(min, max);
+    const minDate = new Date(estimateDates[0]);
+    const maxDate = new Date(Math.max(...allDates));
+    const dates = generateDateRange(minDate, maxDate);
 
-
-    //Annotations
-    taskAnnotations = lineAnnotation(tasksData, 'red')
-    eventAnnotations = lineAnnotation(eventData, 'yellow')
-    todayAnnotation = lineAnnotation([{'end_date' : formatDate(new Date()), 'title' : 'Today'}], color = 'blue')
+    // Annotations
+    const taskAnnotations = lineAnnotation(tasksData, 'red');
+    const eventAnnotations = lineAnnotation(eventData, 'yellow');
+    const todayAnnotation = lineAnnotation([{ end_date: formatDate(new Date()), title: 'Today' }], 'blue');
     const annotations = [...taskAnnotations, ...eventAnnotations, ...todayAnnotation, ...velocityTrend];
-    annotations.appendChild
-    
+
+    // Chart
     const ctx = document.getElementById('myChart');
-    const chart = initializeChart(ctx, dates, est_hist_data, annotations);
+    const chart = initializeChart(ctx, dates, estHistData, annotations);
 
     const checkboxContainer = document.getElementById('task-checkboxes');
     createCheckboxes(checkboxContainer, tasksData, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart));
