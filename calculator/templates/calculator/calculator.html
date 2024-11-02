@@ -1,15 +1,22 @@
 {% extends "base.html" %}
+{% block headcontent %}
+  <title>Taskboard</title>
+
+  {% load static %}
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
+  <script src="{% static 'calculator/calculator.js' %}" defer></script>
+{% endblock %}
 {% block content %}
 <form>
-  <div class="container">
-    <div class="row">
-      <div class="col-sm">
+  <div class="card p-2" id="exam-field-container">
+    <div class="card">
+      <div class="card-body" style="width: 250px">
         <label for="GPA">GPAX</label>
         <input class="form-control" aria-describedby="GPA-help" id="GPA" placeholder="4.00">
         <small id="GPA-help" class="form-text text-muted">สูงสุด 4.00</small>
       </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
     </div>
   </div>
+  <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 {% endblock %}
