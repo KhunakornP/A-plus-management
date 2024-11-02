@@ -1,3 +1,5 @@
+import { processAndAppend } from './utils.js';
+
 async function fetchTaskboardJSON() {
   const response = await fetch('/api/taskboards/');
   const taskboards = await response.json();
@@ -25,17 +27,11 @@ function generateTaskboardCard(taskboard) {
 
 const taskboardContainer = document.getElementById('taskboard-container');
 
-async function appendTaskboards(taskboards) {
-  for (const taskboard of taskboards) {
-    taskboardContainer.appendChild(generateTaskboardCard(taskboard));
-  }
-}
-
 async function renderTaskboards() {
   taskboardContainer.innerHTML = '';
   const taskboards = await fetchTaskboardJSON();
   if (taskboards.length !== 0) {
-    appendTaskboards(taskboards);
+    processAndAppend(taskboards, taskboardContainer, generateTaskboardCard);
   } else {
     const noTaskboardMessage =
       '<h4 class="text-white text-center">You have no taskboard</h4>';

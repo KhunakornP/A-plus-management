@@ -20,6 +20,7 @@ import {
   formatLocalISO,
   getValidDateISOString,
   getValidEstimatedTime,
+  processAndAppend,
 } from './utils.js';
 
 async function updateTask() {
@@ -41,23 +42,15 @@ async function updateTask() {
 
 function toggleOffcanvasFields(on) {
   if (on) {
-    taskOffcanvasTitle.removeAttribute('readonly');
-    taskOffcanvasTitle.setAttribute('class', 'form-control');
-    taskOffcanvasDetails.removeAttribute('readonly');
-    taskOffcanvasDetails.setAttribute('class', 'form-control');
-    taskOffcanvasEndDate.removeAttribute('readonly');
-    taskOffcanvasEndDate.setAttribute('class', 'form-control');
-    taskOffcanvasET.removeAttribute('readonly');
-    taskOffcanvasET.setAttribute('class', 'form-control');
+    for (const toggleable of document.querySelectorAll('.toggleable')) {
+      toggleable.removeAttribute('readonly');
+      toggleable.setAttribute('class', 'form-control');
+    }
   } else {
-    taskOffcanvasTitle.setAttribute('readonly', true);
-    taskOffcanvasTitle.setAttribute('class', 'form-control-plaintext');
-    taskOffcanvasDetails.setAttribute('readonly', true);
-    taskOffcanvasDetails.setAttribute('class', 'form-control-plaintext');
-    taskOffcanvasEndDate.setAttribute('readonly', true);
-    taskOffcanvasEndDate.setAttribute('class', 'form-control-plaintext');
-    taskOffcanvasET.setAttribute('readonly', true);
-    taskOffcanvasET.setAttribute('class', 'form-control-plaintext');
+    for (const toggleable of document.querySelectorAll('.toggleable')) {
+      toggleable.setAttribute('readonly', true);
+      toggleable.setAttribute('class', 'form-control-plaintext');
+    }
   }
 }
 
@@ -114,14 +107,6 @@ function generateTaskCard(task) {
   return card;
 }
 
-async function appendColumnChildren(children, column) {
-  if (column !== null) {
-    for (const child of children) {
-      column.appendChild(generateTaskCard(child));
-    }
-  }
-}
-
 async function renderColumns() {
   for (const column of columns) {
     column.innerHTML = '';
@@ -131,9 +116,21 @@ async function renderColumns() {
   const toDoTasks = tasks.filter((task) => task.status === 'TODO');
   const inProgressTasks = tasks.filter((task) => task.status === 'IN PROGRESS');
   const doneTasks = tasks.filter((task) => task.status === 'DONE');
-  appendColumnChildren(toDoTasks, document.getElementById('TODO'));
-  appendColumnChildren(inProgressTasks, document.getElementById('IN PROGRESS'));
-  appendColumnChildren(doneTasks, document.getElementById('DONE'));
+  processAndAppend(
+    toDoTasks,
+    document.getElementById('TODO'),
+    generateTaskCard
+  );
+  processAndAppend(
+    inProgressTasks,
+    document.getElementById('IN PROGRESS'),
+    generateTaskCard
+  );
+  processAndAppend(
+    doneTasks,
+    document.getElementById('DONE'),
+    generateTaskCard
+  );
 }
 
 columns.forEach((dropArea) => {

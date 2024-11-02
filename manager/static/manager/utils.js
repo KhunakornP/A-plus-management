@@ -29,4 +29,17 @@ function getValidEstimatedTime(time) {
   return Number(time);
 }
 
-export { formatLocalISO, getValidDateISOString, getValidEstimatedTime };
+async function processAndAppend(children, parent, func) {
+  if (parent !== null) {
+    for (const child of children) {
+      parent.appendChild(func(child));
+    }
+  }
+}
+
+export {
+  formatLocalISO,
+  getValidDateISOString,
+  getValidEstimatedTime,
+  processAndAppend,
+};
