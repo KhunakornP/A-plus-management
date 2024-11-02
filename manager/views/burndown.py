@@ -44,7 +44,7 @@ class EstimateHistoryViewset(viewsets.ModelViewSet):
         """Return EstimateHistory objects based on taskboard id."""
         taskboard_id = self.request.query_params.get("taskboard")
         return EstimateHistory.objects.filter(taskboard=taskboard_id).order_by("date")
-    
+
     def list(self, request):
         """
         List EstimateHistory objects of a certain taskboard.

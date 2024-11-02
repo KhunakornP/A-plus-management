@@ -1,4 +1,5 @@
 """Top-level functions used in more than 1 test file."""
+
 from manager.models import Task, Taskboard, EstimateHistory
 from django.contrib.auth.models import User
 from django.test import TestCase

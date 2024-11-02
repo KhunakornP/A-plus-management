@@ -88,6 +88,7 @@ class GoogleLoginCallback(APIView):
         )
         return redirect(reverse("manager:taskboard_index"))
 
+
 class GoogleLogin(SocialLoginView):
     """Social Login View for Google OAuth."""
 
