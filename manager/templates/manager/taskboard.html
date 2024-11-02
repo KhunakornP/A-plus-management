@@ -10,7 +10,7 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-  <h1 class="text-center md-6">{{taskboard.name}}</h1>
+  <h1 class="text-center md-6" id="tb-name"></h1>
 
   <div class="row gx-4 mt-3">
     <div class="col-lg-4 mb-4 mb-lg-0">
@@ -63,8 +63,11 @@
         <textarea readonly class="form-control-plaintext toggleable" id="task-details" rows="4" placeholder="No Details"></textarea>
       </div>
       
-      <input type="button" value="Edit" class="btn btn-sm btn-primary" id="edit-task-btn">
+      <button class="btn btn-sm btn-primary" id="edit-task-btn">Edit</button>
       <button class="btn btn-sm btn-danger" id="del-task-btn">Delete</button>
+      <button class="btn btn-sm btn-primary" id="burndown-chart">
+        Burndown Chart
+      </button>
     </div>
   </div>
 

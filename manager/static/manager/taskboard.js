@@ -94,6 +94,12 @@ function generateTaskCard(task) {
   return card;
 }
 
+async function getTaskboardName() {
+  const response = await fetch(`/api/taskboards/${taskboardID}`)
+  const tb = await response.json()
+  return tb.name
+}
+
 async function renderColumns() {
   for (const column of columns) {
     column.innerHTML = '';
@@ -120,19 +126,6 @@ async function renderColumns() {
   );
 }
 
-columns.forEach((dropArea) => {
-  dropArea.addEventListener('dragover', async (event) => {
-    event.preventDefault();
-    const afterElement = getDragAfterElement(dropArea, event.clientY);
-    const draggable = document.querySelector('.dragging');
-    if (afterElement === null) {
-      dropArea.appendChild(draggable);
-    } else {
-      dropArea.insertBefore(draggable, afterElement);
-    }
-  });
-});
-
 function getDragAfterElement(dropArea, y) {
   const draggableElements = [
     ...dropArea.querySelectorAll('.draggable:not(.dragging)'),
@@ -151,8 +144,9 @@ function getDragAfterElement(dropArea, y) {
   ).element;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   renderColumns();
+  document.getElementById('tb-name').innerHTML = await getTaskboardName()
   deleteBtn.addEventListener('click', async () => {
     await fetch(`/api/tasks/${currentTaskID}/`, {
       method: 'DELETE',
@@ -166,13 +160,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   editBtn.addEventListener('click', () => {
     const toggleables = document.querySelectorAll('.toggleable')
-    if (editBtn.value === 'Edit') {
+    if (editBtn.innerHTML === 'Edit') {
       toggleFields(toggleables, true);
-      editBtn.value = 'Done';
+      editBtn.innerHTML = 'Done';
     } else {
       toggleFields(toggleables, false);
       updateTask();
-      editBtn.value = 'Edit';
+      editBtn.innerHTML = 'Edit';
     }
   });
 
@@ -202,5 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
     taskModalET.value = '';
     taskModalStatus.selectedIndex = 0;
     taskModalDetails.value = '';
+  });
+
+  
+  columns.forEach((dropArea) => {
+    dropArea.addEventListener('dragover', async (event) => {
+      event.preventDefault();
+      const afterElement = getDragAfterElement(dropArea, event.clientY);
+      const draggable = document.querySelector('.dragging');
+      if (afterElement === null) {
+        dropArea.appendChild(draggable);
+      } else {
+        dropArea.insertBefore(draggable, afterElement);
+      }
+    });
   });
 });
