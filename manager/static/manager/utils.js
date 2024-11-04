@@ -37,7 +37,7 @@ async function processAndAppend(children, parent, func) {
   }
 }
 
-function toggleFields(toggleables, on) {
+function toggleInputFields(toggleables, on) {
   if (on) {
     for (const toggleable of toggleables) {
       toggleable.removeAttribute('readonly');
@@ -58,5 +58,5 @@ export {
   getValidDateISOString,
   getValidEstimatedTime,
   processAndAppend,
-  toggleFields
+  toggleInputFields
 };

@@ -47,6 +47,15 @@
         <label for="offcanvas-task-title" class="form-label fw-bold">Title :</label>
         <input type="text" readonly class="form-control-plaintext toggleable" id="task-title">
       </div>
+
+      <div class="mb-3">
+        <label for="offcanvas-task-title" class="form-label fw-bold">Status :</label>
+        <select disabled class="form-control" id="task-status">
+          <option value="TODO">To-Do</option>
+          <option value="IN PROGRESS">In Progress</option>
+          <option value="DONE">Done</option>
+        </select>
+      </div>
       
       <div class="mb-3">
         <h6 class="form-label fw-bold">Due Date :</h6>
@@ -65,16 +74,19 @@
       
       <button class="btn btn-sm btn-primary" id="edit-task-btn">Edit</button>
       <button class="btn btn-sm btn-danger" id="del-task-btn">Delete</button>
-      <button class="btn btn-sm btn-primary" id="burndown-chart">
-        Burndown Chart
-      </button>
     </div>
   </div>
 
+  <!-- btn btn-primary btn-sm w-100 position-fixed bottom-0 start-50 translate-middle-x -->
 
-  <button class="btn btn-primary btn-sm w-100 position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#addTask">
-    Add Task
-  </button>
+  <div class="row justify-content-center position-fixed bottom-0 start-50 translate-middle-x w-100 mb-2">
+    <button class="btn btn-primary btn-sm col-auto mx-2 p-2" data-bs-toggle="modal" data-bs-target="#addTask">
+      Add Task
+    </button>
+    <button class="btn btn-sm btn-primary col-auto mx-2 p-2" id="burndown-chart" onclick="location.href='burndown'">
+      Burndown Chart
+    </button>
+  </div>  
 
   <div class="modal fade" id="addTask" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addTaskLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -117,7 +129,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary" id="create-task-btn">Create</button>
+          <button type="submit" class="btn btn-primary" id="create-task-btn">Create</button>    
         </div>
       </div>
     </div>

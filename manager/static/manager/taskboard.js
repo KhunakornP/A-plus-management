@@ -4,10 +4,13 @@ const createTaskModal = new bootstrap.Modal('#addTask');
 const deleteBtn = document.getElementById('del-task-btn');
 const editBtn = document.getElementById('edit-task-btn');
 const createBtn = document.getElementById('create-task-btn');
+
 const taskOffcanvasTitle = document.getElementById('task-title');
 const taskOffcanvasDetails = document.getElementById('task-details');
 const taskOffcanvasEndDate = document.getElementById('task-enddate');
 const taskOffcanvasET = document.getElementById('task-et');
+const taskOffcanvasStatus = document.getElementById('task-status');
+
 const taskModalTitle = document.getElementById('modal-task-title');
 const taskModalEndDate = document.getElementById('modal-task-enddate');
 const taskModalStatus = document.getElementById('modal-task-status');
@@ -21,7 +24,7 @@ import {
   getValidDateISOString,
   getValidEstimatedTime,
   processAndAppend,
-  toggleFields
+  toggleInputFields
 } from './utils.js';
 
 async function updateTask() {
@@ -34,6 +37,7 @@ async function updateTask() {
     body: JSON.stringify({
       'title': taskOffcanvasTitle.value,
       'details': taskOffcanvasDetails.value,
+      'status': taskOffcanvasStatus.value,
       'end_date': getValidDateISOString(taskOffcanvasEndDate.value),
       'time_estimate': getValidEstimatedTime(taskOffcanvasET.value),
     }),
@@ -65,6 +69,7 @@ function generateTaskCard(task) {
     currentTaskID = task.id;
     taskOffcanvasTitle.value = `${task.title}`;
     taskOffcanvasET.value = `${task.time_estimate}`;
+    taskOffcanvasStatus.value = `${task.status}`
     taskOffcanvasEndDate.value = formatLocalISO(task.end_date);
     if (task.details !== null) {
       taskOffcanvasDetails.value = `${task.details}`;
@@ -161,12 +166,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   editBtn.addEventListener('click', () => {
     const toggleables = document.querySelectorAll('.toggleable')
     if (editBtn.innerHTML === 'Edit') {
-      toggleFields(toggleables, true);
+      toggleInputFields(toggleables, true);
+      taskOffcanvasStatus.removeAttribute('disabled')
       editBtn.innerHTML = 'Done';
     } else {
-      toggleFields(toggleables, false);
-      updateTask();
+      toggleInputFields(toggleables, false);
+      taskOffcanvasStatus.setAttribute('disabled', 'true')
       editBtn.innerHTML = 'Edit';
+      updateTask();
     }
   });
 
