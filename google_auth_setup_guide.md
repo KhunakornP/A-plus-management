@@ -50,8 +50,8 @@
 5. add a social application. fill out the following fields and save
     - Provider: Google
     - Name: A+ management (or anything you fancy really)
-    - Client id: your client id in .env
-    - Secret key: your secret in .env
+    - Client id: your CLIENT_ID in .env
+    - Secret key: your SECRET in .env
     - Sites: move `http://localhost:8000/` to chosen sites
 <img src="./Wiki-images/google-Oauth-guide/admin2.JPG" width="850"><br>
 6. find the site id of `http://localhost:8000/`
