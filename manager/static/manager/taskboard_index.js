@@ -1,3 +1,5 @@
+import { getErrorDiv } from "./utils.js";
+
 async function fetchTaskboardJSON() {
   const response = await fetch('/api/taskboards/');
   const taskboards = await response.json();
@@ -65,18 +67,50 @@ document.addEventListener('DOMContentLoaded', async () => {
   await renderTaskboards();
   const btn = document.getElementById('create-tb-btn');
   const userID = JSON.parse(document.getElementById('user_id').textContent);
+  const nameInput = document.getElementById('taskboard-title');
   btn.addEventListener('click', async () => {
-    await fetch('/api/taskboards/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': Cookies.get('csrftoken'),
-      },
-      body: JSON.stringify({
-        'name': document.getElementById('taskboard-title').value,
-        'user': userID,
-      }),
-    });
-    renderTaskboards();
+    try {
+      const response = await fetch('/api/taskboards/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': Cookies.get('csrftoken'),
+        },
+        body: JSON.stringify({
+          'name': document.getElementById('taskboard-title').value,
+          'user': userID,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Taskboard name cannot be blanked.')
+      }
+      renderTaskboards();
+      const errorText = document.getElementById('error-name');
+      if (errorText !== null) {
+        errorText.remove();
+      }
+      nameInput.classList.remove('is-invalid');
+    } catch (error) {
+      nameInput.classList.add('is-invalid');
+      let errorText = document.getElementById('error-name');
+      if (errorText === null) {
+        errorText = getErrorDiv(error.message);
+        errorText.id = 'error-name';
+        nameInput.parentNode.insertBefore(
+          errorText,
+          nameInput.nextSibling
+        );
+      }
+    }
   });
+
+  document
+    .getElementById('staticBackdrop')
+    .addEventListener('hidden.bs.modal', () => {
+      const errorText = document.getElementById('error-name');
+      if (errorText !== null) {
+        errorText.remove();
+      }
+      nameInput.classList.remove('is-invalid');
+    });
 });
