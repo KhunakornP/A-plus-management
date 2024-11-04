@@ -58,5 +58,5 @@ export {
   getValidDateISOString,
   getValidEstimatedTime,
   processAndAppend,
-  toggleInputFields
+  toggleInputFields,
 };

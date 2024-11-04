@@ -24,7 +24,7 @@ import {
   getValidDateISOString,
   getValidEstimatedTime,
   processAndAppend,
-  toggleInputFields
+  toggleInputFields,
 } from './utils.js';
 
 async function updateTask() {
@@ -69,7 +69,7 @@ function generateTaskCard(task) {
     currentTaskID = task.id;
     taskOffcanvasTitle.value = `${task.title}`;
     taskOffcanvasET.value = `${task.time_estimate}`;
-    taskOffcanvasStatus.value = `${task.status}`
+    taskOffcanvasStatus.value = `${task.status}`;
     taskOffcanvasEndDate.value = formatLocalISO(task.end_date);
     if (task.details !== null) {
       taskOffcanvasDetails.value = `${task.details}`;
@@ -100,9 +100,9 @@ function generateTaskCard(task) {
 }
 
 async function getTaskboardName() {
-  const response = await fetch(`/api/taskboards/${taskboardID}`)
-  const tb = await response.json()
-  return tb.name
+  const response = await fetch(`/api/taskboards/${taskboardID}`);
+  const tb = await response.json();
+  return tb.name;
 }
 
 async function renderColumns() {
@@ -151,7 +151,7 @@ function getDragAfterElement(dropArea, y) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   renderColumns();
-  document.getElementById('tb-name').innerHTML = await getTaskboardName()
+  document.getElementById('tb-name').innerHTML = await getTaskboardName();
   deleteBtn.addEventListener('click', async () => {
     await fetch(`/api/tasks/${currentTaskID}/`, {
       method: 'DELETE',
@@ -164,14 +164,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   editBtn.addEventListener('click', () => {
-    const toggleables = document.querySelectorAll('.toggleable')
+    const toggleables = document.querySelectorAll('.toggleable');
     if (editBtn.innerHTML === 'Edit') {
       toggleInputFields(toggleables, true);
-      taskOffcanvasStatus.removeAttribute('disabled')
+      taskOffcanvasStatus.removeAttribute('disabled');
       editBtn.innerHTML = 'Done';
     } else {
       toggleInputFields(toggleables, false);
-      taskOffcanvasStatus.setAttribute('disabled', 'true')
+      taskOffcanvasStatus.setAttribute('disabled', 'true');
       editBtn.innerHTML = 'Edit';
       updateTask();
     }
@@ -205,7 +205,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     taskModalDetails.value = '';
   });
 
-  
   columns.forEach((dropArea) => {
     dropArea.addEventListener('dragover', async (event) => {
       event.preventDefault();

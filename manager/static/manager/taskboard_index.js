@@ -59,6 +59,7 @@ async function bindDeleteButtons() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await renderTaskboards();
+  const modal = new bootstrap.Modal('#staticBackdrop');
   const btn = document.getElementById('create-tb-btn');
   const userID = JSON.parse(document.getElementById('user_id').textContent);
   btn.addEventListener('click', async () => {
@@ -73,6 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         'user': userID,
       }),
     });
+    modal.hide();
     renderTaskboards();
   });
 });
