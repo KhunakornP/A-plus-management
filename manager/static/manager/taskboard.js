@@ -65,7 +65,10 @@ function generateTaskCard(task) {
 
   const innerCard = document.createElement('div');
   innerCard.classList.add('my-0', 'py-0', 'link-light', 'task-card');
-  innerCard.innerHTML = `<u>${task.title}</u>`;
+  innerCard.innerHTML = `
+  <u>${task.title}</u><br>
+  Due: ${formatLocalISO(task.end_date)}
+  `;
   card.appendChild(innerCard);
   bindClickCard(innerCard, task);
   bindDragCard(card, task);
