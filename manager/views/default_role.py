@@ -45,6 +45,15 @@ class UserSetupView(TemplateView):
             return redirect(reverse("manager:taskboard_index"))
         return super().get(request, *args, **kwargs)
 
+    def post(self, request, *args, **kwargs):
+        """
+        Set up the user's account information based on the given fields.
+        """
+        # check if user is logged in
+        if not self.request.user.is_authenticated:
+            return redirect(reverse("manager:main_login"))
+        return redirect(reverse('manager:user_setup'))
+
 
 @receiver(post_save, sender=User)
 def create_default_info_on_user_creation(sender, instance, created, **kwargs):
