@@ -66,27 +66,30 @@ function generateTaskCard(task) {
   const innerCard = document.createElement('div');
   innerCard.classList.add('my-0', 'py-0', 'link-light', 'task-card');
   innerCard.innerHTML = `<u>${task.title}</u>`;
-  innerCard.addEventListener('click', () => {
-    offcanvas.show();
-    currentTaskID = task.id;
-    taskOffcanvasTitle.value = `${task.title}`;
-    taskOffcanvasET.value = `${task.time_estimate}`;
-    taskOffcanvasStatus.value = `${task.status}`;
-    taskOffcanvasEndDate.value = formatLocalISO(task.end_date);
-    if (task.details !== null) {
-      taskOffcanvasDetails.value = `${task.details}`;
-    } else {
-      taskOffcanvasDetails.value = '';
-    }
-  });
   card.appendChild(innerCard);
-  bindCard(card, task);
+  bindClickCard(innerCard, task);
+  bindDragCard(card, task);
   colorCard(card, task);
   return card;
 }
 
+function bindClickCard(innerCard, task) {
+  innerCard.addEventListener('click', () => {
+    offcanvas.show();
+    currentTaskID = task.id;
+    taskOffcanvasTitle.value = task.title;
+    taskOffcanvasET.value = task.time_estimate;
+    taskOffcanvasStatus.value = innerCard.parentNode.parentNode.id;
+    taskOffcanvasEndDate.value = formatLocalISO(task.end_date);
+    if (task.details !== null) {
+      taskOffcanvasDetails.value = task.details;
+    } else {
+      taskOffcanvasDetails.value = '';
+    }
+  });
+}
+
 function colorCard(card, task) {
-  console.log(task.end_date);
   const taskText = card.querySelector('u');
   if (taskNearDueDate(task.end_date)) {
     card.classList.remove('border-white');
@@ -99,7 +102,7 @@ function colorCard(card, task) {
   }
 }
 
-function bindCard(card, task) {
+function bindDragCard(card, task) {
   card.addEventListener('dragstart', () => {
     currentTaskID = task.id;
     card.classList.add('dragging');
