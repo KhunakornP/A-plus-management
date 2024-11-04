@@ -1,7 +1,10 @@
+const MinuteToMillisecond = 60 * 1000;
+const MillisecondToDay = 1 / (1000 * 60 * 60 * 24);
+
 function formatLocalISO(dateUTC) {
   // formats UTC time to local time
   const dateTime = new Date(dateUTC);
-  const timeZoneOffSet = dateTime.getTimezoneOffset() * 60 * 1000;
+  const timeZoneOffSet = dateTime.getTimezoneOffset() * MinuteToMillisecond;
   let dateTimeLocal = dateTime - timeZoneOffSet;
   dateTimeLocal = new Date(dateTimeLocal);
   let iso = dateTimeLocal.toISOString();
@@ -20,6 +23,29 @@ function getValidDateISOString(dateLocalStr) {
   defaultDate.setHours(0, 0, 0, 0);
   defaultDate.setDate(defaultDate.getDate() + 1);
   return defaultDate.toISOString();
+}
+
+function getTimeDiff(dateStr) {
+  const dueDate = new Date(formatLocalISO(dateStr));
+  const today = new Date();
+  const timeDiff = (dueDate - today) * MillisecondToDay;
+  return timeDiff;
+}
+
+function taskNearDueDate(dateStr) {
+  const timeDiff = getTimeDiff(dateStr);
+  if (0 < timeDiff && timeDiff <= 3) {
+    return true;
+  }
+  return false;
+}
+
+function taskPassedDueDate(dateStr) {
+  const timeDiff = getTimeDiff(dateStr);
+  if (0 >= timeDiff) {
+    return true;
+  }
+  return false;
 }
 
 function getValidEstimatedTime(time) {
@@ -59,4 +85,6 @@ export {
   getValidEstimatedTime,
   processAndAppend,
   toggleInputFields,
+  taskNearDueDate,
+  taskPassedDueDate,
 };

@@ -25,6 +25,8 @@ import {
   getValidEstimatedTime,
   processAndAppend,
   toggleInputFields,
+  taskNearDueDate,
+  taskPassedDueDate,
 } from './utils.js';
 
 async function updateTask() {
@@ -78,6 +80,26 @@ function generateTaskCard(task) {
     }
   });
   card.appendChild(innerCard);
+  bindCard(card, task);
+  colorCard(card, task);
+  return card;
+}
+
+function colorCard(card, task) {
+  console.log(task.end_date);
+  const taskText = card.querySelector('u');
+  if (taskNearDueDate(task.end_date)) {
+    card.classList.remove('border-white');
+    card.classList.add('border-warning');
+    taskText.classList.add('text-warning');
+  } else if (taskPassedDueDate(task.end_date)) {
+    card.classList.remove('border-white');
+    card.classList.add('border-danger');
+    taskText.classList.add('text-danger');
+  }
+}
+
+function bindCard(card, task) {
   card.addEventListener('dragstart', () => {
     currentTaskID = task.id;
     card.classList.add('dragging');
@@ -96,7 +118,6 @@ function generateTaskCard(task) {
       }),
     });
   });
-  return card;
 }
 
 async function getTaskboardName() {
