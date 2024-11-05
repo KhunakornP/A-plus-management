@@ -1,4 +1,4 @@
-import { getErrorDiv } from "./utils.js";
+import { getErrorDiv, insertErrorDiv, removeErrorDivs } from "./utils.js";
 
 async function fetchTaskboardJSON() {
   const response = await fetch('/api/taskboards/');
@@ -85,32 +85,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error('Taskboard name cannot be blanked.')
       }
       renderTaskboards();
-      const errorText = document.getElementById('error-name');
-      if (errorText !== null) {
-        errorText.remove();
-      }
+      removeErrorDivs();
       nameInput.classList.remove('is-invalid');
     } catch (error) {
       nameInput.classList.add('is-invalid');
-      let errorText = document.getElementById('error-name');
-      if (errorText === null) {
-        errorText = getErrorDiv(error.message);
-        errorText.id = 'error-name';
-        nameInput.parentNode.insertBefore(
-          errorText,
-          nameInput.nextSibling
-        );
-      }
+      const errorText = getErrorDiv(error.message, 'error-name');
+      insertErrorDiv(nameInput, errorText);
     }
   });
 
   document
     .getElementById('staticBackdrop')
     .addEventListener('hidden.bs.modal', () => {
-      const errorText = document.getElementById('error-name');
-      if (errorText !== null) {
-        errorText.remove();
-      }
+      removeErrorDivs();
       nameInput.classList.remove('is-invalid');
     });
 });

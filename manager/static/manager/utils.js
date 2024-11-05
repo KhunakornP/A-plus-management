@@ -29,11 +29,32 @@ function getValidEstimatedTime(time) {
   return Number(time);
 }
 
-function getErrorDiv(message) {
-  const errorText = document.createElement('div');
-  errorText.setAttribute('class', 'text-center text-danger');
-  errorText.innerHTML = `<small>${message}</small>`;
-  return errorText;
+function getErrorDiv(message, id) {
+  let errorDiv = document.getElementById(id);
+  if (errorDiv === null) {
+    errorDiv = document.createElement('div');
+    errorDiv.setAttribute('class', 'text-center text-danger error');
+    errorDiv.innerHTML = `<small>${message}</small>`;
+    errorDiv.id = id;
+  }
+  return errorDiv;
+}
+
+function insertErrorDiv(inputField, errorDiv) {
+  const div = document.getElementById(errorDiv.id);
+  if (div === null) {
+    inputField.parentNode.insertBefore(
+      errorDiv,
+      inputField.nextSibling
+    )
+  }
+}
+
+function removeErrorDivs() {
+  const errorDivs = document.querySelectorAll('.error');
+  errorDivs.forEach((div) => {
+    div.remove();
+  })
 }
 
 export {
@@ -41,4 +62,6 @@ export {
   getValidDateISOString,
   getValidEstimatedTime,
   getErrorDiv,
+  insertErrorDiv,
+  removeErrorDivs
 };

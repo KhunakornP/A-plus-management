@@ -21,6 +21,8 @@ import {
   getValidDateISOString,
   getValidEstimatedTime,
   getErrorDiv,
+  insertErrorDiv,
+  removeErrorDivs
 } from './utils.js';
 
 async function updateTask() {
@@ -43,22 +45,12 @@ async function updateTask() {
     }
     renderColumns();
     toggleOffcanvasFields(false);
-    const errorText = document.getElementById('error-title-update');
-    if (errorText !== null) {
-      errorText.remove();
-    }
+    removeErrorDivs();
     taskOffcanvasTitle.classList.remove('is-invalid');
   } catch (error) {
     taskOffcanvasTitle.classList.add('is-invalid');
-    let errorText = document.getElementById('error-title-update');
-    if (errorText === null) {
-      errorText = getErrorDiv(error.message);
-      errorText.id = 'error-title-update';
-      taskOffcanvasTitle.parentNode.insertBefore(
-        errorText,
-        taskOffcanvasTitle.nextSibling
-      );
-    }
+    const errorText = getErrorDiv(error.message, 'error-title-update');
+    insertErrorDiv(taskOffcanvasTitle, errorText);
   }
 }
 
@@ -237,15 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
       createTaskModal.hide();
     } catch (error) {
       taskModalTitle.classList.add('is-invalid');
-      let errorText = document.getElementById('error-title-create');
-      if (errorText === null) {
-        errorText = getErrorDiv(error.message);
-        errorText.id = 'error-title-create';
-        taskModalTitle.parentNode.insertBefore(
-          errorText,
-          taskModalTitle.nextSibling
-        );
-      }
+      const errorText = getErrorDiv(error.message, 'error-title-create');
+      insertErrorDiv(taskModalTitle, errorText)
     }
   });
 
@@ -255,10 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     taskModalET.value = '';
     taskModalStatus.selectedIndex = 0;
     taskModalDetails.value = '';
-    const errorText = document.getElementById('error-title-create');
-    if (errorText !== null) {
-      errorText.remove();
-    }
+    removeErrorDivs();
     taskModalTitle.classList.remove('is-invalid');
   });
 
@@ -266,10 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .getElementById('task-offcanvas')
     .addEventListener('hidden.bs.offcanvas', () => {
       toggleOffcanvasFields(false);
-      const errorText = document.getElementById('error-title-update');
-      if (errorText !== null) {
-        errorText.remove();
-      }
+      removeErrorDivs();
       taskOffcanvasTitle.classList.remove('is-invalid');
     });
 });
