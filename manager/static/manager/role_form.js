@@ -12,22 +12,22 @@ $('.btnPrevious').click(function() {
 function setStudentUser() {
     document.getElementById('type').value = 'student';
     document.getElementById('c2').style.border='5px solid blue'
-    document.getElementById('c1').style.border='initial'
+    document.getElementById('c1').style.border='1px solid rgba(0, 0, 0, 0.175)'
 }
 function setParentUser() {
     document.getElementById('type').value = 'parent';
     document.getElementById('c1').style.border='5px solid blue'
-    document.getElementById('c2').style.border='initial'
+    document.getElementById('c2').style.border='1px solid rgba(0, 0, 0, 0.175)'
 }
 function setExamineeStatus() {
     document.getElementById('exam').value = true;
     document.getElementById('c3').style.border='5px solid blue'
-    document.getElementById('c4').style.border='initial'
+    document.getElementById('c4').style.border='1px solid rgba(0, 0, 0, 0.175)'
 }
 function setNotExamineeStatus() {
     document.getElementById('exam').value = false;
     document.getElementById('c4').style.border='5px solid blue'
-    document.getElementById('c3').style.border='initial'
+    document.getElementById('c3').style.border='1px solid rgba(0, 0, 0, 0.175)'
 }
 function validateForm(event) {
     if (document.getElementById('type').value === '') {
