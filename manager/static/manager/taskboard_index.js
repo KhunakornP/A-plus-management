@@ -1,4 +1,4 @@
-import { getErrorDiv, insertErrorDiv, removeErrorDivs } from "./utils.js";
+import { getErrorDiv, insertErrorDiv, removeErrorDivs } from './utils.js';
 
 async function fetchTaskboardJSON() {
   const response = await fetch('/api/taskboards/');
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }),
       });
       if (!response.ok) {
-        throw new Error('Taskboard name cannot be blanked.')
+        throw new Error('Taskboard name cannot be blanked.');
       }
       renderTaskboards();
       removeErrorDivs();

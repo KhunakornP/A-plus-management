@@ -22,7 +22,7 @@ import {
   getValidEstimatedTime,
   getErrorDiv,
   insertErrorDiv,
-  removeErrorDivs
+  removeErrorDivs,
 } from './utils.js';
 
 async function updateTask() {
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
       taskModalTitle.classList.add('is-invalid');
       const errorText = getErrorDiv(error.message, 'error-title-create');
-      insertErrorDiv(taskModalTitle, errorText)
+      insertErrorDiv(taskModalTitle, errorText);
     }
   });
 

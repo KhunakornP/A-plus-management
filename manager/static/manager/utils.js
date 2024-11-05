@@ -43,10 +43,7 @@ function getErrorDiv(message, id) {
 function insertErrorDiv(inputField, errorDiv) {
   const div = document.getElementById(errorDiv.id);
   if (div === null) {
-    inputField.parentNode.insertBefore(
-      errorDiv,
-      inputField.nextSibling
-    )
+    inputField.parentNode.insertBefore(errorDiv, inputField.nextSibling);
   }
 }
 
@@ -54,7 +51,7 @@ function removeErrorDivs() {
   const errorDivs = document.querySelectorAll('.error');
   errorDivs.forEach((div) => {
     div.remove();
-  })
+  });
 }
 
 export {
@@ -63,5 +60,5 @@ export {
   getValidEstimatedTime,
   getErrorDiv,
   insertErrorDiv,
-  removeErrorDivs
+  removeErrorDivs,
 };

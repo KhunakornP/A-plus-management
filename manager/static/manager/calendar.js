@@ -17,7 +17,12 @@ const deleteButton = document.getElementById('deleteButton');
 let currentEventID = 0;
 let calendar;
 
-import { formatLocalISO, getErrorDiv, insertErrorDiv, removeErrorDivs } from './utils.js';
+import {
+  formatLocalISO,
+  getErrorDiv,
+  insertErrorDiv,
+  removeErrorDivs,
+} from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const calendarElement = document.getElementById('calendar');
@@ -108,16 +113,22 @@ document.addEventListener('DOMContentLoaded', () => {
     newEnd.classList.remove('is-invalid');
     try {
       if (newTitle.value === '') {
-        errorMessages.push({name: 'Title', message: 'Event title cannot be blanked.'})
+        errorMessages.push({
+          name: 'Title',
+          message: 'Event title cannot be blanked.',
+        });
       }
       if (newStart.value === '') {
-        errorMessages.push({name: 'Start', message: 'Event start date cannot be blanked.'})
+        errorMessages.push({ name: 'Start', message: 'Invalid start date.' });
       }
       if (newEnd.value === '') {
-        errorMessages.push({name: 'End', message: 'Event end date cannot be blanked.'})
+        errorMessages.push({ name: 'End', message: 'Invalid end date.' });
       }
       if (endDate < startDate) {
-        errorMessages.push({name: 'Date', message: 'Event end date must be after start date.'})
+        errorMessages.push({
+          name: 'Date',
+          message: 'Event end date must be after start date.',
+        });
       }
       if (errorMessages.length > 0) {
         throw new Error();
@@ -142,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
       newDetails.value = '';
       calendar.getEventSourceById(420).refetch();
       addEventModal.hide();
-    } catch (error) {
+    } catch {
       errorMessages.forEach((e) => {
         if (e.name === 'Title') {
           newTitle.classList.add('is-invalid');
@@ -152,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.name === 'Start') {
           newStart.classList.add('is-invalid');
           const errorStartText = getErrorDiv(e.message, 'error-start-add');
-          insertErrorDiv(newStart, errorStartText)
+          insertErrorDiv(newStart, errorStartText);
         }
         if (e.name === 'End') {
           newEnd.classList.add('is-invalid');
@@ -164,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const errorDateText = getErrorDiv(e.message, 'error-date-add');
           insertErrorDiv(newEnd, errorDateText);
         }
-      })
+      });
     }
   });
 
@@ -176,18 +187,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('eventDetailsModal').addEventListener('hide.bs.modal', () => {
-    toggleEventInput(false);
-    eventTitle.classList.remove('is-invalid');
-    removeErrorDivs();
-  });
+  document
+    .getElementById('eventDetailsModal')
+    .addEventListener('hide.bs.modal', () => {
+      toggleEventInput(false);
+      eventTitle.classList.remove('is-invalid');
+      removeErrorDivs();
+    });
 
-  document.getElementById('addEventModal').addEventListener('hide.bs.modal', () => {
-    newTitle.classList.remove('is-invalid');
-    newStart.classList.remove('is-invalid');
-    newEnd.classList.remove('is-invalid');
-    removeErrorDivs();
-  });
+  document
+    .getElementById('addEventModal')
+    .addEventListener('hide.bs.modal', () => {
+      newTitle.classList.remove('is-invalid');
+      newStart.classList.remove('is-invalid');
+      newEnd.classList.remove('is-invalid');
+      removeErrorDivs();
+    });
 
   deleteButton.addEventListener('click', async () => {
     await fetch(`/api/events/${currentEventID}/`, {
@@ -214,16 +229,22 @@ async function updateEvent() {
   eventEnd.classList.remove('is-invalid');
   try {
     if (eventTitle.value === '') {
-      errorMessages.push({name: 'Title', message: 'Event title cannot be blanked.'})
+      errorMessages.push({
+        name: 'Title',
+        message: 'Event title cannot be blanked.',
+      });
     }
     if (eventStart.value === '') {
-      errorMessages.push({name: 'Start', message: 'Event start date cannot be blanked.'})
+      errorMessages.push({ name: 'Start', message: 'Invalid start date.' });
     }
     if (eventEnd.value === '') {
-      errorMessages.push({name: 'End', message: 'Event end date cannot be blanked.'})
+      errorMessages.push({ name: 'End', message: 'Invalid end date.' });
     }
     if (endDate < startDate) {
-      errorMessages.push({name: 'Date', message: 'Event end date must be after start date.'})
+      errorMessages.push({
+        name: 'Date',
+        message: 'Event end date must be after start date.',
+      });
     }
     if (errorMessages.length > 0) {
       throw new Error();
@@ -240,11 +261,11 @@ async function updateEvent() {
         'end': endDate.toISOString(),
         'details': eventDetails.value,
       }),
-    })
+    });
     calendar.getEventSourceById(420).refetch();
     eventModalTitle.innerHTML = eventTitle.value;
     toggleEventInput(false);
-  } catch (error) {
+  } catch {
     errorMessages.forEach((e) => {
       if (e.name === 'Title') {
         eventTitle.classList.add('is-invalid');
@@ -254,7 +275,7 @@ async function updateEvent() {
       if (e.name === 'Start') {
         eventStart.classList.add('is-invalid');
         const errorStartText = getErrorDiv(e.message, 'error-start-update');
-        insertErrorDiv(eventStart, errorStartText)
+        insertErrorDiv(eventStart, errorStartText);
       }
       if (e.name === 'End') {
         eventEnd.classList.add('is-invalid');
@@ -266,7 +287,7 @@ async function updateEvent() {
         const errorDateText = getErrorDiv(e.message, 'error-date-update');
         insertErrorDiv(eventEnd, errorDateText);
       }
-    })
+    });
   }
 }
 
