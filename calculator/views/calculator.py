@@ -1,4 +1,5 @@
 """An API View for A-Level Calculator page."""
+
 from django.views import generic
 from calculator.models import University, Faculty, Major
 from rest_framework.views import APIView
@@ -49,3 +50,15 @@ class CalculatorView(generic.TemplateView):
     """A view that displays the calculator."""
 
     template_name = "calculator/calculator.html"
+
+
+class MajorView(generic.TemplateView):
+    """A view that displays the major selection page of the calculator."""
+
+    template_name = "calculator/major.html"
+
+
+class ScoreView(generic.TemplateView):
+    """A view that displays the score of the calculation."""
+
+    template_name = "calculator/score.html"
