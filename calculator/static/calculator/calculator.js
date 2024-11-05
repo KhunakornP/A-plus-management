@@ -1,9 +1,20 @@
-const examFieldContainer = document.getElementById('exam-field-container')
+const TContainer = document.getElementById('tgat-tpat')
+const AContainer = document.getElementById('a-level')
+const OContainer = document.getElementById('other-exams')
 
-async function fetchExamFieldsJSON() {
-  const tgatResponse = await fetch('/api/exams/?exam_type=TGAT');
-  const tgat = await tgatResponse.json();
-  return tgat;
+
+function processAndAppend(children, parent, func) {
+  if (parent !== null) {
+    for (const child of children) {
+      parent.appendChild(func(child));
+    }
+  }
+}
+
+async function fetchExamFieldsJSON(examType) {
+  const response = await fetch(`/api/exams/?exam_type=${examType}`);
+  const exams = await response.json();
+  return exams;
 }
 
 function generateExamFields(exam){
@@ -11,23 +22,25 @@ function generateExamFields(exam){
   examField.innerHTML = `
   <div class="card-body">
         <label for="${exam.name}">${exam.name}</label>
-        <input class="form-control" aria-describedby="${exam.name}-help" id="${exam.name}" placeholder="${exam.max_score}">
+        <input class="form-control exam-field" id="${exam.name}" placeholder="${exam.max_score}">
         <small id="${exam.name}-help" class="form-text text-muted">สูงสุด ${exam.max_score}</small>
       </div>
   `
   return examField;
 }
 
-async function appendExams(exams) {
-  for (const exam of exams) {
-    examFieldContainer.appendChild(generateExamFields(exam));
-  }
+async function renderExams() {
+  const tgat = await fetchExamFieldsJSON('TGAT');
+  const tpat = await fetchExamFieldsJSON('TPAT');
+  const aLevels = await fetchExamFieldsJSON('A-Level');
+  const others = await fetchExamFieldsJSON('Other');
+  processAndAppend(tgat, TContainer, generateExamFields);
+  processAndAppend(tpat, TContainer, generateExamFields);
+  processAndAppend(aLevels, AContainer, generateExamFields);
+  processAndAppend(others, OContainer, generateExamFields);
 }
 
-async function renderExams() {
-  const exams = await fetchExamFieldsJSON();
-  appendExams(exams);
-}
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     renderExams();
