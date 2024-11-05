@@ -22,14 +22,14 @@
               <div class="card-body">
                 <img src="..." class="card-img-top" alt="parent img">
                 <h5 class="card-title">I am a parent</h5>
-                <a href="#" class="hidden-link stretched-link" id="parent">Continue</a>
+                <a href="#parent_selected" class="hidden-link stretched-link" id="parent">Continue</a>
               </div>
             </div>
             <div class="card" style="width: 18rem;" id="c2">
               <div class="card-body">
                 <img src="..." class="card-img-top" alt="student img">
                 <h5 class="card-title">I am a student</h5>
-                <a href="#" class="hidden-link stretched-link" id="student">Continue</a>
+                <a href="#student_selected" class="hidden-link stretched-link" id="student">Continue</a>
               </div>
             </div>
             <a class="btn btn-primary btnNext">Next</a>
@@ -50,22 +50,22 @@
               <div class="card-body">
                 <img src="..." class="card-img-top" alt="A level img">
                 <h5 class="card-title">Yes, I am taking the A Levels.</h5>
-                <a href="#" class="hidden-link stretched-link" id="a_level">Continue</a>
+                <a href="#examinee" class="hidden-link stretched-link" id="a_level">Continue</a>
               </div>
             </div>
             <div class="card" style="width: 18rem;" id="c4">
               <div class="card-body">
                 <img src="..." class="card-img-top" alt="A level img">
                 <h5 class="card-title">No, I am not</h5>
-                <a href="#" class="hidden-link stretched-link" id="not_a_level">Continue</a>
+                <a href="#not_examinee" class="hidden-link stretched-link" id="not_a_level">Continue</a>
               </div>
             </div>
             <a class="btn btn-primary btnPrevious">Back</a>
-            <form action="{% url 'manager:user_setup' %}" method="post">
+            <form action="{% url 'manager:user_setup' %}" onsubmit="validateForm(event)" method="post">
               {% csrf_token %}
               <input type="hidden" id="type" name="type" value="">
               <input type="hidden" id="exam" name="exam" value="">
-              <button type="submit" class="btn btn-primary">Confirm</button>
+              <button type="submit" class="btn btn-primary" id="submit">Confirm</button>
             </form>
           </div>
         </div>

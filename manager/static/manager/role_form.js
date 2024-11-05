@@ -9,18 +9,36 @@ $('.btnPrevious').click(function() {
   const prevTab = new bootstrap.Tab(prevTabLinkEl);
   prevTab.show();
 });
-function setUserRole(role) {
-    document.getElementById('type').value = role;
+function setStudentUser() {
+    document.getElementById('type').value = 'student';
+    document.getElementById('c2').style.border='5px solid blue'
+    document.getElementById('c1').style.border='initial'
+}
+function setParentUser() {
+    document.getElementById('type').value = 'parent';
+    document.getElementById('c1').style.border='5px solid blue'
+    document.getElementById('c2').style.border='initial'
+}
+function setExamineeStatus() {
+    document.getElementById('exam').value = true;
+    document.getElementById('c3').style.border='5px solid blue'
+    document.getElementById('c4').style.border='initial'
+}
+function setNotExamineeStatus() {
+    document.getElementById('exam').value = false;
+    document.getElementById('c4').style.border='5px solid blue'
+    document.getElementById('c3').style.border='initial'
+}
+function validateForm(event) {
+    if (document.getElementById('type').value === '') {
+    event.preventDefault()} if (document.getElementById('type').value === 'student' &&
+    document.getElementById('exam').value === '') {
+    event.preventDefault()}
 }
 
-function setExamineeStatus(status) {
-    document.getElementById('exam').value = status;
-}
-document.addEventListener('DOMContentLoaded', init, false)
-
-function init(){
-document.getElementById('student').addEventListener("click", setUserRole('student'));
-document.getElementById('parent').addEventListener("click", setUserRole('parent'));
-document.getElementById('a_level').addEventListener("click", setExamineeStatus(true));
-document.getElementById('not_a_level').addEventListener("click", setExamineeStatus(false));
-}
+document.addEventListener("DOMContentLoaded", function(event) {
+    document.getElementById('student').addEventListener("click", setStudentUser)
+    document.getElementById('parent').addEventListener("click", setParentUser);
+    document.getElementById('a_level').addEventListener("click", setExamineeStatus);
+    document.getElementById('not_a_level').addEventListener("click", setNotExamineeStatus);
+});
