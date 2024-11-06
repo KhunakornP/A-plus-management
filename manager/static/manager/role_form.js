@@ -39,7 +39,7 @@ function validateForm(event) {
     event.preventDefault()}
 }
 
-document.addEventListener("DOMContentLoaded", function(event) {
+document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('student').addEventListener("click", setStudentUser)
     document.getElementById('parent').addEventListener("click", setParentUser);
     document.getElementById('a_level').addEventListener("click", setExamineeStatus);
