@@ -1,14 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
 {% if child_list %}
+{% load index %}
 <h3>Your children</h3>
 {% for child in child_list %}
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">{{ child.displayed_name }}</h5>
+    <p>Task statistics</p>
+    <table>
+      <tr>
+        <th>Status</th>
+        <th>Count</th>
+      </tr>
+      <tr>
+        <td>Due today</td>
+        <td align="right">{{ today|index:forloop.counter0 }}</td>
+      </tr>
+      <tr>
+        <td>Late</td>
+        <td align="right">{{ late|index:forloop.counter0 }}</td>
+      </tr>
+      <tr>
+        <td>Finished</td>
+        <td align="right">{{ fin|index:forloop.counter0 }}</td>
+      </tr>
+    </table>
     <a href="{% url 'manager:user_tb_index' child.user.id %}" class="card-link">Taskboards</a>
     <a href="#" class="card-link">Burndown charts</a>
-    <a href="#" class="card-link">Summary</a>
   </div>
 </div>
 {% endfor %}
