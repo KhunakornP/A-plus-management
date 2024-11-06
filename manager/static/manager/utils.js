@@ -1,10 +1,10 @@
-const MinuteToMillisecond = 60 * 1000;
-const MillisecondToDay = 1 / (1000 * 60 * 60 * 24);
+const MINUTE_TO_MILLISECOND = 60 * 1000;
+const MILLISECOND_TO_DAY = 1 / (1000 * 60 * 60 * 24);
 
 function formatLocalISO(dateUTC) {
   // formats UTC time to local time
   const dateTime = new Date(dateUTC);
-  const timeZoneOffSet = dateTime.getTimezoneOffset() * MinuteToMillisecond;
+  const timeZoneOffSet = dateTime.getTimezoneOffset() * MINUTE_TO_MILLISECOND;
   let dateTimeLocal = dateTime - timeZoneOffSet;
   dateTimeLocal = new Date(dateTimeLocal);
   let iso = dateTimeLocal.toISOString();
@@ -28,7 +28,7 @@ function getValidDateISOString(dateLocalStr) {
 function getTimeDiff(dateStr) {
   const dueDate = new Date(formatLocalISO(dateStr));
   const today = new Date();
-  const timeDiff = (dueDate - today) * MillisecondToDay;
+  const timeDiff = (dueDate - today) * MILLISECOND_TO_DAY;
   return timeDiff;
 }
 

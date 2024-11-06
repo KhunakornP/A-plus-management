@@ -195,10 +195,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (editBtn.innerHTML === 'Edit') {
       toggleInputFields(toggleables, true);
       taskOffcanvasStatus.removeAttribute('disabled');
+      taskOffcanvasStatus.classList.remove('form-control-plaintext');
+      taskOffcanvasStatus.classList.add('form-control');
       editBtn.innerHTML = 'Done';
     } else {
       toggleInputFields(toggleables, false);
       taskOffcanvasStatus.setAttribute('disabled', 'true');
+      taskOffcanvasStatus.classList.remove('form-control');
+      taskOffcanvasStatus.classList.add('form-control-plaintext');
       editBtn.innerHTML = 'Edit';
       updateTask();
     }
