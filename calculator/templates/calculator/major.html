@@ -7,8 +7,8 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <h2 class="pt-3 text-center rounded">Step 2/3: Select your Major</h2>
+<div class="container-fluid py-4 px-3">
+  <h2 class="text-center rounded">Step 2/3: Select your Major</h2>
   <h5 class="text-center rounded">Or input score weights manually</h5>
   <div class="row justify-content-between my-3">
     <select name="test" class="col form-control mx-2" id="university"></select>
@@ -21,24 +21,33 @@
   </div>
 
   <div class="row gx-4 mt-3">
-    <div class="col-lg-4 mb-4 mb-lg-0 card" id="tgat-tpat">
-      <h4 class="pt-3 text-center rounded">TGAT, TPAT and GPA</h4>
-      <div class="card-body">
-        <label for="GPA">GPAX</label>
-        <input class="form-control" aria-describedby="GPA-help" id="GPA" placeholder="Percentage (0-100)">
-        <small id="GPA-help" class="form-text text-muted">Placeholding</small>
+  
+    <div class="col-lg-4 mb-4 mb-lg-0">
+      <div class="p-4 rounded card" style="height: 50vh;">
+        <h4 class="pt-3 text-center rounded">TGAT, TPAT and GPA</h4>
+        <div id="tgat-tpat" class="overflow-y-auto">
+          <div class="card-body">
+            <label for="GPA">GPAX</label>
+            <input class="form-control" aria-describedby="GPA-help" id="GPA" placeholder="Percentage (0-100)">
+            <small id="GPA-help" class="form-text text-muted">Placeholding</small>
+          </div>
+          </div>
       </div>
     </div>
 
-    <div class="col-lg-4 mb-4 mb-lg-0 card" id="a-level">
-      <h4 class="pt-3 text-center rounded">A-Level</h4>
+    <div class="col-lg-4 mb-4 mb-lg-0">
+      <div class="p-4 rounded card" style="height: 50vh;">
+        <h4 class="pt-3 text-center rounded">A-Level</h4>
+        <div id="a-level" class="overflow-y-auto"></div>
+      </div>
     </div>
 
-    <div class="col-lg-4 mb-4 mb-lg-0 card" id="other-exams">
-      <h4 class="pt-3 text-center rounded">Other Exams</h4>
-    </div>
-  </div>
-</div>
+    <div class="col-lg-4 mb-4 mb-lg-0">
+      <div class="p-4 rounded card" style="height: 50vh;">
+        <h4 class="pt-3 text-center rounded">Other Exams</h4>
+        <div id="other-exams" class="overflow-y-auto"></div>
+      </div>
+    </div></div>
 
 </div>
 {% endblock %}
