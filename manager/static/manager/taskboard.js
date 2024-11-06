@@ -65,8 +65,6 @@ async function updateTask() {
   }
 }
 
-
-
 function generateTaskCard(task) {
   const card = document.createElement('div');
   card.classList.add(
@@ -205,7 +203,7 @@ function toggleSelectField(selectField, on) {
     selectField.setAttribute('disabled', 'true');
     selectField.classList.remove('form-control');
     selectField.classList.add('form-control-plaintext');
-}
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
