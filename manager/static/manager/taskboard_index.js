@@ -1,9 +1,5 @@
-import {
-  getErrorDiv,
-  insertErrorDiv,
-  removeErrorDivs,
-  processAndAppend,
-} from './utils.js';
+import { getErrorDiv, insertErrorDiv, removeErrorDivs, processAndAppend } from './utils.js';
+
 
 async function fetchTaskboardJSON() {
   const response = await fetch('/api/taskboards/');
