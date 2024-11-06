@@ -67,8 +67,7 @@ class GoogleLoginCallback(APIView):
 
         if code is None:
             messages.error(request, "Google sign in failed: Please login again.")
-            #  change this to the login page after it is created as well
-            return redirect(reverse("manager:taskboard_index"))
+            return redirect(reverse("manager:main_login"))
 
         token_endpoint_url = urljoin("http://localhost:8000", reverse("google_login"))
         params = {
@@ -87,7 +86,7 @@ class GoogleLoginCallback(APIView):
                 user,
                 backend="allauth.account.auth_backends.AuthenticationBackend",
             )
-            return redirect(reverse("manager:main_login"))
+            return redirect(reverse("manager:taskboard_index"))
         except (ValueError, IndexError):
             messages.error(request, "Authentication Error: Please login again.")
             return redirect(reverse("manager:main_login"))

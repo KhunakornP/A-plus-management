@@ -28,13 +28,41 @@ class Task(models.Model):
     )
     time_estimate = models.IntegerField(default=0)
 
-    def __compute_time_diff(self, new_time: int) -> int:
+    def __compute_time_diff(self) -> int:
         """Compute the difference between old and new time estimate."""
         try:
             old_time = Task.objects.get(pk=self.pk).time_estimate
-            return new_time - old_time
+            return self.time_estimate - old_time
         except Task.DoesNotExist:
-            return new_time
+            return self.time_estimate
+
+    def __status_changed_to_done(self) -> bool:
+        """Check whether status of existing tasks are changed to DONE.
+
+        :return: True if the task's status changed from something else to DONE.
+        Otherwise, return false.
+        """
+        try:
+            old_status = Task.objects.get(pk=self.pk).status
+            if self.status == old_status:
+                return False
+            return self.status == "DONE"
+        except Task.DoesNotExist:
+            return False
+
+    def __status_changed_from_done(self) -> bool:
+        """Check whether status of existing tasks are changed from DONE.
+
+        :return: True if the task's status changed from DONE to something else.
+        Otherwise, return false.
+        """
+        try:
+            old_status = Task.objects.get(pk=self.pk).status
+            if self.status == old_status:
+                return False
+            return old_status == "DONE"
+        except Task.DoesNotExist:
+            return False
 
     def save(self, *args, **kwargs):
         """Override default save method.
@@ -48,7 +76,12 @@ class Task(models.Model):
         eh = EstimateHistory.objects.get(
             date=timezone.localdate(), taskboard=self.taskboard
         )
-        eh.time_remaining += self.__compute_time_diff(self.time_estimate)
+        if self.__status_changed_to_done():
+            eh.time_remaining -= self.time_estimate
+        elif self.__status_changed_from_done():
+            eh.time_remaining += self.time_estimate
+        elif self.status != "DONE":
+            eh.time_remaining += self.__compute_time_diff()
         eh.save()
 
         super().save(*args, **kwargs)
@@ -58,11 +91,10 @@ class Task(models.Model):
 
         Also subtracts the time remaining in the related EstimateHistory object.
         """
-        est = self.time_estimate
         eh = EstimateHistory.objects.get(
             date=timezone.localdate(), taskboard=self.taskboard
         )
-        eh.time_remaining -= est
+        eh.time_remaining -= self.time_estimate
         eh.save()
 
         super().delete(using, keep_parents)

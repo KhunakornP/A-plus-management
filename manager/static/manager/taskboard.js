@@ -4,10 +4,15 @@ const createTaskModal = new bootstrap.Modal('#addTask');
 const deleteBtn = document.getElementById('del-task-btn');
 const editBtn = document.getElementById('edit-task-btn');
 const createBtn = document.getElementById('create-task-btn');
+
+const toggleables = document.querySelectorAll('.toggleable');
+
 const taskOffcanvasTitle = document.getElementById('task-title');
 const taskOffcanvasDetails = document.getElementById('task-details');
 const taskOffcanvasEndDate = document.getElementById('task-enddate');
 const taskOffcanvasET = document.getElementById('task-et');
+const taskOffcanvasStatus = document.getElementById('task-status');
+
 const taskModalTitle = document.getElementById('modal-task-title');
 const taskModalEndDate = document.getElementById('modal-task-enddate');
 const taskModalStatus = document.getElementById('modal-task-status');
@@ -23,6 +28,10 @@ import {
   getErrorDiv,
   insertErrorDiv,
   removeErrorDivs,
+  processAndAppend,
+  toggleInputFields,
+  taskNearDueDate,
+  taskPassedDueDate,
 } from './utils.js';
 
 async function updateTask() {
@@ -36,6 +45,7 @@ async function updateTask() {
       body: JSON.stringify({
         'title': taskOffcanvasTitle.value,
         'details': taskOffcanvasDetails.value,
+        'status': taskOffcanvasStatus.value,
         'end_date': getValidDateISOString(taskOffcanvasEndDate.value),
         'time_estimate': getValidEstimatedTime(taskOffcanvasET.value),
       }),
@@ -44,7 +54,8 @@ async function updateTask() {
       throw new Error('Title cannot be blanked.');
     }
     renderColumns();
-    toggleOffcanvasFields(false);
+    toggleInputFields(toggleables, false);
+    toggleSelectField(taskOffcanvasStatus, false);
     removeErrorDivs();
     taskOffcanvasTitle.classList.remove('is-invalid');
   } catch (error) {
@@ -54,29 +65,7 @@ async function updateTask() {
   }
 }
 
-function toggleOffcanvasFields(on) {
-  if (on) {
-    taskOffcanvasTitle.removeAttribute('readonly');
-    taskOffcanvasTitle.setAttribute('class', 'form-control');
-    taskOffcanvasDetails.removeAttribute('readonly');
-    taskOffcanvasDetails.setAttribute('class', 'form-control');
-    taskOffcanvasEndDate.removeAttribute('readonly');
-    taskOffcanvasEndDate.setAttribute('class', 'form-control');
-    taskOffcanvasET.removeAttribute('readonly');
-    taskOffcanvasET.setAttribute('class', 'form-control');
-    editBtn.value = 'Done';
-  } else {
-    taskOffcanvasTitle.setAttribute('readonly', true);
-    taskOffcanvasTitle.setAttribute('class', 'form-control-plaintext');
-    taskOffcanvasDetails.setAttribute('readonly', true);
-    taskOffcanvasDetails.setAttribute('class', 'form-control-plaintext');
-    taskOffcanvasEndDate.setAttribute('readonly', true);
-    taskOffcanvasEndDate.setAttribute('class', 'form-control-plaintext');
-    taskOffcanvasET.setAttribute('readonly', true);
-    taskOffcanvasET.setAttribute('class', 'form-control-plaintext');
-    editBtn.value = 'Edit';
-  }
-}
+
 
 function generateTaskCard(task) {
   const card = document.createElement('div');
@@ -96,20 +85,47 @@ function generateTaskCard(task) {
 
   const innerCard = document.createElement('div');
   innerCard.classList.add('my-0', 'py-0', 'link-light', 'task-card');
-  innerCard.innerHTML = `<u>${task.title}</u>`;
+  innerCard.innerHTML = `
+  <u>${task.title}</u><br>
+  Due: ${formatLocalISO(task.end_date)}
+  `;
+  card.appendChild(innerCard);
+  bindClickCard(innerCard, task);
+  bindDragCard(card, task);
+  colorCard(card, task);
+  return card;
+}
+
+function bindClickCard(innerCard, task) {
   innerCard.addEventListener('click', () => {
     offcanvas.show();
     currentTaskID = task.id;
-    taskOffcanvasTitle.value = `${task.title}`;
-    taskOffcanvasET.value = `${task.time_estimate}`;
+    taskOffcanvasTitle.value = task.title;
+    taskOffcanvasET.value = task.time_estimate;
+    taskOffcanvasStatus.value = innerCard.parentNode.parentNode.id;
     taskOffcanvasEndDate.value = formatLocalISO(task.end_date);
     if (task.details !== null) {
-      taskOffcanvasDetails.value = `${task.details}`;
+      taskOffcanvasDetails.value = task.details;
     } else {
       taskOffcanvasDetails.value = '';
     }
   });
-  card.appendChild(innerCard);
+}
+
+function colorCard(card, task) {
+  const taskText = card.querySelector('u');
+  if (taskNearDueDate(task.end_date)) {
+    card.classList.remove('border-white');
+    card.classList.add('border-warning');
+    taskText.classList.add('text-warning');
+  } else if (taskPassedDueDate(task.end_date)) {
+    card.classList.remove('border-white');
+    card.classList.add('border-danger');
+    taskText.classList.add('text-danger');
+  }
+}
+
+function bindDragCard(card, task) {
   card.addEventListener('dragstart', () => {
     currentTaskID = task.id;
     card.classList.add('dragging');
@@ -128,15 +144,12 @@ function generateTaskCard(task) {
       }),
     });
   });
-  return card;
 }
 
-async function appendColumnChildren(children, column) {
-  if (column !== null) {
-    for (const child of children) {
-      column.appendChild(generateTaskCard(child));
-    }
-  }
+async function getTaskboardName() {
+  const response = await fetch(`/api/taskboards/${taskboardID}`);
+  const tb = await response.json();
+  return tb.name;
 }
 
 async function renderColumns() {
@@ -148,23 +161,22 @@ async function renderColumns() {
   const toDoTasks = tasks.filter((task) => task.status === 'TODO');
   const inProgressTasks = tasks.filter((task) => task.status === 'IN PROGRESS');
   const doneTasks = tasks.filter((task) => task.status === 'DONE');
-  appendColumnChildren(toDoTasks, document.getElementById('TODO'));
-  appendColumnChildren(inProgressTasks, document.getElementById('IN PROGRESS'));
-  appendColumnChildren(doneTasks, document.getElementById('DONE'));
+  processAndAppend(
+    toDoTasks,
+    document.getElementById('TODO'),
+    generateTaskCard
+  );
+  processAndAppend(
+    inProgressTasks,
+    document.getElementById('IN PROGRESS'),
+    generateTaskCard
+  );
+  processAndAppend(
+    doneTasks,
+    document.getElementById('DONE'),
+    generateTaskCard
+  );
 }
-
-columns.forEach((dropArea) => {
-  dropArea.addEventListener('dragover', async (event) => {
-    event.preventDefault();
-    const afterElement = getDragAfterElement(dropArea, event.clientY);
-    const draggable = document.querySelector('.dragging');
-    if (afterElement === null) {
-      dropArea.appendChild(draggable);
-    } else {
-      dropArea.insertBefore(draggable, afterElement);
-    }
-  });
-});
 
 function getDragAfterElement(dropArea, y) {
   const draggableElements = [
@@ -184,8 +196,21 @@ function getDragAfterElement(dropArea, y) {
   ).element;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function toggleSelectField(selectField, on) {
+  if (on) {
+    selectField.removeAttribute('disabled');
+    selectField.classList.remove('form-control-plaintext');
+    selectField.classList.add('form-control');
+  } else {
+    selectField.setAttribute('disabled', 'true');
+    selectField.classList.remove('form-control');
+    selectField.classList.add('form-control-plaintext');
+}
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
   renderColumns();
+  document.getElementById('tb-name').innerHTML = await getTaskboardName();
   deleteBtn.addEventListener('click', async () => {
     await fetch(`/api/tasks/${currentTaskID}/`, {
       method: 'DELETE',
@@ -198,9 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   editBtn.addEventListener('click', () => {
-    if (editBtn.value === 'Edit') {
-      toggleOffcanvasFields(true);
+    if (editBtn.innerHTML === 'Edit') {
+      toggleInputFields(toggleables, true);
+      toggleSelectField(taskOffcanvasStatus, true);
+      editBtn.innerHTML = 'Done';
     } else {
+      editBtn.innerHTML = 'Edit';
       updateTask();
     }
   });
@@ -247,8 +275,23 @@ document.addEventListener('DOMContentLoaded', () => {
   document
     .getElementById('task-offcanvas')
     .addEventListener('hidden.bs.offcanvas', () => {
-      toggleOffcanvasFields(false);
+      toggleInputFields(toggleables, false);
+      toggleSelectField(taskOffcanvasStatus, false);
       removeErrorDivs();
       taskOffcanvasTitle.classList.remove('is-invalid');
+      editBtn.innerHTML = 'Edit';
     });
+
+  columns.forEach((dropArea) => {
+    dropArea.addEventListener('dragover', async (event) => {
+      event.preventDefault();
+      const afterElement = getDragAfterElement(dropArea, event.clientY);
+      const draggable = document.querySelector('.dragging');
+      if (afterElement === null) {
+        dropArea.appendChild(draggable);
+      } else {
+        dropArea.insertBefore(draggable, afterElement);
+      }
+    });
+  });
 });
