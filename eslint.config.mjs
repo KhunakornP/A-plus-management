@@ -13,7 +13,8 @@ export default [
         bootstrap: "readonly",
         FullCalendar: "readonly",
         Cookies: "readonly",
-        Chart: "readonly"
+        Chart: "readonly",
+        jquery: "readonly"
       }
     },
     rules: {

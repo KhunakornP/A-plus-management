@@ -29,6 +29,9 @@ function setNotExamineeStatus() {
     document.getElementById('c4').style.border='5px solid blue'
     document.getElementById('c3').style.border='1px solid rgba(0, 0, 0, 0.175)'
 }
+
+// disabling next line since the function is used in html but not in js
+// eslint-disable-next-line
 function validateForm(event) {
     if (document.getElementById('type').value === '') {
     event.preventDefault()} if (document.getElementById('type').value === 'student' &&
