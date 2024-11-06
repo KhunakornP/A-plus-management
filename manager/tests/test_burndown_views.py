@@ -1,10 +1,10 @@
 """Test Burndown chart views."""
 
 from django.test import TestCase
-# from django.urls import reverse
-# from .templates_for_tests import create_taskboard, create_estimate_hisotry
-# from datetime import date, timedelta
-# from manager.models import Taskboard, EstimateHistory
+from .templates_for_tests import create_taskboard, create_estimate_hisotry
+from django.contrib.auth.models import User
+from rest_framework import status
+from datetime import date, timedelta
 
 
 class EstimateHistoryViewTests(TestCase):
@@ -12,65 +12,35 @@ class EstimateHistoryViewTests(TestCase):
 
     def setUp(self):
         """Create EstimateHistory objects."""
-        pass
+        super().setUp()
+        self.username = "Tester"
+        self.password = "Bestbytest!123"
+        self.user = User.objects.create_user(
+            username=self.username, email="testuser@nowhere.com"
+        )
+        self.user.set_password(self.password)
+        self.user.save()
+        self.client.login(username=self.username, password=self.password)  
 
-    def test_get_all_estimate_history(self):
-        """Test getting all estimate history info."""
-        pass
+        self.tb = create_taskboard(self.user, "Test Taskboard")
+
+        self.today = date.today()
+        self.tomorrow =  date.today() + timedelta(days=1)
+        self.aftertomorrow =  date.today() + timedelta(days=2)
+
+        self.eh1 = create_estimate_hisotry(self.tb, self.today, 70)
+        self.eh2 = create_estimate_hisotry(self.tb, self.tomorrow, 60)
+        self.eh3 = create_estimate_hisotry(self.tb, self.aftertomorrow, 40)
+
 
     def test_get_eh_of_taskboard(self):
         """Test getting estimate_history in a specific taskboard."""
-        pass
+        response = self.client.get(f"/api/estimate_history/?taskboard={self.tb.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
 
-    def test_get_invalid_estimate_history(self):
+
+    def test_get_invalid_taskboard(self):
         """Test getting a non-existent estimate history info."""
-        pass
-
-
-# class EstimateHistoryJsonTests(TestCase):
-#     """Test the json response for EstimateHistory objects."""
-
-#     def test_estimate_histories_json(self):
-#         """Test json response."""
-#         tb = create_taskboard("Taskboard 1")
-
-#         create_estimate_hisotry(
-#             tb, date=date.today() - timedelta(days=3), time_remaining=50
-#         )
-#         create_estimate_hisotry(
-#             tb, date=date.today() - timedelta(days=2), time_remaining=40
-#         )
-#         create_estimate_hisotry(
-#             tb, date=date.today() - timedelta(days=1), time_remaining=20
-#         )
-
-#         url = reverse(
-#             "/api/estimate_history/",
-#             kwargs={"taskboard_id": tb.id},
-#         )
-#         response = self.client.get(url)
-
-#         self.assertEqual(response.status_code, 200)
-
-
-# class TestBurndownChartView(TestCase):
-#     """Test the burndown chat view."""
-
-#     def test_get_request(self):
-#         """Test sending get request."""
-#         tb = create_taskboard()
-#         url = reverse("manager:burndown_chart", args=(tb.id,))
-#         response = self.client.get(url)
-#         self.assertEqual(response.status_code, 200)
-
-#     def test_post_request(self):
-#         """Test sending post request.
-
-#         The BurndownChartView should get the events data.
-#         """
-#         tb = create_taskboard()
-#         url = reverse("manager:burndown_chart", args=(tb.id,))
-#         data = {"events": ["a", "b", "v"]}
-#         response = self.client.post(url, data)
-#         self.assertEqual(response.context["events"], data["events"])
-#         self.assertEqual(response.status_code, 200)
+        response = self.client.get("/api/estimate_history/?taskboard=9999")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
