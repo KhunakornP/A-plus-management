@@ -1,5 +1,12 @@
 async function fetchTaskboardJSON() {
-  const response = await fetch('/api/taskboards/');
+let studentID;
+  if (document.getElementById('student_id')) {
+  studentID = JSON.parse(document.getElementById('student_id').textContent);
+  console.log(studentID);
+  } else {
+  studentID = '';
+  }
+  const response = await fetch(`/api/taskboards/?user_id=${studentID}`)
   const taskboards = await response.json();
   return taskboards;
 }
