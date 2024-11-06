@@ -22,7 +22,7 @@ class TaskboardViewSet(viewsets.ModelViewSet):
         # if the user is not a parent
         if not self.request.user.has_perm("manager.is_parent"):
             return Taskboard.objects.filter(user=self.request.user)
-        query = self.request.GET.get('user_id', None)
+        query = self.request.GET.get("user_id", None)
         if query:
             return Taskboard.objects.filter(user__pk=query)
         return Taskboard.objects.filter(user=self.request.user)
@@ -52,5 +52,3 @@ def get_user_taskboard(request, user_id: int):
         return redirect(reverse("manager:dashboard"))
     context = {"user_id": user.id}
     return render(request, "manager/taskboard_index.html", context)
-
-

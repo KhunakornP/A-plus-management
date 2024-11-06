@@ -56,24 +56,25 @@ class UserSetupView(TemplateView):
         if self.request.user.has_perm("manager.is_verified"):
             return redirect(reverse("manager:taskboard_index"))
         print(request.POST)
-        if request.POST['type'] == "parent":
+        if request.POST["type"] == "parent":
             content_type = ContentType.objects.get_for_model(UserPermissions)
             permissions = Permission.objects.filter(content_type=content_type)
             for permission in permissions:
                 self.request.user.user_permissions.add(permission)
                 print(permission)
             info = StudentInfo.objects.get(user=self.request.user)
-            new_info = ParentInfo.objects.create(user=self.request.user,
-                                                 displayed_name=info.displayed_name)
+            new_info = ParentInfo.objects.create(
+                user=self.request.user, displayed_name=info.displayed_name
+            )
             info.delete()
             new_info.save()
-            return redirect(reverse('manager:taskboard_index'))
+            return redirect(reverse("manager:taskboard_index"))
         # if user is not a parent then they are a student
         # check if they take the A-levels
-        if request.POST['exam']:
+        if request.POST["exam"]:
             self.request.user.user_permissions.add("manager.is_taking_A_levels")
         self.request.user.user_permissions.add("manager.is_verified")
-        return redirect(reverse('manager:user_setup'))
+        return redirect(reverse("manager:user_setup"))
 
 
 @receiver(post_save, sender=User)
