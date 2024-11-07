@@ -15,7 +15,7 @@ class DashboardViewTestCase(TestCase):
     """Test cases for the dashboard."""
 
     def setUp(self):
-        """Set up a parent user and some child users."""
+        """Set up parent users and some child users."""
         super().setUp()
         self.username = "DekD"
         self.password = "Tcaslover123"
@@ -50,6 +50,14 @@ class DashboardViewTestCase(TestCase):
         for permission in permissions:
             self.user3.user_permissions.add(permission)
 
+    def test_access_by_unauthenticated_user(self):
+        """Unauthenticated users should be redirected back to the login page."""
+        self.client.logout()
+        url = reverse("manager:dashboard")
+        response = self.client.get(url)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse("manager:main_login"))
+
     def test_access_by_student(self):
         """Only parents can access the parent dashboard."""
         self.client.login(username="myTcasser", password="myTcasdabest123")
@@ -66,6 +74,30 @@ class DashboardViewTestCase(TestCase):
         students = StudentInfo.objects.filter(parent=self.user3)
         self.assertQuerySetEqual(
             students, response.context["child_list"], ordered=False
+        )
+
+    def test_no_children(self):
+        """The dashboard page displays help text if user has no children."""
+        # create a fresh student
+        self.user4 = User.objects.create_user(
+            username="Dio", password="Worstdad1941", email="notavalidemail2@gmail.com"
+        )
+        self.user4.save()
+        self.client.login(username="Dio", password="Worstdad1941")
+        # give the user parent permissions
+        content_type = ContentType.objects.get_for_model(UserPermissions)
+        permissions = Permission.objects.filter(content_type=content_type)
+        for permission in permissions:
+            self.user4.user_permissions.add(permission)
+        # go to the dashboard
+        response = self.client.get(reverse("manager:dashboard"))
+        self.assertEqual(200, response.status_code)
+        students = StudentInfo.objects.none()
+        self.assertQuerySetEqual(
+            students, response.context["child_list"], ordered=False
+        )
+        self.assertContains(
+            response, "You currently do not have any children associated!"
         )
 
     def test_get_children_statistics(self):
