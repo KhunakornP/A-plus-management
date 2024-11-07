@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (newEnd.value === '') {
         errorMessages.push({ name: 'End', message: 'Invalid end date.' });
       }
-      if (endDate < startDate) {
+      if (endDate <= startDate) {
         errorMessages.push({
           name: 'Date',
           message: 'Event end date must be after start date.',
@@ -240,7 +240,7 @@ async function updateEvent() {
     if (eventEnd.value === '') {
       errorMessages.push({ name: 'End', message: 'Invalid end date.' });
     }
-    if (endDate < startDate) {
+    if (endDate <= startDate) {
       errorMessages.push({
         name: 'Date',
         message: 'Event end date must be after start date.',
