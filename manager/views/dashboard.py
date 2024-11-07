@@ -1,4 +1,5 @@
 """Views for the parent dashboard."""
+
 from django.db.models import Q
 from django.shortcuts import redirect, reverse
 from django.utils import timezone
@@ -25,14 +26,27 @@ class DashboardView(generic.ListView):
             late = []
             fin = []
             for student in students:
-                today.append(Task.objects.filter(taskboard__user=student.user, end_date__day=timezone.now().day).count())
-                late.append(Task.objects.filter(~Q(status="DONE"), taskboard__user=student.user, end_date__lte=timezone.now()).count())
-                fin.append(Task.objects.filter(taskboard__user=student.user, status="DONE").count())
+                today.append(
+                    Task.objects.filter(
+                        taskboard__user=student.user, end_date__day=timezone.now().day
+                    ).count()
+                )
+                late.append(
+                    Task.objects.filter(
+                        ~Q(status="DONE"),
+                        taskboard__user=student.user,
+                        end_date__lte=timezone.now(),
+                    ).count()
+                )
+                fin.append(
+                    Task.objects.filter(
+                        taskboard__user=student.user, status="DONE"
+                    ).count()
+                )
             context["today"] = today
             context["late"] = late
             context["fin"] = fin
         return context
-
 
     def get(self, request, *args, **kwargs):
         """

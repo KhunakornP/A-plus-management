@@ -61,7 +61,6 @@ class UserSetupView(TemplateView):
             permissions = Permission.objects.filter(content_type=content_type)
             for permission in permissions:
                 self.request.user.user_permissions.add(permission)
-                print(permission)
             info = StudentInfo.objects.get(user=self.request.user)
             new_info = ParentInfo.objects.create(
                 user=self.request.user, displayed_name=info.displayed_name
