@@ -300,13 +300,25 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     updateVelocityEstimate(velocitySlope);
     updateDoneByEstimate(velocityEndDate);
 
+    const today = new Date();
+
+    const filteredTasksData = tasksData.filter(task => {
+      const endDate = new Date(task.end_date);
+      return endDate >= today && endDate <= velocityEndDate[0];
+    });
+
+    const filteredEventData = eventData.filter(event => {
+      const endDate = new Date(event.end_date);
+      return endDate >= today && endDate <= velocityEndDate[0];
+    });
+
     // Get all relevant dates and generate date range for the chart
-    const allDates = getAllDates(estimateHistoryData, tasksData, eventData, velocityEndDate);
+    const allDates = getAllDates(estimateHistoryData, filteredTasksData, filteredEventData, velocityEndDate);
     const dates = generateDateRange(new Date(estimateHistoryData[0].date), new Date(Math.max(...allDates)));
 
     // Create line annotations for tasks, events, and today
-    const taskAnnotations = lineAnnotation(tasksData, 'red');
-    const eventAnnotations = lineAnnotation(eventData, 'yellow');
+    const taskAnnotations = lineAnnotation(filteredTasksData, 'red');
+    const eventAnnotations = lineAnnotation(filteredEventData, 'yellow');
     const todayAnnotation = lineAnnotation([{ 'end_date': formatDate(new Date()), title: 'Today' }], 'blue');
 
     // Calculate the nearest trend line
@@ -321,8 +333,8 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     const chart = initializeChart(ctx, dates, estHistData, annotations);
 
     // Create checkboxes for tasks and events to update annotations dynamically
-    createCheckboxes(document.getElementById('task-checkboxes'), tasksData, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
-    createCheckboxes(document.getElementById('event-checkboxes'), eventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
+    createCheckboxes(document.getElementById('task-checkboxes'), filteredTasksData, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
+    createCheckboxes(document.getElementById('event-checkboxes'), filteredEventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
 
     updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0])
 
