@@ -41,14 +41,14 @@ class TaskModelTestcase(BaseTestCase):
         self.assertEqual([t1, t2, t3], list(taskboard.task_set.all()))
 
     def test_task_is_due_today(self):
-        """Tasks with a deadline within today should return True"""
+        """Tasks with a deadline within today should return True."""
         taskboard = create_taskboard(self.user1)
         t1 = create_task("Study math", "TODO", taskboard)
         self.assertEqual(t1.end_date, today_midnight())
         self.assertTrue(t1.due_today())
 
     def test_task_not_due_today(self):
-        """Tasks with a deadline on another day should return False"""
+        """Tasks with a deadline on another day should return False."""
         taskboard = create_taskboard(self.user1)
         t1 = create_task(
             "Study math", "TODO", taskboard, timezone.now() + timezone.timedelta(days=1)

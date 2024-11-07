@@ -34,8 +34,9 @@ class UserSetupView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         """
-        Override the GET request and check if the user has set up their
-        account. Redirect the user to the main page if they already have.
+        Override the GET request and check if the user has set up their account.
+
+        Redirect the user to the main page if they already have.
         """
         # check if user is logged in
         if not self.request.user.is_authenticated:
@@ -46,9 +47,7 @@ class UserSetupView(TemplateView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        """
-        Set up the user's account information based on the given fields.
-        """
+        """Set up the user's account information based on the given fields."""
         # check if user is logged in
         if not self.request.user.is_authenticated:
             return redirect(reverse("manager:main_login"))

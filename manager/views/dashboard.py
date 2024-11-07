@@ -14,7 +14,7 @@ class DashboardView(generic.ListView):
     context_object_name = "child_list"
 
     def get_queryset(self):
-        """Returns all children associated with the user."""
+        """Return all children associated with the user."""
         return self.request.user.student_set.all()
 
     def get_context_data(self, **kwargs):
