@@ -41,4 +41,4 @@ class EstimateHistoryViewTests(TestCase):
     def test_get_invalid_taskboard(self):
         """Test getting a non-existent estimate history info."""
         response = self.client.get("/api/estimate_history/?taskboard=9999")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data, [])

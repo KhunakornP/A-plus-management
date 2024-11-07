@@ -41,20 +41,6 @@ function formatDate(date) {
     return date.toISOString().split('T')[0];
 }
 
-// Return the number days from d1 to the day the trend reaches 0 based on t1 and t2.
-// d1, d2 : String, t1, t2 : Number
-// ret: number
-function daysUntilZero(d1, d2, t1, t2) {
-  if (d1 === d2 || t1 === t2) {
-      document.getElementById("slope").innerText = `Average Velocity: N/A`;
-      return 0;
-  }
-  const daysBetween = calculateDaysBetween(d1, d2);
-  const slope = calculateSlope(t1, t2, daysBetween);
-  document.getElementById("slope").innerText = `Average Velocity: ${-slope.toFixed(2)} hr/day`;
-  return Math.ceil(t1 / -slope);
-}
-
 function getAllDates(estimateHistoryData, tasksData, eventData, velocityEndDate) {
     const estimateDates = estimateHistoryData.map(item => new Date(item.date));
     const taskEndDates = tasksData.map(item => new Date(item.end_date));
@@ -218,36 +204,38 @@ function updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData
         chart.options.plugins.annotation.annotations.push(trendAnnotation(x1, x2, y1, y2, 'rgba(255, 100, 100, 1)')[0]);
     }
     
-    const warningElement = document.getElementById('warning');
     if (trendLine && trendLine.display) {
-        const daysBetween = calculateDaysBetween(x1, x2);
-        const slope = calculateSlope(y1, y2, daysBetween);
-        warningElement.innerText = `Required velocity: ${-slope.toFixed(2)} hr/day`;
+        const slope = calculateSlope(y1, y2, calculateDaysBetween(x1, x2));
+        updateWarningEstimate(slope);
     } else {
-        warningElement.innerText = 'Required velocity: N/A';
+        updateWarningEstimate(0);
     }
 
     chart.update();
 }
 
 function createCheckboxes(container, data, type, updateAnnotations) {
-data.forEach((item, index) => {
-    const checkboxDiv = document.createElement('div');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.id = `${type}-checkbox-${index}`;
-    checkbox.checked = true;
+    if (data.length === 0) {
+        container.innerText = `There are no ${type}s.`;
+        return; 
+    }
+    data.forEach((item, index) => {
+        const checkboxDiv = document.createElement('div');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `${type}-checkbox-${index}`;
+        checkbox.checked = true;
 
-    const label = document.createElement('label');
-    label.htmlFor = `${type}-checkbox-${index}`;
-    label.innerText = item.title;
+        const label = document.createElement('label');
+        label.htmlFor = `${type}-checkbox-${index}`;
+        label.innerText = item.title;
 
-    checkbox.addEventListener('change', updateAnnotations);
+        checkbox.addEventListener('change', updateAnnotations);
 
-    checkboxDiv.appendChild(checkbox);
-    checkboxDiv.appendChild(label);
-    container.appendChild(checkboxDiv);
-});
+        checkboxDiv.appendChild(checkbox);
+        checkboxDiv.appendChild(label);
+        container.appendChild(checkboxDiv);
+    });
 }
 
 function updateDoneByEstimate(velocityEndDate) {
@@ -258,9 +246,37 @@ function updateDoneByEstimate(velocityEndDate) {
     }
 }
 
+function updateVelocityEstimate(velocitySlope) {
+    if (velocitySlope === 0 || velocitySlope === NaN) {
+        document.getElementById("slope").innerText = `Average Velocity: N/A`;
+    } else {
+        document.getElementById("slope").innerText = `Average Velocity: ${-velocitySlope.toFixed(2)} hr/day`;
+    }
+}
+
+function updateWarningEstimate(velocitySlope) {
+    if (velocitySlope === 0 || velocitySlope === NaN) {
+        document.getElementById('warning').innerText = 'Required velocity: N/A';
+    } else {
+        document.getElementById('warning').innerText = `Required velocity: ${-velocitySlope.toFixed(2)} hr/day`;
+    }
+}
+
 function calculateVelocityTrend(estHistData) {
     const maxElement = estHistData.reduce((max, current) => current.y > max.y ? current : max, estHistData[0]);
-    const ehNDays = daysUntilZero(maxElement.x, estHistData[estHistData.length - 1].x, maxElement.y, estHistData[estHistData.length - 1].y);
+
+    const d1 = maxElement.x
+    const d2 = estHistData[estHistData.length - 1].x
+    const t1 = maxElement.y
+    const t2 = estHistData[estHistData.length - 1].y
+    let ehNDays = 0;
+    let velocitySlope = 0;
+
+    if (!(d1 === d2 || t1 === t2)) {
+        const daysBetween = calculateDaysBetween(d1, d2);
+        velocitySlope = calculateSlope(t1, t2, daysBetween);
+        ehNDays = Math.ceil(t1 / -velocitySlope);
+    }
   
     if (ehNDays === 0) {
       return { velocityEndDate: [], velocityTrend: [] };
@@ -270,7 +286,7 @@ function calculateVelocityTrend(estHistData) {
       const ehEndDate = formatDate(maxDate);
       const velocityEndDate = [new Date(ehEndDate)];
       const velocityTrend = trendAnnotation(maxElement.x, ehEndDate, maxElement.y, 'rgba(75, 192, 192, 1)');
-      return { velocityEndDate, velocityTrend };
+      return { velocityEndDate, velocityTrend, velocitySlope};
     }
 }
 
@@ -280,7 +296,8 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     const estHistData = fillEstHistData(estimateHistoryData);
 
     // Calculate velocity trend and update done-by estimate
-    const { velocityEndDate, velocityTrend } = calculateVelocityTrend(estHistData);
+    const { velocityEndDate, velocityTrend, velocitySlope} = calculateVelocityTrend(estHistData);
+    updateVelocityEstimate(velocitySlope);
     updateDoneByEstimate(velocityEndDate);
 
     // Get all relevant dates and generate date range for the chart
@@ -296,20 +313,6 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     const { x1, x2, y1, y2, color } = getNearestTrendData(estHistData, taskAnnotations, eventAnnotations);
     const nearestTrend = trendAnnotation(x1, x2, y1, y2, color);
 
-    const trendEndDate = new Date(x2);
-
-    if (trendEndDate < velocityEndDate[0]) {
-        nearestTrend.display = false;
-    }
-
-    // if (trendEndDate <= velocityEndDate[0]) {
-    //     const daysBetween = calculateDaysBetween(x1, x2);
-    //     const slope = calculateSlope(y1, y2, daysBetween);
-    //     document.getElementById('warning').innerText = `Required velocity: ${-slope.toFixed(2)} hr/day`;
-    // } else {
-    //     document.getElementById('warning').innerText = 'Required velocity: N/A';
-    // }
-
     // Combine all annotations
     const annotations = [...taskAnnotations, ...eventAnnotations, ...todayAnnotation, ...velocityTrend, ...nearestTrend];
 
@@ -320,6 +323,9 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     // Create checkboxes for tasks and events to update annotations dynamically
     createCheckboxes(document.getElementById('task-checkboxes'), tasksData, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
     createCheckboxes(document.getElementById('event-checkboxes'), eventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
+
+    updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0])
+
   })
   .catch(error => {
     console.error('Error fetching data:', error);
