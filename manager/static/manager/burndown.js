@@ -19,8 +19,8 @@ async function fetchTaskJson(){
 
 async function fetchEstimateHistoryData() {
     const response = await fetch(`/api/estimate_history/?taskboard=${taskboardID}`);
-    const estimate_histories = await response.json();
-    return estimate_histories;
+    const estimateHistories = await response.json();
+    return estimateHistories;
 }
 
 // Return the number of days between d1 and d2
@@ -87,7 +87,7 @@ function fillEstHistData(data) {
 }
 
 function lineAnnotation(data, color){
-    const endDates = data.map(task => formatDate(new Date(task.end_date)));
+    const endDates = data.map(item => formatDate(new Date(item.end_date)));
     const titles = data.map(item => item.title);
     const annotations = endDates.map((endDate, index) => ({
         type: 'line',
@@ -126,7 +126,7 @@ function trendAnnotation(x1, x2, y1, y2, color) {
   }];
 }
 
-function initializeChart(ctx, dates, est_hist_data, annotations) {
+function initializeChart(ctx, dates, estHistData, annotations) {
     return new Chart(ctx, {
         type: 'bar',
         data: {
@@ -134,7 +134,7 @@ function initializeChart(ctx, dates, est_hist_data, annotations) {
             datasets: [
                 {
                     label: 'Time Remaining',
-                    data: est_hist_data,
+                    data: estHistData,
                     borderWidth: 1,
                 },
             ]
@@ -247,7 +247,7 @@ function updateDoneByEstimate(velocityEndDate) {
 }
 
 function updateVelocityEstimate(velocitySlope) {
-    if (velocitySlope === 0 || velocitySlope === NaN) {
+    if (velocitySlope === 0 ||  isNaN(velocitySlope)) {
         document.getElementById("slope").innerText = `Average Velocity: N/A`;
     } else {
         document.getElementById("slope").innerText = `Average Velocity: ${-velocitySlope.toFixed(2)} hr/day`;
@@ -255,7 +255,7 @@ function updateVelocityEstimate(velocitySlope) {
 }
 
 function updateWarningEstimate(velocitySlope) {
-    if (velocitySlope === 0 || velocitySlope === NaN) {
+    if (velocitySlope === 0 || isNaN(velocitySlope)) {
         document.getElementById('warning').innerText = 'Required velocity: N/A';
     } else {
         document.getElementById('warning').innerText = `Required velocity: ${-velocitySlope.toFixed(2)} hr/day`;
@@ -280,14 +280,14 @@ function calculateVelocityTrend(estHistData) {
   
     if (ehNDays === 0) {
       return { velocityEndDate: [], velocityTrend: [] };
-    } else {
-      const maxDate = new Date(maxElement.x);
-      maxDate.setDate(maxDate.getDate() + ehNDays);
-      const ehEndDate = formatDate(maxDate);
-      const velocityEndDate = [new Date(ehEndDate)];
-      const velocityTrend = trendAnnotation(maxElement.x, ehEndDate, maxElement.y, 'rgba(75, 192, 192, 1)');
-      return { velocityEndDate, velocityTrend, velocitySlope};
     }
+
+    const maxDate = new Date(maxElement.x);
+    maxDate.setDate(maxDate.getDate() + ehNDays);
+    const ehEndDate = formatDate(maxDate);
+    const velocityEndDate = [new Date(ehEndDate)];
+    const velocityTrend = trendAnnotation(maxElement.x, ehEndDate, maxElement.y, 'rgba(75, 192, 192, 1)');
+    return { velocityEndDate, velocityTrend, velocitySlope};
 }
 
 Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
@@ -307,7 +307,7 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     // Create line annotations for tasks, events, and today
     const taskAnnotations = lineAnnotation(tasksData, 'red');
     const eventAnnotations = lineAnnotation(eventData, 'yellow');
-    const todayAnnotation = lineAnnotation([{ end_date: formatDate(new Date()), title: 'Today' }], 'blue');
+    const todayAnnotation = lineAnnotation([{ 'end_date': formatDate(new Date()), title: 'Today' }], 'blue');
 
     // Calculate the nearest trend line
     const { x1, x2, y1, y2, color } = getNearestTrendData(estHistData, taskAnnotations, eventAnnotations);
