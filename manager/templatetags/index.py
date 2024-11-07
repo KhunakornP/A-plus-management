@@ -8,6 +8,6 @@ register = template.Library()
 
 
 @register.filter
-def index(dataclass: Sequence, i:int) -> Any:
+def index(dataclass: Sequence, i: int) -> Any:
     """Index a given object with the current index."""
     return dataclass[i]
