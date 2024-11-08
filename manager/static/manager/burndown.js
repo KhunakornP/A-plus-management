@@ -33,12 +33,15 @@ function calculateDaysBetween(d1, d2) {
 
 // ret: num
 function calculateSlope(t1, t2, daysBetween) {
+    if (daysBetween === 0) {
+        return -t1;
+    }
     return (t2 - t1) / daysBetween;
 }
 
 // ret: Date
 function formatDate(date) {
-    return date.toISOString().split('T')[0];
+    return date.toLocaleDateString('en-CA').split('T')[0];
 }
 
 function getAllDates(estimateHistoryData, tasksData, eventData, velocityEndDate) {
@@ -63,6 +66,7 @@ function generateDateRange(startDate, endDate) {
 
     return dateArray;
 }
+
 function fillEstHistData(data) {
     const result = [];
     let lastKnownTimeRemaining = null;
@@ -189,14 +193,13 @@ function scroller(scroll, chart) {
             chart.config.options.scales.x.min -= 1;
             chart.config.options.scales.x.max -= 1;
         }
-    } else {
-
     }
     chart.update();
 }
 
 function getNearestTrendData(estHistData, taskAnnotations, eventAnnotations) {
     const today = new Date();
+    today.setHours(0, 0, 0, 0)
     const x1 = formatDate(today);
     const estToday = estHistData.find(item => item.x === x1);
     const y1 = estToday ? estToday.y : 0;
@@ -204,7 +207,6 @@ function getNearestTrendData(estHistData, taskAnnotations, eventAnnotations) {
     const checkableDates = [...taskAnnotations, ...eventAnnotations]
         .filter(annotation => annotation.display)
         .map(annotation => new Date(annotation.value))
-        .filter(date => date > today)
         .sort((a, b) => a - b);
 
     const x2 = checkableDates.length > 0 ? formatDate(checkableDates[0]) : null;
@@ -335,6 +337,7 @@ function calculateVelocityTrend(estHistData) {
     maxDate.setDate(maxDate.getDate() + ehNDays);
     const ehEndDate = formatDate(maxDate);
     const velocityEndDate = [new Date(ehEndDate)];
+    velocityEndDate[0].setHours(23, 59, 59, 999)
     const velocityTrend = trendAnnotation(maxElement.x, ehEndDate, maxElement.y, 'rgba(75, 192, 192, 1)');
     return { velocityEndDate, velocityTrend, velocitySlope};
 }
@@ -352,6 +355,7 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Filter tasks and evets after today or before the velocityEndDate
     const filteredTasksData = tasksData.filter(task => {
       const endDate = new Date(task.end_date);
       return endDate >= today && endDate <= velocityEndDate[0];
