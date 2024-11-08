@@ -12,7 +12,7 @@ class EventViewSet(viewsets.ViewSet):
 
     def list(self, request):
         """
-        List all Event objects.
+        List all Event objects related to the user who submitted the request.
 
         :param request: The HTTP request.
         :return: Response with events.
