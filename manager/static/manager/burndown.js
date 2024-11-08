@@ -63,10 +63,11 @@ function generateDateRange(startDate, endDate) {
 
     return dateArray;
 }
-
 function fillEstHistData(data) {
     const result = [];
     let lastKnownTimeRemaining = null;
+    const today = new Date();
+
     data.forEach((entry, index) => {
         const currentDate = new Date(entry.date);
         const nextDate = index < data.length - 1 ? new Date(data[index + 1].date) : null;
@@ -82,6 +83,14 @@ function fillEstHistData(data) {
             }
         }
     });
+
+    let lastDate = new Date(data[data.length - 1].date);
+    lastDate.setDate(lastDate.getDate() + 1);
+
+    while (lastDate <= today) {
+        result.push({ x: formatDate(lastDate), y: lastKnownTimeRemaining });
+        lastDate.setDate(lastDate.getDate() + 1);
+    }
 
     return result;
 }
@@ -127,6 +136,8 @@ function trendAnnotation(x1, x2, y1, y2, color) {
 }
 
 function initializeChart(ctx, dates, estHistData, annotations) {
+    const yMax = annotations[annotations.length-2].yMin;
+
     return new Chart(ctx, {
         type: 'bar',
         data: {
@@ -141,8 +152,13 @@ function initializeChart(ctx, dates, estHistData, annotations) {
         },
         options: {
             scales: {
+                x: {
+                    min: 0,
+                    max: 13,
+                },
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    max: yMax
                 }
             },
             plugins: {
@@ -152,6 +168,31 @@ function initializeChart(ctx, dates, estHistData, annotations) {
             }
         }
     });
+}
+
+function scroller(scroll, chart) {
+    const dataLength = chart.data.labels.length
+
+    if (scroll.deltaY > 0) {
+        if (chart.config.options.scales.x.max >= dataLength - 1) {
+            chart.config.options.scales.x.min = dataLength - 14;
+            chart.config.options.scales.x.max = dataLength - 1;
+        } else {
+            chart.config.options.scales.x.min += 1;
+            chart.config.options.scales.x.max += 1;
+        }
+    } else if (scroll.deltaY < 0) {
+        if (chart.config.options.scales.x.min <= 0) {
+            chart.config.options.scales.x.min = 0;
+            chart.config.options.scales.x.max = 13;
+        } else {
+            chart.config.options.scales.x.min -= 1;
+            chart.config.options.scales.x.max -= 1;
+        }
+    } else {
+
+    }
+    chart.update();
 }
 
 function getNearestTrendData(estHistData, taskAnnotations, eventAnnotations) {
@@ -181,29 +222,37 @@ function updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData
         });
     };
 
-    updateDisplayStatus(taskAnnotations, 'task');
-    updateDisplayStatus(eventAnnotations, 'event');
-
-    const { x1, x2, y1, y2 } = getNearestTrendData(estHistData, taskAnnotations, eventAnnotations);
-
-    const trendLine = chart.options.plugins.annotation.annotations.find(annotation => 
-        annotation.borderColor === 'rgba(255, 100, 100, 1)' && annotation.mode === 'xy'
-    );
-
-    const trendEndDate = new Date(x2);
-
-    if (trendLine) {
-        if (x2 && trendEndDate <= velocityEndDate) {
+    const updateTrendLine = (trendLine, x2, y1, y2, velocityEndDate) => {
+        const trendEndDate = new Date(x2);
+        if (x2 && y1 > 0 && trendEndDate <= velocityEndDate) {
             trendLine.xMax = x2;
             trendLine.yMax = y2;
             trendLine.display = true;
         } else {
             trendLine.display = false;
         }
+    };
+
+    const addTrendLine = (chart, x1, x2, y1, y2) => {
+        chart.options.plugins.annotation.annotations.push(
+            trendAnnotation(x1, x2, y1, y2, 'rgba(255, 100, 100, 1)')[0]
+        );
+    };
+
+    updateDisplayStatus(taskAnnotations, 'task');
+    updateDisplayStatus(eventAnnotations, 'event');
+
+    const { x1, x2, y1, y2 } = getNearestTrendData(estHistData, taskAnnotations, eventAnnotations);
+    const trendLine = chart.options.plugins.annotation.annotations.find(annotation => 
+        annotation.borderColor === 'rgba(255, 100, 100, 1)' && annotation.mode === 'xy'
+    );
+
+    if (trendLine) {
+        updateTrendLine(trendLine, x2, y1, y2, velocityEndDate);
     } else if (x2) {
-        chart.options.plugins.annotation.annotations.push(trendAnnotation(x1, x2, y1, y2, 'rgba(255, 100, 100, 1)')[0]);
+        addTrendLine(chart, x1, x2, y1, y2);
     }
-    
+
     if (trendLine && trendLine.display) {
         const slope = calculateSlope(y1, y2, calculateDaysBetween(x1, x2));
         updateWarningEstimate(slope);
@@ -301,6 +350,7 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     updateDoneByEstimate(velocityEndDate);
 
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const filteredTasksData = tasksData.filter(task => {
       const endDate = new Date(task.end_date);
@@ -337,6 +387,9 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     createCheckboxes(document.getElementById('event-checkboxes'), filteredEventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
 
     updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0])
+    chart.canvas.addEventListener('wheel', (e) => {
+        scroller(e, chart);
+    })
 
   })
   .catch(error => {
