@@ -30,18 +30,29 @@ document.addEventListener('DOMContentLoaded', () => {
     initialView: 'dayGridMonth',
     nowIndicator: true,
     allDaySlot: false,
+    slotEventOverlap: false,
+    scrollTime: '00:00:00',
     customButtons: {
       addEvent: {
-        text: 'Add Event',
+        text: '❓',
         click: () => {
-          addEventModal.show();
+          new bootstrap.Modal('#help').show();
         },
       },
     },
     headerToolbar: {
-      left: 'prev,next today',
+      left: 'prevYear,prev,next,nextYear today',
       center: 'title',
       right: 'addEvent dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+    },
+    views: {
+      timeGridWeek: {
+        eventMaxStack: 2,
+        moreLinkClick: 'day',
+      },
+      timeGridDay: {
+        eventMaxStack: 4,
+      }
     },
     height: '90vh',
     navLinks: true,
@@ -99,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     select: (selectionInfo) => {
       newStart.value = formatLocalISO(selectionInfo.start);
       newEnd.value = formatLocalISO(selectionInfo.end);
+      addEventModal.show();
     },
   });
 
