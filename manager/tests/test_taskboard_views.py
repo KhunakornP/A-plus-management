@@ -1,5 +1,7 @@
 """Test taskboard creation, deletion, modification and redirections."""
 
+from django.contrib.auth.models import User
+from django.urls import reverse
 from manager.models import Taskboard
 from typing import Any, Optional
 from rest_framework import status
@@ -22,7 +24,7 @@ def create_taskboard_json(
 
 
 class TaskboardTests(BaseTestCase):
-    """Test creating, deleting and modifying taskboards."""
+    """Test creating, deleting, getting and modifying taskboards."""
 
     def test_create_valid_taskboard(self):
         """Test creating valid taskboard."""
@@ -92,3 +94,18 @@ class TaskboardTests(BaseTestCase):
         tb.refresh_from_db()
         self.assertEqual(Taskboard.objects.count(), 1)
         self.assertEqual(tb.name, "goodbye")
+
+    def test_get_user_taskboard(self):
+        """Test getting the taskboard index of a different user."""
+        user2 = User.objects.create_user(
+            username="bogus man", email="testuser@nowhere.com"
+        )
+        user2.save()
+        url = reverse("manager:user_tb_index", args=(user2.id,))
+        response = self.client.get(url)
+        self.assertEqual(response.context["user_id"], user2.id)
+        url = reverse("manager:user_tb_index", args=(9999,))
+        response = self.client.get(url)
+        with self.assertRaises(TypeError):
+            # should not be any context data
+            self.assertEqual(response.context["user_id"], 0)
