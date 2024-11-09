@@ -12,8 +12,8 @@ class Criterion(models.Model):
     Criterion is a singular form of criteria, according to Merriam-Webster dictionary.
     """
 
-    exam = models.ForeignKey(Exams)
-    min_score = models.FloatField()
+    exam = models.ForeignKey(Exams, on_delete=models.CASCADE)
+    min_score = models.FloatField(default=0)
     weight = models.FloatField(validators=[MaxValueValidator(100)])
 
 

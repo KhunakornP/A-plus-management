@@ -19,7 +19,7 @@ class University(models.Model):
 class Faculty(models.Model):
     """Name of different faculties of a university."""
 
-    university = models.ForeignKey(University, on_delete=models.CASCADE)
+    university = models.OneToOneField(University, on_delete=models.CASCADE, unique=True)
     name = models.CharField(max_length=200, null=False)
 
     def __str__(self) -> str:
@@ -27,7 +27,7 @@ class Faculty(models.Model):
 
         :return: A string.
         """
-        return f"{self.name} {self.university}"
+        return f"{self.name}, {self.university}"
 
 
 class Major(models.Model):
@@ -42,4 +42,4 @@ class Major(models.Model):
 
         :return: A string.
         """
-        return f"{self.name} {self.faculty.name} {self.faculty.university.name}"
+        return f"{self.name}, {self.faculty.__str__()}"

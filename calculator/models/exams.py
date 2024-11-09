@@ -15,4 +15,3 @@ class Exams(models.Model):
     name = models.CharField(max_length=200)
     max_score = models.FloatField(default=100.00)
     core = models.BooleanField(default=False)
-
