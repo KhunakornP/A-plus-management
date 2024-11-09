@@ -142,11 +142,6 @@ function trendAnnotation(x1, x2, y1, y2, color) {
 function initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotations, scaleMax) {
     const yMax = trendAnnotations[trendAnnotations.length-2].yMin;
 
-    console.log(dates)
-    console.log(estHistData)
-    console.log(lineAnnotations)
-    console.log(trendAnnotations)
-
     return new Chart(ctx, {
         type: 'bar',
         data: {
