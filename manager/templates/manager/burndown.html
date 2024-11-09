@@ -9,13 +9,12 @@
     <div class="col-md-8 col-12">
       <div class="card">
         <div class="card-body">
-          <h5>Burndown Chart</h5>
+          <div class="d-flex justify-content-between align-items-center">
+            <h5>Burndown Chart</h5>
+            <select id="timescaleSelector" class="form-select w-auto">
+            </select>
+          </div>
           <hr>
-          <select id="timescaleSelector">
-            <option value="dates">Dates</option>
-            <option value="months">Months</option>
-            <option value="years">Years</option>
-          </select>
           <canvas id="myChart"></canvas>
         </div>
       </div>

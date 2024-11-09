@@ -441,8 +441,20 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
 
     updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0])
 
-    console.log(aggregateMonths(dates, estHistData, lineAnnotations, trendAnnotations))
-    console.log(aggregateYears(dates, estHistData, lineAnnotations, trendAnnotations))
+    const firstYear = parseInt(estHistData[0].x.split('-')[0]);
+    const lastYear = parseInt(formatDate(velocityEndDate[0]).split('-')[0]);
+    
+    if (firstYear === lastYear) {
+        timescaleSelector.innerHTML = `
+            <option value="dates">Dates</option>
+            <option value="months">Months</option>
+        `;
+    } else {
+        timescaleSelector.innerHTML = `
+            <option value="dates">Dates</option>
+            <option value="years">Years</option>
+        `;
+    }
 
     document.getElementById('timescaleSelector').addEventListener('change', function() {
         const timescale = this.value;
