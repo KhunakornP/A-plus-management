@@ -54,7 +54,7 @@ class SetUpPageTest(TestCase):
         self.assertFalse(self.user1.has_perm("manager.is_parent"))
         self.assertFalse(self.user1.has_perm("manager.is_taking_A_levels"))
 
-    def test_get_A_level_student_perms(self):
+    def test_get_a_level_student_perms(self):
         """Test getting permissions as an A-level student."""
         self.client.login(username="myTcasser", password="myTcasdabest123")
         url = reverse("manager:user_setup")
