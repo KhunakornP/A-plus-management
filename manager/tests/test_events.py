@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from django.utils import timezone
 from .templates_for_tests import BaseTestCase
-from manager.models import Event
+from manager.models import Event, today_midnight
 from typing import Any, Optional
 
 
@@ -26,7 +26,7 @@ def create_event(
     if not start_date:
         start_date = timezone.now()
     if not end_date:
-        end_date = timezone.now()
+        end_date = today_midnight()
     return Event.objects.create(
         user=user,
         title=title,
@@ -55,7 +55,7 @@ def create_event_json(
     if not start_date:
         start_date = timezone.now()
     if not end_date:
-        end_date = timezone.now()
+        end_date = today_midnight()
 
     data = {"details": "something"}
     if id is not None:
