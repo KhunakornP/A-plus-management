@@ -445,12 +445,12 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     const lastYear = parseInt(formatDate(velocityEndDate[0]).split('-')[0]);
     
     if (firstYear === lastYear) {
-        timescaleSelector.innerHTML = `
+        document.getElementById('timescaleSelector').innerHTML = `
             <option value="dates">Dates</option>
             <option value="months">Months</option>
         `;
     } else {
-        timescaleSelector.innerHTML = `
+        document.getElementById('timescaleSelector').innerHTML = `
             <option value="dates">Dates</option>
             <option value="years">Years</option>
         `;
