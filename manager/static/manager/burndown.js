@@ -139,8 +139,13 @@ function trendAnnotation(x1, x2, y1, y2, color) {
   }];
 }
 
-function initializeChart(ctx, dates, estHistData, annotations) {
-    const yMax = annotations[annotations.length-2].yMin;
+function initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotations, scaleMax) {
+    const yMax = trendAnnotations[trendAnnotations.length-2].yMin;
+
+    console.log(dates)
+    console.log(estHistData)
+    console.log(lineAnnotations)
+    console.log(trendAnnotations)
 
     return new Chart(ctx, {
         type: 'bar',
@@ -158,7 +163,7 @@ function initializeChart(ctx, dates, estHistData, annotations) {
             scales: {
                 x: {
                     min: 0,
-                    max: 13,
+                    max: scaleMax,
                 },
                 y: {
                     beginAtZero: true,
@@ -167,34 +172,14 @@ function initializeChart(ctx, dates, estHistData, annotations) {
             },
             plugins: {
                 annotation: {
-                    annotations: annotations
+                    annotations: [...lineAnnotations, ...trendAnnotations]
+                },
+                legend: {
+                    display: false
                 }
             }
         }
     });
-}
-
-function scroller(scroll, chart) {
-    const dataLength = chart.data.labels.length
-
-    if (scroll.deltaY > 0) {
-        if (chart.config.options.scales.x.max >= dataLength - 1) {
-            chart.config.options.scales.x.min = dataLength - 14;
-            chart.config.options.scales.x.max = dataLength - 1;
-        } else {
-            chart.config.options.scales.x.min += 1;
-            chart.config.options.scales.x.max += 1;
-        }
-    } else if (scroll.deltaY < 0) {
-        if (chart.config.options.scales.x.min <= 0) {
-            chart.config.options.scales.x.min = 0;
-            chart.config.options.scales.x.max = 13;
-        } else {
-            chart.config.options.scales.x.min -= 1;
-            chart.config.options.scales.x.max -= 1;
-        }
-    }
-    chart.update();
 }
 
 function getNearestTrendData(estHistData, taskAnnotations, eventAnnotations) {
@@ -338,7 +323,7 @@ function calculateVelocityTrend(estHistData) {
     const ehEndDate = formatDate(maxDate);
     const velocityEndDate = [new Date(ehEndDate)];
     velocityEndDate[0].setHours(23, 59, 59, 999)
-    const velocityTrend = trendAnnotation(maxElement.x, ehEndDate, maxElement.y, 'rgba(75, 192, 192, 1)');
+    const velocityTrend = trendAnnotation(maxElement.x, ehEndDate, maxElement.y, 0, 'rgba(75, 192, 192, 1)');
     return { velocityEndDate, velocityTrend, velocitySlope};
 }
 
@@ -380,20 +365,19 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     const nearestTrend = trendAnnotation(x1, x2, y1, y2, color);
 
     // Combine all annotations
-    const annotations = [...taskAnnotations, ...eventAnnotations, ...todayAnnotation, ...velocityTrend, ...nearestTrend];
+    const lineAnnotations = [...taskAnnotations, ...eventAnnotations, ...todayAnnotation];
+    const trendAnnotations = [...velocityTrend, ...nearestTrend];
 
     // Initialize the chart with the data and annotations
+    const scaleMax = 30
     const ctx = document.getElementById('myChart');
-    const chart = initializeChart(ctx, dates, estHistData, annotations);
+    const chart = initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotations, scaleMax);
 
     // Create checkboxes for tasks and events to update annotations dynamically
     createCheckboxes(document.getElementById('task-checkboxes'), filteredTasksData, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
     createCheckboxes(document.getElementById('event-checkboxes'), filteredEventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
 
     updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0])
-    chart.canvas.addEventListener('wheel', (e) => {
-        scroller(e, chart);
-    })
 
   })
   .catch(error => {
