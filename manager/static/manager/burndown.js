@@ -322,6 +322,73 @@ function calculateVelocityTrend(estHistData) {
     return { velocityEndDate, velocityTrend, velocitySlope};
 }
 
+function aggregateMonths(dates, estHistData, lineAnnotations, trendAnnotations) {
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+    // Aggregate dates to months
+    const months = [...new Set(dates.map(date => monthNames[new Date(date).getMonth()]))];
+
+    // Aggregate estHistData by months
+    const estHistDataByMonth = {};
+    estHistData.forEach(({ x, y }) => {
+        const month = monthNames[new Date(x).getMonth()];
+        if (!estHistDataByMonth[month]) estHistDataByMonth[month] = 0;
+        estHistDataByMonth[month] += y;
+    });
+    const aggregatedEstHistData = Object.keys(estHistDataByMonth).map(month => ({ x: month, y: estHistDataByMonth[month] }));
+
+    // Aggregate lineAnnotations by months
+    const aggregatedLineAnnotations = lineAnnotations.map(annotation => {
+        const month = monthNames[new Date(annotation.value).getMonth()];
+        return { ...annotation, value: month };
+    });
+
+    // Aggregate trendAnnotations by months
+    const aggregatedTrendAnnotations = trendAnnotations.map(annotation => {
+        const monthValue = monthNames[new Date(annotation.value).getMonth()];
+        const monthEndValue = monthNames[new Date(annotation.endValue).getMonth()];
+        const monthXMin = monthNames[new Date(annotation.xMin).getMonth()];
+        const monthXMax = monthNames[new Date(annotation.xMax).getMonth()];
+        const yMin = aggregatedEstHistData.find(data => data.x === monthXMin)?.y || 0;
+        return { ...annotation, value: monthValue, endValue: monthEndValue, xMin: monthXMin, xMax: monthXMax, yMin };
+    });
+
+    return [months, aggregatedEstHistData, aggregatedLineAnnotations, aggregatedTrendAnnotations];
+}
+
+function aggregateYears(dates, estHistData, lineAnnotations, trendAnnotations) {
+    // Aggregate dates to years
+    const years = [...new Set(dates.map(date => new Date(date).getFullYear().toString()))];
+
+    // Aggregate estHistData by years
+    const estHistDataByYear = {};
+    estHistData.forEach(({ x, y }) => {
+        const year = new Date(x).getFullYear().toString();
+        if (!estHistDataByYear[year]) estHistDataByYear[year] = 0;
+        estHistDataByYear[year] += y;
+    });
+    const aggregatedEstHistData = Object.keys(estHistDataByYear).map(year => ({ x: year, y: estHistDataByYear[year] }));
+
+    // Aggregate lineAnnotations by years
+    const aggregatedLineAnnotations = lineAnnotations.map(annotation => {
+        const year = new Date(annotation.value).getFullYear().toString();
+        return { ...annotation, value: year };
+    });
+
+    // Aggregate trendAnnotations by years
+    const aggregatedTrendAnnotations = trendAnnotations.map(annotation => {
+        const yearValue = new Date(annotation.value).getFullYear().toString();
+        const yearEndValue = new Date(annotation.endValue).getFullYear().toString();
+        const yearXMin = new Date(annotation.xMin).getFullYear().toString();
+        const yearXMax = new Date(annotation.xMax).getFullYear().toString();
+        const yMin = aggregatedEstHistData.find(data => data.x === yearXMin)?.y || 0;
+        return { ...annotation, value: yearValue, endValue: yearEndValue, xMin: yearXMin, xMax: yearXMax, yMin };
+    });
+
+    return [years, aggregatedEstHistData, aggregatedLineAnnotations, aggregatedTrendAnnotations];
+}
+
+
 Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
   .then(([estimateHistoryData, tasksData, eventData]) => {
     // Fill estimate history data
@@ -366,13 +433,37 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     // Initialize the chart with the data and annotations
     const scaleMax = 30
     const ctx = document.getElementById('myChart');
-    const chart = initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotations, scaleMax);
+    let chart = initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotations, scaleMax);
 
     // Create checkboxes for tasks and events to update annotations dynamically
     createCheckboxes(document.getElementById('task-checkboxes'), filteredTasksData, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
     createCheckboxes(document.getElementById('event-checkboxes'), filteredEventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
 
     updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0])
+
+    console.log(aggregateMonths(dates, estHistData, lineAnnotations, trendAnnotations))
+    console.log(aggregateYears(dates, estHistData, lineAnnotations, trendAnnotations))
+
+    document.getElementById('timescaleSelector').addEventListener('change', function() {
+        const timescale = this.value;
+        let aggregatedData;
+    
+        if (timescale === 'months') {
+            aggregatedData = aggregateMonths(dates, estHistData, lineAnnotations, trendAnnotations);
+        } else if (timescale === 'years') {
+            aggregatedData = aggregateYears(dates, estHistData, lineAnnotations, trendAnnotations);
+        } else {
+            aggregatedData = [dates, estHistData, lineAnnotations, trendAnnotations];
+        }
+
+        const checkboxes = document.querySelectorAll('#task-checkboxes input, #event-checkboxes input');
+        checkboxes.forEach(checkbox => {
+            checkbox.disabled = (timescale !== 'dates');
+        });
+    
+        chart.destroy();
+        chart = initializeChart(ctx, ...aggregatedData, scaleMax);
+    });
 
   })
   .catch(error => {
