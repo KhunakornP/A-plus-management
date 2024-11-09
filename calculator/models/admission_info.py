@@ -6,8 +6,11 @@ from .exams import Exams
 from django.core.validators import MaxValueValidator
 
 
-class Criteria(models.Model):
-    """A passing criteria and the weight of each exam."""
+class Criterion(models.Model):
+    """A passing criteria and the weight of each exam.
+
+    Criterion is a singular form of criteria, according to Merriam-Webster dictionary.
+    """
 
     exam = models.ForeignKey(Exams)
     min_score = models.FloatField()
@@ -22,4 +25,4 @@ class CriteriaSet(models.Model):
     """
 
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
-    criteria_set = models.ManyToManyField(Criteria)
+    criteria = models.ManyToManyField(Criterion)
