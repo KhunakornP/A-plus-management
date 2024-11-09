@@ -136,13 +136,14 @@ class EventViewSetTests(BaseTestCase):
     def test_update_event_with_invalid_data(self):
         """Updating an event with invalid data should raise HTTP 400."""
         event = create_event(self.user1, "goodbye")
-        new_event = {"name": 1234, "id": event.id}
-        self.client.put(
+        new_event = {"name": 1234, "id": event.id, "start": 1234}
+        response = self.client.put(
             f"/api/events/{event.id}/",
             new_event,
             format="json",
             content_type="application/json",
         )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         event.refresh_from_db()
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(event.title, "goodbye")
@@ -166,6 +167,12 @@ class EventViewSetTests(BaseTestCase):
             datetime.fromisoformat(request.data["end_date"]), event_json["end"]
         )
         self.assertEqual(request.data["details"], event_json["details"])
+
+    def test_get_invalid_event(self):
+        """Test getting a non-existent event info."""
+        response = self.client.get("/api/events/9999/")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "Event not found")
 
     def test_get_all_events(self):
         """Test getting all events."""
