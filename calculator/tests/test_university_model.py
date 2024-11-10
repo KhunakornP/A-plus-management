@@ -1,8 +1,7 @@
 """Test cases for University, Faculty and Major models."""
 
-from django.test import TestCase
 from django.db.utils import IntegrityError
-from calculator.models import University, Major, Faculty
+from calculator.models import Major, Faculty
 from .tempalte_for_tests import CalculatorBaseTestCase
 
 
