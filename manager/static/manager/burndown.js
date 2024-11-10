@@ -191,7 +191,13 @@ function trendAnnotation(x1, x2, y1, y2, color) {
 }
 
 function initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotations, scaleMax) {
-    const yMax = trendAnnotations[0].yMin;
+
+    const chartStartDate = lineAnnotations[lineAnnotations.length - 1].value;
+
+    const startIndex = dates.indexOf(chartStartDate);
+    const adjustedStartIndex = startIndex <= 7 ? 0 : startIndex - 7;
+    const endIndex = startIndex + scaleMax;
+
 
     return new Chart(ctx, {
         type: 'bar',
@@ -208,12 +214,12 @@ function initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotati
         options: {
             scales: {
                 x: {
-                    min: 0,
-                    max: scaleMax,
+                    type: 'category',
+                    min: dates[adjustedStartIndex],
+                    max: dates[endIndex],
                 },
                 y: {
                     beginAtZero: true,
-                    max: yMax
                 }
             },
             plugins: {
