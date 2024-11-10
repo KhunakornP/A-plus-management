@@ -1,7 +1,10 @@
+const MINUTE_TO_MILLISECOND = 60 * 1000;
+const MILLISECOND_TO_DAY = 1 / (1000 * 60 * 60 * 24);
+
 function formatLocalISO(dateUTC) {
   // formats UTC time to local time
   const dateTime = new Date(dateUTC);
-  const timeZoneOffSet = dateTime.getTimezoneOffset() * 60 * 1000;
+  const timeZoneOffSet = dateTime.getTimezoneOffset() * MINUTE_TO_MILLISECOND;
   let dateTimeLocal = dateTime - timeZoneOffSet;
   dateTimeLocal = new Date(dateTimeLocal);
   let iso = dateTimeLocal.toISOString();
@@ -22,6 +25,29 @@ function getValidDateISOString(dateLocalStr) {
   return defaultDate.toISOString();
 }
 
+function getTimeDiff(dateStr) {
+  const dueDate = new Date(formatLocalISO(dateStr));
+  const today = new Date();
+  const timeDiff = (dueDate - today) * MILLISECOND_TO_DAY;
+  return timeDiff;
+}
+
+function taskNearDueDate(dateStr) {
+  const timeDiff = getTimeDiff(dateStr);
+  if (0 < timeDiff && timeDiff <= 3) {
+    return true;
+  }
+  return false;
+}
+
+function taskPassedDueDate(dateStr) {
+  const timeDiff = getTimeDiff(dateStr);
+  if (0 >= timeDiff) {
+    return true;
+  }
+  return false;
+}
+
 function getValidEstimatedTime(time) {
   if (time === '') {
     return 0;
@@ -29,4 +55,64 @@ function getValidEstimatedTime(time) {
   return Number(time);
 }
 
-export { formatLocalISO, getValidDateISOString, getValidEstimatedTime };
+async function processAndAppend(children, parent, func) {
+  if (parent !== null) {
+    for (const child of children) {
+      parent.appendChild(func(child));
+    }
+  }
+}
+
+function toggleInputFields(toggleables, on) {
+  if (on) {
+    for (const toggleable of toggleables) {
+      toggleable.removeAttribute('readonly');
+      toggleable.classList.remove('form-control-plaintext');
+      toggleable.classList.add('form-control');
+    }
+  } else {
+    for (const toggleable of toggleables) {
+      toggleable.setAttribute('readonly', true);
+      toggleable.classList.remove('form-control');
+      toggleable.classList.add('form-control-plaintext');
+    }
+  }
+}
+
+function getErrorDiv(message, id) {
+  let errorDiv = document.getElementById(id);
+  if (errorDiv === null) {
+    errorDiv = document.createElement('div');
+    errorDiv.setAttribute('class', 'text-center text-danger error');
+    errorDiv.innerHTML = `<small>${message}</small>`;
+    errorDiv.id = id;
+  }
+  return errorDiv;
+}
+
+function insertErrorDiv(inputField, errorDiv) {
+  const div = document.getElementById(errorDiv.id);
+  if (div === null) {
+    inputField.parentNode.insertBefore(errorDiv, inputField.nextSibling);
+  }
+}
+
+function removeErrorDivs() {
+  const errorDivs = document.querySelectorAll('.error');
+  errorDivs.forEach((div) => {
+    div.remove();
+  });
+}
+
+export {
+  formatLocalISO,
+  getValidDateISOString,
+  getValidEstimatedTime,
+  processAndAppend,
+  toggleInputFields,
+  taskNearDueDate,
+  taskPassedDueDate,
+  getErrorDiv,
+  insertErrorDiv,
+  removeErrorDivs,
+};
