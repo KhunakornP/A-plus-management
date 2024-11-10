@@ -106,6 +106,7 @@ function fillEstHistData(data) {
     const today = new Date();
 
     data.forEach((entry, index) => {
+        if (result.length >= 3000) return;
         const currentDate = new Date(entry.date);
         const nextDate = index < data.length - 1 ? new Date(data[index + 1].date) : null;
         result.push({ x: entry.date, y: entry.time_remaining });
@@ -114,7 +115,7 @@ function fillEstHistData(data) {
             let gapDate = new Date(currentDate);
             gapDate.setDate(gapDate.getDate() + 1);
 
-            while (gapDate < nextDate) {
+            while (gapDate < nextDate && result.length < 3000) {
                 result.push({ x: formatDate(gapDate), y: lastKnownTimeRemaining });
                 gapDate.setDate(gapDate.getDate() + 1);
             }
@@ -124,7 +125,7 @@ function fillEstHistData(data) {
     let lastDate = new Date(data[data.length - 1].date);
     lastDate.setDate(lastDate.getDate() + 1);
 
-    while (lastDate <= today) {
+    while (lastDate <= today && result.length < 3000) {
         result.push({ x: formatDate(lastDate), y: lastKnownTimeRemaining });
         lastDate.setDate(lastDate.getDate() + 1);
     }
@@ -475,7 +476,7 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
         ctx.innerHTML = `It seems like you haven't added any tasks. <br> Add some tasks on the taskboard.`;
         ctx.style.height = '220px';
         ctx.style.textAlign = 'center';
-        
+
         updateDoneByEstimate(0)
         updateVelocityEstimate(0)
         updateWarningEstimate(0)
