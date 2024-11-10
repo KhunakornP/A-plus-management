@@ -24,7 +24,7 @@ async function fetchEstimateHistoryData() {
 }
 
 // Return the number of days between d1 and d2
-// par: String, ret: Number
+// par: Date, ret: Number
 function calculateDaysBetween(d1, d2) {
     const startDate = new Date(d1);
     const endDate = new Date(d2);
@@ -140,7 +140,7 @@ function trendAnnotation(x1, x2, y1, y2, color) {
 }
 
 function initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotations, scaleMax) {
-    const yMax = trendAnnotations[trendAnnotations.length-2].yMin;
+    const yMax = trendAnnotations[0].yMin;
 
     return new Chart(ctx, {
         type: 'bar',
@@ -247,9 +247,9 @@ function updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData
 
 function createCheckboxes(container, data, type, updateAnnotations) {
     if (data.length === 0) {
-        container.innerText = `There are no ${type}s.`;
+        container.innerText = `${type.charAt(0).toUpperCase() + type.slice(1)}s are on time.`;
         return; 
-    }
+      }      
     data.forEach((item, index) => {
         const checkboxDiv = document.createElement('div');
         const checkbox = document.createElement('input');
@@ -270,7 +270,7 @@ function createCheckboxes(container, data, type, updateAnnotations) {
 }
 
 function updateDoneByEstimate(velocityEndDate) {
-    if (velocityEndDate.length === 0) {
+    if (!velocityEndDate || velocityEndDate.length === 0) {
       document.getElementById("done-by").innerText = `Done-by Estimate: N/A`;
     } else {
       document.getElementById("done-by").innerText = `Done-by Estimate: ${formatDate(velocityEndDate[0])}`;
@@ -310,45 +310,48 @@ function calculateVelocityTrend(estHistData) {
     }
   
     if (ehNDays === 0) {
-      return { velocityEndDate: [], velocityTrend: [] };
+      return { velocityEndDate: [], velocityTrend: [], velocitySlope: 0};
     }
 
     const maxDate = new Date(maxElement.x);
     maxDate.setDate(maxDate.getDate() + ehNDays);
     const ehEndDate = formatDate(maxDate);
     const velocityEndDate = [new Date(ehEndDate)];
+
     velocityEndDate[0].setHours(23, 59, 59, 999)
     const velocityTrend = trendAnnotation(maxElement.x, ehEndDate, maxElement.y, 0, 'rgba(75, 192, 192, 1)');
+
     return { velocityEndDate, velocityTrend, velocitySlope};
 }
 
 function aggregateMonths(dates, estHistData, lineAnnotations, trendAnnotations) {
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     
-    // Aggregate dates to months
-    const months = [...new Set(dates.map(date => monthNames[new Date(date).getMonth()]))];
+    const getMonthYear = date => {
+        const d = new Date(date);
+        return `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+    };
 
-    // Aggregate estHistData by months
+    const months = [...new Set(dates.map(date => getMonthYear(date)))];
+
     const estHistDataByMonth = {};
     estHistData.forEach(({ x, y }) => {
-        const month = monthNames[new Date(x).getMonth()];
+        const month = getMonthYear(x);
         if (!estHistDataByMonth[month]) estHistDataByMonth[month] = 0;
         estHistDataByMonth[month] += y;
     });
     const aggregatedEstHistData = Object.keys(estHistDataByMonth).map(month => ({ x: month, y: estHistDataByMonth[month] }));
 
-    // Aggregate lineAnnotations by months
     const aggregatedLineAnnotations = lineAnnotations.map(annotation => {
-        const month = monthNames[new Date(annotation.value).getMonth()];
+        const month = getMonthYear(annotation.value);
         return { ...annotation, value: month };
     });
 
-    // Aggregate trendAnnotations by months
     const aggregatedTrendAnnotations = trendAnnotations.map(annotation => {
-        const monthValue = monthNames[new Date(annotation.value).getMonth()];
-        const monthEndValue = monthNames[new Date(annotation.endValue).getMonth()];
-        const monthXMin = monthNames[new Date(annotation.xMin).getMonth()];
-        const monthXMax = monthNames[new Date(annotation.xMax).getMonth()];
+        const monthValue = getMonthYear(annotation.value);
+        const monthEndValue = getMonthYear(annotation.endValue);
+        const monthXMin = getMonthYear(annotation.xMin);
+        const monthXMax = getMonthYear(annotation.xMax);
         const yMin = aggregatedEstHistData.find(data => data.x === monthXMin)?.y || 0;
         return { ...annotation, value: monthValue, endValue: monthEndValue, xMin: monthXMin, xMax: monthXMax, yMin };
     });
@@ -391,11 +394,24 @@ function aggregateYears(dates, estHistData, lineAnnotations, trendAnnotations) {
 
 Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
   .then(([estimateHistoryData, tasksData, eventData]) => {
+
+    if (estimateHistoryData.length === 0 ){
+        const ctx = document.getElementById('blank');
+        ctx.textContent = "It seems like you haven't added any tasks. \n Add some tasks on the taskboard.";
+        ctx.style.height = '500px';
+        
+        updateDoneByEstimate(0)
+        updateVelocityEstimate(0)
+        updateWarningEstimate(0)
+        
+        return;
+    }
+
     // Fill estimate history data
     const estHistData = fillEstHistData(estimateHistoryData);
 
     // Calculate velocity trend and update done-by estimate
-    const { velocityEndDate, velocityTrend, velocitySlope} = calculateVelocityTrend(estHistData);
+    const { velocityEndDate, velocityTrend, velocitySlope } = calculateVelocityTrend(estHistData);
     updateVelocityEstimate(velocitySlope);
     updateDoneByEstimate(velocityEndDate);
 
@@ -440,21 +456,6 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     createCheckboxes(document.getElementById('event-checkboxes'), filteredEventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
 
     updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0])
-
-    const firstYear = parseInt(estHistData[0].x.split('-')[0]);
-    const lastYear = parseInt(formatDate(velocityEndDate[0]).split('-')[0]);
-    
-    if (firstYear === lastYear) {
-        document.getElementById('timescaleSelector').innerHTML = `
-            <option value="dates">Dates</option>
-            <option value="months">Months</option>
-        `;
-    } else {
-        document.getElementById('timescaleSelector').innerHTML = `
-            <option value="dates">Dates</option>
-            <option value="years">Years</option>
-        `;
-    }
 
     document.getElementById('timescaleSelector').addEventListener('change', function() {
         const timescale = this.value;

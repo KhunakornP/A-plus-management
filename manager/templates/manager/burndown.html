@@ -11,10 +11,14 @@
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
             <h5>Burndown Chart</h5>
-            <select id="timescaleSelector" class="form-select w-auto">
+            <select id="timescaleSelector">
+              <option value="dates">Dates</option>
+              <option value="months">Months</option>
+              <option value="years">Years</option>
             </select>
           </div>
           <hr>
+          <div id="blank"></div>
           <canvas id="myChart"></canvas>
         </div>
       </div>
