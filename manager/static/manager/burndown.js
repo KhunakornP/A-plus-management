@@ -23,15 +23,29 @@ async function fetchEstimateHistoryData() {
     return estimateHistories;
 }
 
-// Return the number of days between d1 and d2
-// par: Date, ret: Number
+/**
+ * Returns the number of days between two dates.
+ * 
+ * @function calculateDaysBetween
+ * @param {Date} d1 - The start date.
+ * @param {Date} d2 - The end date.
+ * @returns {Number} The number of days between d1 and d2.
+ */
 function calculateDaysBetween(d1, d2) {
     const startDate = new Date(d1);
     const endDate = new Date(d2);
     return (endDate - startDate) / numberOfMiliseconds;
-  }
+}
 
-// ret: num
+/**
+ * Calculates the slope between two points over a given number of days.
+ * 
+ * @function calculateSlope
+ * @param {Number} t1 - The value at the first point.
+ * @param {Number} t2 - The value at the second point.
+ * @param {Number} daysBetween - The number of days between the two points.
+ * @returns {Number} The slope between t1 and t2.
+ */
 function calculateSlope(t1, t2, daysBetween) {
     if (daysBetween === 0) {
         return -t1;
@@ -39,7 +53,13 @@ function calculateSlope(t1, t2, daysBetween) {
     return (t2 - t1) / daysBetween;
 }
 
-// ret: Date
+/**
+ * Formats a date to 'YYYY-MM-DD' format.
+ * 
+ * @function formatDate
+ * @param {Date} date - The date to format.
+ * @returns {String} The formatted date.
+ */
 function formatDate(date) {
     return date.toLocaleDateString('en-CA').split('T')[0];
 }
@@ -51,8 +71,14 @@ function getAllDates(estimateHistoryData, tasksData, eventData, velocityEndDate)
     return [...estimateDates, ...taskEndDates, ...eventEndDates, ...velocityEndDate, estimateDates[estimateDates.length - 1]];
 }
 
-//Return a list of dates from startDate to endDate
-// par: Date, ret: [String]
+/**
+ * Returns a list of dates from startDate to endDate.
+ * 
+ * @function generateDateRange
+ * @param {Date} startDate - The start date.
+ * @param {Date} endDate - The end date.
+ * @returns {String[]} An array of date strings in 'YYYY-MM-DD' format.
+ */
 function generateDateRange(startDate, endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -67,6 +93,13 @@ function generateDateRange(startDate, endDate) {
     return dateArray;
 }
 
+/**
+ * Fills in the estimate history data with daily entries, ensuring there are no gaps between dates.
+ * 
+ * @function fillEstHistData
+ * @param {Object[]} data - Array of estimate history objects, each containing a date and time_remaining property.
+ * @returns {Object[]} An array of objects with x (date) and y (time remaining) properties, filled in for each day.
+ */
 function fillEstHistData(data) {
     const result = [];
     let lastKnownTimeRemaining = null;
@@ -99,6 +132,14 @@ function fillEstHistData(data) {
     return result;
 }
 
+/**
+ * Creates line annotations for a chart based on provided data.
+ * 
+ * @function lineAnnotation
+ * @param {Object[]} data - Array of objects, each containing an end_date and title property.
+ * @param {String} color - The color of the annotation lines.
+ * @returns {Object[]} An array of annotation objects for the chart.
+ */
 function lineAnnotation(data, color){
     const endDates = data.map(item => formatDate(new Date(item.end_date)));
     const titles = data.map(item => item.title);
@@ -118,9 +159,19 @@ function lineAnnotation(data, color){
     }));
 
     return annotations;
-      
 }
 
+/**
+ * Creates a trend line annotation for a chart.
+ * 
+ * @function trendAnnotation
+ * @param {String} x1 - The starting x-coordinate value.
+ * @param {String} x2 - The ending x-coordinate value.
+ * @param {Number} y1 - The starting y-coordinate value.
+ * @param {Number} y2 - The ending y-coordinate value.
+ * @param {String} color - The color of the trend line.
+ * @returns {Object[]} An array containing a single trend line annotation object for the chart.
+ */
 function trendAnnotation(x1, x2, y1, y2, color) {
   return [{
       type: 'line',
@@ -179,7 +230,7 @@ function initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotati
 
 function getNearestTrendData(estHistData, taskAnnotations, eventAnnotations) {
     const today = new Date();
-    today.setHours(0, 0, 0, 0)
+    today.setHours(0, 0, 0, 0);
     const x1 = formatDate(today);
     const estToday = estHistData.find(item => item.x === x1);
     const y1 = estToday ? estToday.y : 0;
@@ -269,22 +320,40 @@ function createCheckboxes(container, data, type, updateAnnotations) {
     });
 }
 
+/**
+ * Updates the "Done-by Estimate" display based on the provided velocity end date.
+ * 
+ * @function updateDoneByEstimate
+ * @param {Date[]} velocityEndDate - Array containing the velocity end date.
+ */
 function updateDoneByEstimate(velocityEndDate) {
     if (!velocityEndDate || velocityEndDate.length === 0) {
-      document.getElementById("done-by").innerText = `Done-by Estimate: N/A`;
+        document.getElementById("done-by").innerText = `Done-by Estimate: N/A`;
     } else {
-      document.getElementById("done-by").innerText = `Done-by Estimate: ${formatDate(velocityEndDate[0])}`;
+        document.getElementById("done-by").innerText = `Done-by Estimate: ${formatDate(velocityEndDate[0])}`;
     }
 }
 
+/**
+ * Updates the "Average Velocity" display based on the provided velocity slope.
+ * 
+ * @function updateVelocityEstimate
+ * @param {Number} velocitySlope - The calculated velocity slope.
+ */
 function updateVelocityEstimate(velocitySlope) {
-    if (velocitySlope === 0 ||  isNaN(velocitySlope)) {
+    if (velocitySlope === 0 || isNaN(velocitySlope)) {
         document.getElementById("slope").innerText = `Average Velocity: N/A`;
     } else {
         document.getElementById("slope").innerText = `Average Velocity: ${-velocitySlope.toFixed(2)} hr/day`;
     }
 }
 
+/**
+ * Updates the "Required Velocity" display based on the provided velocity slope.
+ * 
+ * @function updateWarningEstimate
+ * @param {Number} velocitySlope - The calculated velocity slope.
+ */
 function updateWarningEstimate(velocitySlope) {
     if (velocitySlope === 0 || isNaN(velocitySlope)) {
         document.getElementById('warning').innerText = 'Required velocity: N/A';
