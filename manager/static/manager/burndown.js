@@ -472,8 +472,9 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
 
     if (estimateHistoryData.length === 0 ){
         const ctx = document.getElementById('blank');
-        ctx.textContent = "It seems like you haven't added any tasks. \n Add some tasks on the taskboard.";
+        ctx.innerHTML = `It seems like you haven't added any tasks. <br> Add some tasks on the taskboard.`;
         ctx.style.height = '220px';
+        ctx.style.textAlign = 'center';
         
         updateDoneByEstimate(0)
         updateVelocityEstimate(0)
