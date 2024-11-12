@@ -9,6 +9,12 @@ from typing import Any, Optional
 from .templates_for_tests import create_taskboard, create_task
 from django.contrib.auth.models import User
 
+TODAY_DATETIME = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+TODAY_ISO_STR = TODAY_DATETIME.strftime("%Y-%m-%dT%H:%M:%S")
+TOMORROW_ISO_STR = (TODAY_DATETIME + timezone.timedelta(days=1)).strftime(
+    "%Y-%m-%dT%H:%M:%S"
+)
+
 
 def create_task_json(
     title: str,
@@ -83,6 +89,14 @@ class TaskViewTests(TestCase):
         """Test getting a non-existent task info."""
         response = self.client.get("/api/tasks/9999/")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_all_tasks_in_range(self):
+        """Test getting tasks within a given range of days."""
+        response = self.client.get(
+            f"/api/tasks/?start_date={TODAY_ISO_STR}&end_date={TOMORROW_ISO_STR}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
 
     def test_get_all_status_not_done(self):
         """Test getting tasks with status not equal to DONE."""
