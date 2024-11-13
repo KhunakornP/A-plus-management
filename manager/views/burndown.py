@@ -3,30 +3,62 @@
 from manager.serializers import EstimateHistorySerializer
 from manager.models import EstimateHistory
 from django.views import generic
-from django.shortcuts import get_object_or_404
-from django.http import Http404
-from typing import Optional
-from manager.models import Taskboard
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
 
-def get_taskboard(taskboard_id: int) -> Optional[Taskboard]:
-    """Return a Taskboard which has a specific taskboard id.
+class VelocityViewSet(viewsets.ViewSet):
+    """Viewset for getting velocity."""
 
-    :param taskboard_id: the ID of the taskboard
-    :return: a Taskboard object, return None if it does not exists
-    """
-    try:
-        return get_object_or_404(Taskboard, pk=taskboard_id)
-    except Http404:
-        return None
+    def list(self, request):
+        """Get a velocity depending on the given query parameters."""
+        mode = request.query_params.get("mode")
+        start_id = request.query_params.get("start")
+        end_id = request.query_params.get("end")
+        velocity = self.compute_basic_velocity(start_id, end_id)
+        if mode == "average":
+            velocity = self.compute_average_velocity(start_id, end_id)
+        return Response({"velocity": velocity}, status=status.HTTP_200_OK)
 
+    def compute_basic_velocity(self, start_id: int, end_id: int) -> float:
+        """
+        Return the velocity from the given estimate history objects.
 
-def get_estimate_history_data(taskboard_id):
-    """Get EstimateHistory data."""
-    taskboard = get_taskboard(taskboard_id)
-    return EstimateHistory.objects.filter(taskboard=taskboard).order_by("date")
+        This computation does not take work created between the start and
+        end date into account which sacrifices precision for speed.
+
+        :param start_id: The id of the first estimate history object.
+        :param end_id: The id of the last estimate history object.
+        :return: The averaged difference of velocity from the start to end date.
+        """
+        start_estimate = EstimateHistory.objects.get(pk=start_id)
+        end_estimate = EstimateHistory.objects.get(pk=end_id)
+        work_done = start_estimate.time_remaining - end_estimate.time_remaining
+        # add 1 because start day is inclusive
+        length = (end_estimate.date.day - start_estimate.date.day) + 1
+        return work_done / length
+
+    def compute_average_velocity(self, start_id: int, end_id: int) -> float:
+        """
+        Return the average velocity of the user based on work done.
+
+        Calculates the amount of work done between the start and end dates and
+        computes the average work done per given unit of time.
+        :param start_id: The id of the first estimate history object.
+        :param end_id: The id of the last estimate history object.
+        :return: The average work done per unit of time.
+        """
+        start_estimate = EstimateHistory.objects.get(pk=start_id)
+        end_estimate = EstimateHistory.objects.get(pk=end_id)
+        # add 1 because start day is inclusive
+        length = (end_estimate.date.day - start_estimate.date.day) + 1
+        history = EstimateHistory.objects.filter(taskboard=start_estimate.taskboard)
+        total_work = 0
+        for day in range(1, len(history)):
+            diff = history[day - 1].time_remaining - history[day].time_remaining
+            if 0 < diff:
+                total_work += diff
+        return total_work / length
 
 
 class BurndownView(generic.TemplateView):

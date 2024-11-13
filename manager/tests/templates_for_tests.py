@@ -57,6 +57,9 @@ def create_estimate_hisotry(tb: Taskboard, date, time_remaining: int):
     :param tb: the Taskboard that this task would be bounded to
     :return: a Task object
     """
-    return EstimateHistory.objects.create(
+    history = EstimateHistory.objects.create(
         taskboard=tb, date=date, time_remaining=time_remaining
     )
+    history.time_remaining = time_remaining
+    history.save()
+    return history

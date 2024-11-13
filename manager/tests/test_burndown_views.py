@@ -42,3 +42,20 @@ class EstimateHistoryViewTests(TestCase):
         """Test getting a non-existent estimate history info."""
         response = self.client.get("/api/estimate_history/?taskboard=9999")
         self.assertEqual(response.data, [])
+
+    def test_get_simple_velocity(self):
+        """Test getting the velocity for data that is trending downward."""
+        response = self.client.get(
+            f"/api/velocity/?start={self.eh1.id}&end={self.eh3.id}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["velocity"], 10.0)
+
+    def test_get_average_velocity(self):
+        """Test getting the velocity for data that contains recalculation."""
+        eh4 = create_estimate_hisotry(self.tb, self.today + timedelta(days=3), 80)
+        response = self.client.get(
+            f"/api/velocity/?start={self.eh1.id}&end={eh4.id}&mode=average"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["velocity"], 7.5)
