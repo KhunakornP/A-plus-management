@@ -5,6 +5,8 @@ from manager.models import EstimateHistory
 from django.views import generic
 from rest_framework import status, viewsets
 from rest_framework.response import Response
+from django.utils import timezone
+from datetime import datetime
 
 
 class VelocityViewSet(viewsets.ViewSet):
@@ -13,46 +15,49 @@ class VelocityViewSet(viewsets.ViewSet):
     def list(self, request):
         """Get a velocity depending on the given query parameters."""
         mode = request.query_params.get("mode")
-        start_id = request.query_params.get("start")
-        end_id = request.query_params.get("end")
-        velocity = self.compute_basic_velocity(start_id, end_id)
+        start_date = request.query_params.get("start")
+        taskboard_id = request.query_params.get("taskboard")
+        interval = request.query_params.get("interval", "day")
+        velocity = self.compute_basic_velocity(start_date, interval, taskboard_id)
         if mode == "average":
-            velocity = self.compute_average_velocity(start_id, end_id)
+            velocity = self.compute_average_velocity(start_date, interval, taskboard_id)
         return Response({"velocity": velocity}, status=status.HTTP_200_OK)
 
-    def compute_basic_velocity(self, start_id: int, end_id: int) -> float:
+    def compute_basic_velocity(self, start_date: str, unit: str, taskboard_id: int) -> float:
         """
         Return the velocity from the given estimate history objects.
 
         This computation does not take work created between the start and
         end date into account which sacrifices precision for speed.
 
-        :param start_id: The id of the first estimate history object.
-        :param end_id: The id of the last estimate history object.
+        :param start_date: The ISO string of the starting date.
+        :param unit: The unit or interval of time to find the velocity.
+        :param taskboard_id: The id of the taskboard to calculate velocity for.
         :return: The averaged difference of velocity from the start to end date.
         """
-        start_estimate = EstimateHistory.objects.get(pk=start_id)
-        end_estimate = EstimateHistory.objects.get(pk=end_id)
+        start_day = timezone.make_aware(datetime.fromisoformat(start_date))
+        start_estimate = EstimateHistory.objects.filter(date__lte=start_day).last()
+        end_estimate = EstimateHistory.objects.filter(taskboard__id=taskboard_id).last()
         work_done = start_estimate.time_remaining - end_estimate.time_remaining
         # add 1 because start day is inclusive
-        length = (end_estimate.date.day - start_estimate.date.day) + 1
+        length = (timezone.now().day - start_day.day) + 1
         return work_done / length
 
-    def compute_average_velocity(self, start_id: int, end_id: int) -> float:
+    def compute_average_velocity(self, start_date: str, unit: str, taskboard_id: int) -> float:
         """
         Return the average velocity of the user based on work done.
 
-        Calculates the amount of work done between the start and end dates and
-        computes the average work done per given unit of time.
-        :param start_id: The id of the first estimate history object.
-        :param end_id: The id of the last estimate history object.
+        Calculates the amount of work done between the starting date and today
+        then computes the average work done per given unit of time.
+        :param start_date: The ISO string of the start date.
+        :param taskboard_id: The id of the taskboard to calculate velocity for.
+        :param unit: The unit or interval of time to find the velocity.
         :return: The average work done per unit of time.
         """
-        start_estimate = EstimateHistory.objects.get(pk=start_id)
-        end_estimate = EstimateHistory.objects.get(pk=end_id)
+        start_day = timezone.make_aware(datetime.fromisoformat(start_date))
         # add 1 because start day is inclusive
-        length = (end_estimate.date.day - start_estimate.date.day) + 1
-        history = EstimateHistory.objects.filter(taskboard=start_estimate.taskboard)
+        length = (timezone.now().day - start_day.day) + 1
+        history = EstimateHistory.objects.filter(taskboard__id=taskboard_id, date__gte=start_day)
         total_work = 0
         for day in range(1, len(history)):
             diff = history[day - 1].time_remaining - history[day].time_remaining

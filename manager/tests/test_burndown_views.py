@@ -24,13 +24,13 @@ class EstimateHistoryViewTests(TestCase):
 
         self.tb = create_taskboard(self.user, "Test Taskboard")
 
+        self.two_days_before = date.today() - timedelta(days=2)
+        self.yesterday = date.today() - timedelta(days=1)
         self.today = date.today()
-        self.tomorrow = date.today() + timedelta(days=1)
-        self.aftertomorrow = date.today() + timedelta(days=2)
 
-        self.eh1 = create_estimate_hisotry(self.tb, self.today, 70)
-        self.eh2 = create_estimate_hisotry(self.tb, self.tomorrow, 60)
-        self.eh3 = create_estimate_hisotry(self.tb, self.aftertomorrow, 40)
+        self.eh1 = create_estimate_hisotry(self.tb, self.two_days_before, 70)
+        self.eh2 = create_estimate_hisotry(self.tb, self.yesterday, 60)
+        self.eh3 = create_estimate_hisotry(self.tb, self.today, 40)
 
     def test_get_eh_of_taskboard(self):
         """Test getting estimate_history in a specific taskboard."""
@@ -46,16 +46,17 @@ class EstimateHistoryViewTests(TestCase):
     def test_get_simple_velocity(self):
         """Test getting the velocity for data that is trending downward."""
         response = self.client.get(
-            f"/api/velocity/?start={self.eh1.id}&end={self.eh3.id}"
+            f"/api/velocity/?start={self.two_days_before.strftime('%Y-%m-%d')}&taskboard={self.tb.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["velocity"], 10.0)
 
     def test_get_average_velocity(self):
         """Test getting the velocity for data that contains recalculation."""
-        eh4 = create_estimate_hisotry(self.tb, self.today + timedelta(days=3), 80)
+        create_estimate_hisotry(self.tb, self.today - timedelta(days=3), 80)
+        start = self.today - timedelta(days=3)
         response = self.client.get(
-            f"/api/velocity/?start={self.eh1.id}&end={eh4.id}&mode=average"
+            f"/api/velocity/?start={start.strftime('%Y-%m-%d')}&taskboard={self.tb.id}&mode=average"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["velocity"], 7.5)
