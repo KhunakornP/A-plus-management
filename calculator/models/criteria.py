@@ -1,7 +1,6 @@
-"""A module for models relating to admission information such as criteria and score."""
+"""A module for models relating to admission criteria."""
 
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator
 from django.db import models
 from .university import Major
 from .exams import Exams
@@ -27,11 +26,3 @@ class CriteriaSet(models.Model):
 
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
     criteria = models.ManyToManyField(Criterion)
-
-
-class StudentExamScore(models.Model):
-    """A model to store each student's score of each exam."""
-
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
-    exam = models.ForeignKey(Exams, on_delete=models.CASCADE)
-    score = models.FloatField(validators=[MinValueValidator(0)])

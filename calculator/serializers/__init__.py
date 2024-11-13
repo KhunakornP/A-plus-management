@@ -1,4 +1,4 @@
-from .faculty_serializer import FacultySerializer
-from .major_serializer import MajorSerializer
-from .uni_serializer import UniversitySerializer
+from .uni_serializer import UniversitySerializer, FacultySerializer, MajorSerializer
 from .exam_serializer import ExamSerializer
+from .criteria_serializer import CriteriaSetSerializer, CriterionSerializer
+from .exam_score_serializer import ExamScoreSerializer

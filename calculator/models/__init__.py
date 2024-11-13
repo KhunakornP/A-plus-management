@@ -1,3 +1,4 @@
-from .admission_info import StudentExamScore, CriteriaSet, Criterion
+from .criteria import CriteriaSet, Criterion
 from .exams import Exams
 from .university import University, Faculty, Major
+from .student_exam_score import StudentExamScore
