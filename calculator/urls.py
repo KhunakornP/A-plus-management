@@ -5,7 +5,6 @@ from . import views
 
 app_name = "calculator"
 urlpatterns = [
-    path('api/', views.CalculatorAPIView.as_view(), name='calc_api'),
     path('', views.CalculatorView.as_view(), name='calculator'),
     path('1', views.CalculatorView.as_view(), name='calculator_alt'),
     path('2', views.MajorView.as_view(), name='major'),

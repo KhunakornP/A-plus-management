@@ -10,9 +10,9 @@ class CalculatorBaseTestCase(TestCase):
     def setUp(self):
         """Set up the tests."""
         faculty_name = "Engineering"
-        self.university = University.objects.create(name="Kasetsart")
-        self.faculty = Faculty.objects.create(
-            name=faculty_name, university=self.university
+        self.university1 = University.objects.create(name="Kasetsart")
+        self.faculty1 = Faculty.objects.create(
+            name=faculty_name, university=self.university1
         )
         self.university2 = University.objects.create(name="KMITL")
         self.faculty2 = Faculty.objects.create(

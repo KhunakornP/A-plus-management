@@ -2,7 +2,7 @@
 
 from django.contrib.auth.models import User
 from calculator.models import CriteriaSet, Criterion, Major, Exams, StudentExamScore
-from .tempalte_for_tests import CalculatorBaseTestCase
+from .calculator_base_test_case import CalculatorBaseTestCase
 
 
 class AdmissionCriteriaTest(CalculatorBaseTestCase):
@@ -12,7 +12,7 @@ class AdmissionCriteriaTest(CalculatorBaseTestCase):
         """Set up majors and criteria."""
         super().setUp()
         major = Major.objects.create(
-            faculty=self.faculty, code="177013", name="Computer Engineering."
+            faculty=self.faculty1, code="177013", name="Computer Engineering."
         )
 
         self.cs1 = CriteriaSet(major=major)

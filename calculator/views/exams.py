@@ -1,4 +1,4 @@
-"""API View for A-Level Exams."""
+"""API Views for handling Exams."""
 
 from rest_framework import status, viewsets
 from rest_framework.response import Response

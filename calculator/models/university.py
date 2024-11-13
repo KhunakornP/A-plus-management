@@ -19,7 +19,15 @@ class University(models.Model):
 class Faculty(models.Model):
     """Name of different faculties of a university."""
 
-    university = models.OneToOneField(University, on_delete=models.CASCADE, unique=True)
+    class Meta:
+        """Meta definition of faculty.
+
+        Set university faculty names to be composite primary key.
+        """
+
+        unique_together = (("university", "name"),)
+
+    university = models.ForeignKey(University, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, null=False)
 
     def __str__(self) -> str:
