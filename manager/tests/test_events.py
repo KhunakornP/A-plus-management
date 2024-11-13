@@ -8,6 +8,12 @@ from .templates_for_tests import BaseTestCase
 from manager.models import Event
 from typing import Any, Optional
 
+TODAY_DATETIME = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+TODAY_ISO_STR = TODAY_DATETIME.strftime("%Y-%m-%dT%H:%M:%S")
+TOMORROW_ISO_STR = (TODAY_DATETIME + timezone.timedelta(days=1)).strftime(
+    "%Y-%m-%dT%H:%M:%S"
+)
+
 
 def create_event(
     user: User,
@@ -174,3 +180,15 @@ class EventViewSetTests(BaseTestCase):
         create_event(self.user1, "zaijian")
         request = self.client.get("/api/events/")
         self.assertEqual(len(request.data), 3)
+
+    def test_get_events_in_range(self):
+        """Test getting events within a given range of days."""
+        create_event(self.user1, "My birthday", start_date=timezone.now())
+        create_event(self.user1, "Go outside", start_date=timezone.now())
+        future = timezone.now() + timezone.timedelta(days=1000)
+        create_event(self.user1, "Reach heaven", start_date=future)
+        response = self.client.get(
+            f"/api/events/?start_date={TODAY_ISO_STR}&end_date={TOMORROW_ISO_STR}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
