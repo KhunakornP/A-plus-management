@@ -4,6 +4,7 @@ from typing import Any
 from django.db import models
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 from django.views.generic import ListView
 from manager.models import ParentInfo, StudentInfo, User
 
@@ -38,7 +39,7 @@ class ProfileView(ListView):
 
 def update_displayed_name(request):
     """Update user's displayed name.
-    
+
     :param request: request from the user
     :return: redirect to the profile page
     """
@@ -49,50 +50,67 @@ def update_displayed_name(request):
         info = StudentInfo.objects.get(user=user)
     info.displayed_name = request.POST["name"]
     info.save()
+    messages.success(request, "Your displayed name has been updated.")
     return HttpResponseRedirect(reverse("manager:profile"))
+
 
 def add_parent(request):
     """Add a parent to student information.
-    
+
     :param request: request from the user
     :return: redirect to the profile page
     """
-    try:
-        parent_user = User.objects.get(email=request.POST["email"])
-    except User.DoesNotExist:
-        return HttpResponseRedirect(reverse("manager:profile"))
-    if not parent_user.has_perm("manager.is_parent"):
-        return HttpResponseRedirect(reverse("manager:profile"))
+    email = request.POST["email"]
     user = request.user
     info = StudentInfo.objects.get(user=user)
+    try:
+        parent_user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        messages.error(request, f"There is no user with email: {email}.")
+        return HttpResponseRedirect(reverse("manager:profile"))
+    if not parent_user.has_perm("manager.is_parent"):
+        messages.error(request, f"User with email: {email} is not a parent.")
+        return HttpResponseRedirect(reverse("manager:profile"))
+    if info.parent.filter(email=email).exists():
+        messages.warning(request, f"{email} is already in the list")
+        return HttpResponseRedirect(reverse("manager:profile"))
     info.parent.add(parent_user)
+    messages.success(request, f"Successfully added {email} to the list.")
     return HttpResponseRedirect(reverse("manager:profile"))
+
 
 def remove_parent(request):
     """Remove a parent from student information.
-    
+
     :param request: request from the user
     :return: redirect to the profile page
     """
+    email = request.POST["email"]
     try:
-        parent_user = User.objects.get(email=request.POST["email"])
+        parent_user = User.objects.get(email=email)
     except User.DoesNotExist:
+        messages.error(request, f"There is no user with email: {email}.")
         return HttpResponseRedirect(reverse("manager:profile"))
     user = request.user
     info = StudentInfo.objects.get(user=user)
     info.parent.remove(parent_user)
+    messages.success(request, f"Successfully removed {email} from the list.")
     return HttpResponseRedirect(reverse("manager:profile"))
+
 
 def remove_child(request):
     """Remove a student from parent information.
-    
+
     :param request: request from the user
     :return: redirect to the profile page
     """
+    email = request.POST["email"]
     try:
-        student_info = StudentInfo.objects.get(user__email=request.POST["email"])
+        student_info = StudentInfo.objects.get(user__email=email)
     except User.DoesNotExist:
+        messages.error(request, f"There is no user with email: {email}.")
         return HttpResponseRedirect(reverse("manager:profile"))
     user = request.user
     user.student_set.remove(student_info)
+    messages.success(request, f"Successfully removed {email} from the list.")
     return HttpResponseRedirect(reverse("manager:profile"))

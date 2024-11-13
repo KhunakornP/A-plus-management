@@ -8,6 +8,15 @@
 {% block content %}
 <div class="container py-5">
   <div class="row justify-content-center">
+    {% if messages %}
+    <div class="row mb-3">
+      {% for message in messages %}
+      <div class="alert alert-light" role="alert">
+        {{message}}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
     <form action="{% url 'manager:update_displayed_name' %}" method="post">
       {% csrf_token %}
       <div class="row mb-3">
