@@ -27,16 +27,16 @@ class UniversityTest(CalculatorBaseTestCase):
                 name=f"Faculty #{i}", university=self.university1
             )
             m.save()
-        self.assertEqual(Faculty.objects.filter(university=self.university1).count(), 7)
+        self.assertEqual(Faculty.objects.filter(university=self.university1).count(), 8)
 
     def test_many_major_per_faculty(self):
         """One faculty can have many majors."""
-        for i in range(6):
+        for i in range(3):
             m = Major.objects.create(
-                name=f"Major #{i}", code=f"{i}", faculty=self.faculty1
+                name=f"Major #{i}", code=f"Sddm{i*1000}", faculty=self.faculty1
             )
             m.save()
-        self.assertEqual(Major.objects.filter(faculty=self.faculty1).count(), 6)
+        self.assertEqual(Major.objects.filter(faculty=self.faculty1).count(), 7)
 
     def test_major_cannot_have_same_code(self):
         """Different major must have unique code."""

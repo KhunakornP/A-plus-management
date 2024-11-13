@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from manager.views import TaskboardViewSet, EventViewSet, TaskViewSet
-from calculator.views import ExamsViewSet, UniversityViewSet, FacultyViewSet, MajorViewSet
+from calculator.views import ExamsViewSet, UniversityViewSet, FacultyViewSet, MajorViewSet, StudentExamScoreViewSet
 
 
 router = DefaultRouter()
@@ -11,3 +11,4 @@ router.register(r'exams', ExamsViewSet, basename='exams')
 router.register(r'university', UniversityViewSet, basename="university")
 router.register(r'faculty', FacultyViewSet, basename="faculty")
 router.register(r'major', MajorViewSet, basename="major")
+router.register(r'exam_score', StudentExamScoreViewSet, basename="exam_score")

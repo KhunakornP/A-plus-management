@@ -1,7 +1,7 @@
 """Base test case for Calculator app models."""
 
 from django.test import TestCase
-from calculator.models import University, Faculty
+from calculator.models import University, Faculty, Major
 
 
 class CalculatorBaseTestCase(TestCase):
@@ -18,3 +18,11 @@ class CalculatorBaseTestCase(TestCase):
         self.faculty2 = Faculty.objects.create(
             name=faculty_name, university=self.university2
         )
+        Faculty.objects.create(university=self.university1, name="Humanity")
+        for i in range(7):
+            m = Major.objects.create(
+                name=f"Major #{i}",
+                code=f"{i}",
+                faculty=self.faculty1 if i % 2 == 0 else self.faculty2,
+            )
+            m.save()

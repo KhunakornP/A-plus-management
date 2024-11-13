@@ -1,24 +1,11 @@
 """Test cases for APIs relating to getting university-related data."""
 
-from calculator.models import Faculty, Major
 from .calculator_base_test_case import CalculatorBaseTestCase
 from rest_framework import status
 
 
 class UniversityAPITest(CalculatorBaseTestCase):
     """Test University, Faculty and Major APIs."""
-
-    def setUp(self):
-        """Set up some majors."""
-        super().setUp()
-        Faculty.objects.create(university=self.university1, name="Humanity")
-        for i in range(7):
-            m = Major.objects.create(
-                name=f"Major #{i}",
-                code=f"{i}",
-                faculty=self.faculty1 if i % 2 == 0 else self.faculty2,
-            )
-            m.save()
 
     def test_getting_university(self):
         """Test fetching university data from the api view."""
