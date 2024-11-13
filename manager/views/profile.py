@@ -19,7 +19,6 @@ class ProfileView(ListView):
         """Return a query set of children if the user is a parent and vice versa."""
         user = self.request.user
         if user.has_perm("manager.is_parent"):
-            print(user.student_set.all())
             return user.student_set.all()
         else:
             student_info = StudentInfo.objects.get(user=self.request.user)
@@ -43,6 +42,8 @@ def update_displayed_name(request):
     :param request: request from the user
     :return: redirect to the profile page
     """
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("manager:profile"))
     user = request.user
     if user.has_perm("manager.is_parent"):
         info = ParentInfo.objects.get(user=user)
@@ -60,6 +61,8 @@ def add_parent(request):
     :param request: request from the user
     :return: redirect to the profile page
     """
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("manager:profile"))
     email = request.POST["email"]
     user = request.user
     info = StudentInfo.objects.get(user=user)
@@ -85,6 +88,8 @@ def remove_parent(request):
     :param request: request from the user
     :return: redirect to the profile page
     """
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("manager:profile"))
     email = request.POST["email"]
     try:
         parent_user = User.objects.get(email=email)
@@ -104,10 +109,12 @@ def remove_child(request):
     :param request: request from the user
     :return: redirect to the profile page
     """
+    if request.method != "POST":
+        return HttpResponseRedirect(reverse("manager:profile"))
     email = request.POST["email"]
     try:
         student_info = StudentInfo.objects.get(user__email=email)
-    except User.DoesNotExist:
+    except StudentInfo.DoesNotExist:
         messages.error(request, f"There is no user with email: {email}.")
         return HttpResponseRedirect(reverse("manager:profile"))
     user = request.user
