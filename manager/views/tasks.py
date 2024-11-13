@@ -41,7 +41,7 @@ class TaskViewSet(viewsets.ViewSet):
         if start_date and end_date:
             queryset = self.get_tasks_in_range(start_date, end_date, taskboard_id)
         # get all non-finished tasks from the taskboard.
-        if ignore_status and taskboard_id:
+        elif ignore_status and taskboard_id:
             queryset = Task.objects.filter(
                 ~Q(status=ignore_status), taskboard=taskboard_id
             )
