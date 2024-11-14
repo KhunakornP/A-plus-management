@@ -30,6 +30,27 @@
       </div>
     </form>
     {% if not perms.manager.is_parent %}
+      <form action="{% url 'manager:update_a_level' %}" method="post">
+        {% csrf_token %}
+        <div class="row mb-3">
+          <label for="choice" class="col-sm-3 col-form-label">Taking A-level ? :</label>
+          <div class="col-sm-8">
+            <select name="choice" id="choice" class="form-select">
+              {% if perms.manager.is_taking_A_levels %}
+                <option selected value="Yes">Yes</option>
+                <option value="No">No</option>
+              {% else %}
+                <option value="Yes">Yes</option>
+                <option selected value="No">No</option>
+              {% endif %}
+            </select>
+          </div>
+          <div class="col-sm-1">
+            <button type="submit" class="btn btn-primary mb-3">Save</button>
+          </div>
+        </div>
+      </form>
+
       <form action="{% url 'manager:add_parent' %}" method="post">
         {% csrf_token %}
         <div class="row mb-3">
@@ -38,10 +59,11 @@
             <input type="email" name="email" id="email" class="form-control">
           </div>
           <div class="col-sm-1">
-            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="submit" class="btn btn-primary mb-3">Add</button>
           </div>
         </div>
       </form>
+
       <div class="row">
         <h4>Parent/Guardian List</h4>
         <div style="overflow: auto;">
