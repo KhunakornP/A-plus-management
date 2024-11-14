@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Any
 from math import ceil
 from django.db.models import Max
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, TruncWeek
 
 
 class VelocityViewSet(viewsets.ViewSet):
@@ -114,7 +114,7 @@ class VelocityViewSet(viewsets.ViewSet):
         if interval == "week":
             # get the latest history objects for each week
             latest_entries = (
-                taskboard_data.annotate(weeks=TruncMonth("date"))
+                taskboard_data.annotate(weeks=TruncWeek("date"))
                 .values("weeks")
                 .annotate(most_recent=Max("date"))
                 .values_list("most_recent", flat=True)
