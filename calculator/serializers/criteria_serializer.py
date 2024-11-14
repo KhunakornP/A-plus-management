@@ -25,4 +25,4 @@ class CriteriaSetSerializer(serializers.ModelSerializer):
         """Meta definition for CriteriaSet."""
 
         model = CriteriaSet
-        fields = "__all__"
+        fields = ["major", "criteria"]
