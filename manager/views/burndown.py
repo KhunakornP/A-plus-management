@@ -9,6 +9,8 @@ from django.utils import timezone
 from datetime import datetime
 from typing import Any
 from math import ceil
+from django.db.models import Max
+from django.db.models.functions import TruncMonth
 
 
 class VelocityViewSet(viewsets.ViewSet):
@@ -23,11 +25,12 @@ class VelocityViewSet(viewsets.ViewSet):
         if mode == "average":
             data = self.compute_average_velocity(start_date, interval, taskboard_id)
         else:
-            data = self.compute_basic_velocity(start_date, interval,
-                                               taskboard_id)
+            data = self.compute_basic_velocity(start_date, interval, taskboard_id)
         return Response(data, status=status.HTTP_200_OK)
 
-    def compute_basic_velocity(self, start_date: str, unit: str, taskboard_id: int) -> dict[str, Any]:
+    def compute_basic_velocity(
+        self, start_date: str, unit: str, taskboard_id: int
+    ) -> dict[str, Any]:
         """
         Return the velocity from the given estimate history objects.
 
@@ -45,7 +48,7 @@ class VelocityViewSet(viewsets.ViewSet):
         end_estimate = EstimateHistory.objects.filter(taskboard__id=taskboard_id).last()
         work_done = start_estimate.time_remaining - end_estimate.time_remaining
         # add 1 because start day is inclusive
-        length = (timezone.now().day - start_day.day) + 1
+        length = self.get_timeframe(start_day, unit)
         velocity = work_done / length
         if velocity == 0:
             return {"x": "", "velocity": velocity}
@@ -53,10 +56,22 @@ class VelocityViewSet(viewsets.ViewSet):
         day = (timezone.now() + timezone.timedelta(days=fin_date)).strftime("%Y-%m-%d")
         return {"x": day, "velocity": velocity}
 
-    def get_basic_interval(self, interval):
-        """"""
+    def get_timeframe(self, start_day, interval):
+        """
+        Get the total duration of work for calculating the basic velocity
+        based on the time interval.
+        """
+        if interval == "week":
+            return (
+                timezone.now().isocalendar().week - start_day.isocalendar().week
+            ) + 1
+        elif interval == "month":
+            return (timezone.now().month - start_day.month) + 1
+        return (timezone.now().day - start_day.day) + 1
 
-    def compute_average_velocity(self, start_date: str, unit: str, taskboard_id: int) -> dict[str, Any]:
+    def compute_average_velocity(
+        self, start_date: str, unit: str, taskboard_id: int
+    ) -> dict[str, Any]:
         """
         Return the average velocity of the user based on work done.
 
@@ -68,10 +83,14 @@ class VelocityViewSet(viewsets.ViewSet):
         :return: The average work done per unit of time and finishing date.
         """
         start_day = timezone.make_aware(datetime.fromisoformat(start_date))
+        start_estimate = EstimateHistory.objects.filter(date__lte=start_day).last()
         # add 1 because start day is inclusive
-        length = (timezone.now().day - start_day.day) + 1
-        history = EstimateHistory.objects.filter(taskboard__id=taskboard_id, date__gte=start_day)
+        length = self.get_timeframe(start_day, unit)
+        history = self.aggregate_history_data(start_day, taskboard_id, unit)
         total_work = 0
+        diff = start_estimate.time_remaining - history[0].time_remaining
+        if diff > 0:
+            total_work += diff
         for day in range(1, len(history)):
             diff = history[day - 1].time_remaining - history[day].time_remaining
             if 0 < diff:
@@ -80,12 +99,41 @@ class VelocityViewSet(viewsets.ViewSet):
         today = history.last()
         if velocity == 0:
             return {"x": "", "velocity": velocity}
-        fin_date = ceil(today.time_remaining/velocity)
+        fin_date = ceil(today.time_remaining / velocity)
         day = (timezone.now() + timezone.timedelta(days=fin_date)).strftime("%Y-%m-%d")
         return {"x": day, "velocity": velocity}
 
-    def get_average_interval(self, interval):
-        """"""
+    def aggregate_history_data(self, start_day, taskboard_id, interval):
+        """
+        Group the data for each estimateHistory object based on the given
+        interval.
+        """
+        taskboard_data = EstimateHistory.objects.filter(
+            taskboard__id=taskboard_id, date__gte=start_day
+        )
+        if interval == "week":
+            # get the latest history objects for each week
+            latest_entries = (
+                taskboard_data.annotate(weeks=TruncMonth("date"))
+                .values("weeks")
+                .annotate(most_recent=Max("date"))
+                .values_list("most_recent", flat=True)
+            )
+            # filter the db again for objects that are in the above query
+            data = EstimateHistory.objects.filter(date__in=latest_entries)
+            return data.order_by("date")
+        elif interval == "month":
+            # get the latest history objects for each month
+            latest_entries = (
+                taskboard_data.annotate(months=TruncMonth("date"))
+                .values("months")
+                .annotate(most_recent=Max("date"))
+                .values_list("most_recent", flat=True)
+            )
+            # filter the db again for objects that are in the above query
+            data = EstimateHistory.objects.filter(date__in=latest_entries)
+            return data.order_by("date")
+        return taskboard_data
 
 
 class BurndownView(generic.TemplateView):
