@@ -36,7 +36,9 @@ class UpdateALevelPermissionTest(ProfileTestCase):
 
     def test_remove_a_level_permission(self):
         """Student can remove thier status as a A-level examinee."""
-        self.student.user_permissions.add(Permission.objects.get(codename="is_taking_A_levels"))
+        self.student.user_permissions.add(
+            Permission.objects.get(codename="is_taking_A_levels")
+        )
         self.assertTrue(self.student.has_perm("manager.is_taking_A_levels"))
         form_data = {"choice": "No"}
         response = self.client.post(self.url, form_data, follow=True)

@@ -123,9 +123,10 @@ def remove_child(request):
     messages.success(request, f"Successfully removed {email} from the list.")
     return HttpResponseRedirect(reverse("manager:profile"))
 
+
 def update_a_level_permission(request):
     """Update a student's permission about A-level.
-    
+
     :param request: request from the user
     :return: a redirect response to the profile page
     """
@@ -136,6 +137,8 @@ def update_a_level_permission(request):
         user.user_permissions.add(Permission.objects.get(codename="is_taking_A_levels"))
         messages.success(request, "You can now access A-level calculator.")
     if request.POST["choice"] == "No":
-        user.user_permissions.remove(Permission.objects.get(codename="is_taking_A_levels"))
+        user.user_permissions.remove(
+            Permission.objects.get(codename="is_taking_A_levels")
+        )
         messages.success(request, "Access to A-level calculator has been removed.")
     return HttpResponseRedirect(reverse("manager:profile"))
