@@ -50,6 +50,9 @@ class EstimateHistoryViewTests(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["velocity"], 10.0)
+        # remaining 40hr/10 vel per day = 4 days till completion
+        end = self.today + timedelta(days=4)
+        self.assertEqual(response.data["x"], end.strftime('%Y-%m-%d'))
 
     def test_get_average_velocity(self):
         """Test getting the velocity for data that contains recalculation."""
@@ -60,3 +63,7 @@ class EstimateHistoryViewTests(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["velocity"], 7.5)
+        # with a velocity of 7.5 it takes 80/7.5 = 10.67
+        # aka finish before 11 days after today
+        end = self.today + timedelta(days=11)
+        self.assertEqual(response.data["x"], end.strftime('%Y-%m-%d'))
