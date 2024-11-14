@@ -17,10 +17,42 @@ async function fetchTaskJson(){
     return tasks
 }
 
+async function fetchTaskData(startDate, endDate){
+
+    console.log(startDate.toISOString().slice(0, 19))
+    console.log(endDate.toISOString().slice(0, 19))
+
+    const response = await fetch(`/api/tasks/?start_date=${startDate.toISOString().slice(0, 19)}&end_date=${endDate.toISOString().slice(0, 19)}&taskboard=${taskboardID}`)
+    const tasks = await response.json()
+
+    console.log(tasks)
+
+    return tasks
+}
+
+async function fetchEventData(startDate, endDate){
+    console.log(startDate.toISOString().slice(0, 19))
+    console.log(endDate.toISOString().slice(0, 19))
+
+    const response = await fetch(`/api/events/?start_date=${startDate.toISOString().slice(0, 19)}&end_date=${endDate.toISOString().slice(0, 19)}`)
+    const events = await response.json()
+
+    console.log(events)
+
+    return events
+}
+
 async function fetchEstimateHistoryData() {
     const response = await fetch(`/api/estimate_history/?taskboard=${taskboardID}`);
     const estimateHistories = await response.json();
     return estimateHistories;
+}
+
+async function fetchVelocityData(startID, endID, mode) {
+    console.log(startID)
+    console.log(endID)
+    console.log(mode)
+
 }
 
 /**
@@ -484,8 +516,12 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
         return;
     }
 
+    console.log(estimateHistoryData)
+
     // Fill estimate history data
     const estHistData = fillEstHistData(estimateHistoryData);
+
+    console.log(estHistData)
 
     // Calculate velocity trend and update done-by estimate
     const { velocityEndDate, velocityTrend, velocitySlope } = calculateVelocityTrend(estHistData);
@@ -505,6 +541,9 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
       const endDate = new Date(event.end_date);
       return endDate >= today && endDate <= velocityEndDate[0];
     });
+
+    const tasks = fetchTaskData(today, velocityEndDate[0])
+    const events = fetchEventData(today, velocityEndDate[0])
 
     // Get all relevant dates and generate date range for the chart
     const allDates = getAllDates(estimateHistoryData, filteredTasksData, filteredEventData, velocityEndDate);
