@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block headcontent %}
+<title>Taskboard {{taskboard_id}} Burndown Chart</title>
+{% endblock %}
+{% block content %}
+
+<div class="container-fluid">
+  <a href="#" class="btn btn-secondary my-3">
+    Back to Taskboard
+  </a>
+  <div class="row align-items-start">
+    <div class="col">
+      Graph {{taskboard_id}}
+
+      {% for event in events %}
+      {{event}}
+      {% endfor %}
+    </div>
+
+    <div class="col">
+      <h2>Select Event</h2>
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="form-check">
+          <input class="form-check-input" name="events" type="checkbox" value="a" id="flexCheckDefault">
+          <label class="form-check-label" for="flexCheckDefault">
+            Default checkbox
+          </label>
+        </div>
+
+        <div class="form-check">
+          <input class="form-check-input" name="events" type="checkbox" value="c" id="flexCheckChecked">
+          <label class="form-check-label" for="flexCheckChecked">
+            Checked checkbox
+          </label>
+        </div>
+
+        <input type="submit" value="View event on graph">
+
+      </form>
+    
+  </div>
+
+</div>
+
+{% endblock %}

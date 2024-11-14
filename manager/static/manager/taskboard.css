@@ -1,0 +1,11 @@
+.draggable {
+  cursor: move;
+}
+
+.draggable.dragging {
+  opacity: .5;
+}
+
+u {
+  cursor: pointer;
+}

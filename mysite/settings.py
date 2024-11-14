@@ -40,7 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'manager.apps.ManagerConfig'
+    'manager.apps.ManagerConfig',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django.contrib.sites',
+    'dj_rest_auth',
+    'allauth',
+    'allauth.account',
+    'dj_rest_auth.registration',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'mysite.urls'
@@ -102,6 +112,42 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend'
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email'
+        ],
+        'AUTH_PARAMS': {
+            'access_type':'online',
+        }
+    }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+    ),
+    'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S.%fZ",
+}
+
+SITE_ID = config('SITE_ID', cast=int, default=3)
+LOGOUT_REDIRECT_URL = 'manager:main_login'
+
+#  The maximum difference between the iat and server time allowed in seconds
+ABSOLUTE_TOLERATED_TIME_DIFF = config('DELTA_TIME', cast=float, default=1)
+GOOGLE_CALLBACK_URI = config("CALLBACK", default="api/callmelater/")
+GOOGLE_CLIENT_ID = config("CLIENT_ID", default="bogusID.google.com")
+
+SOCIALACCOUNT_STORE_TOKENS = True
 
 
 # Internationalization

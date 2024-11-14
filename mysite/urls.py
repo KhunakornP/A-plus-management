@@ -17,10 +17,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import RedirectView
+from .api_router import router
 
 
 urlpatterns = [
-    path('', RedirectView.as_view(url='manager/taskboard')),
+    path('', RedirectView.as_view(url='manager/login')),
+    path('api/', include(router.urls)),
     path('admin/', admin.site.urls),
-    path('manager/', include('manager.urls'))
+    path('rest-auth/', include('dj_rest_auth.urls')),
+    path('accounts/', include('allauth.urls')),
+    path('manager/', include('manager.urls')),
+    path('api/auth/', include('auth.urls')),
+    path('api-auth/', include('rest_framework.urls')),
 ]

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block headcontent %}
+  <title>Taskboard</title>
+
+  {% load static %}
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
+  <script src="{% static 'manager/taskboard_index.js' %}" defer type="module"></script>
+  {{ request.user.id|json_script:"user_id" }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center" id="taskboard-container"></div>
+
+
+  <div class="justify-content-center row">
+    <button type="button" class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="center">
+      Create a taskboard
+    </button>
+
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">Create a taskboard</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="taskboard_name" class="form-label">Taskboard name</label>
+              <input type="text" name="name" class="form-control" id="taskboard-title" placeholder="New taskboard name">
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn btn-primary" id = "create-tb-btn">Create</button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
