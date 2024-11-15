@@ -24,13 +24,13 @@ class EstimateHistoryViewTests(TestCase):
 
         self.tb = create_taskboard(self.user, "Test Taskboard")
 
+        self.two_days_before = date.today() - timedelta(days=2)
+        self.yesterday = date.today() - timedelta(days=1)
         self.today = date.today()
-        self.tomorrow = date.today() + timedelta(days=1)
-        self.aftertomorrow = date.today() + timedelta(days=2)
 
-        self.eh1 = create_estimate_hisotry(self.tb, self.today, 70)
-        self.eh2 = create_estimate_hisotry(self.tb, self.tomorrow, 60)
-        self.eh3 = create_estimate_hisotry(self.tb, self.aftertomorrow, 40)
+        self.eh1 = create_estimate_hisotry(self.tb, self.two_days_before, 70)
+        self.eh2 = create_estimate_hisotry(self.tb, self.yesterday, 60)
+        self.eh3 = create_estimate_hisotry(self.tb, self.today, 40)
 
     def test_get_eh_of_taskboard(self):
         """Test getting estimate_history in a specific taskboard."""
@@ -46,16 +46,42 @@ class EstimateHistoryViewTests(TestCase):
     def test_get_simple_velocity(self):
         """Test getting the velocity for data that is trending downward."""
         response = self.client.get(
-            f"/api/velocity/?start={self.eh1.id}&end={self.eh3.id}"
+            f"/api/velocity/?start={self.two_days_before.strftime('%Y-%m-%d')}&taskboard={self.tb.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["velocity"], 10.0)
+        # remaining 40hr/10 vel per day = 4 days till completion
+        end = self.today + timedelta(days=4)
+        self.assertEqual(response.data["x"], end.strftime("%Y-%m-%d"))
 
     def test_get_average_velocity(self):
         """Test getting the velocity for data that contains recalculation."""
-        eh4 = create_estimate_hisotry(self.tb, self.today + timedelta(days=3), 80)
+        self.eh1.time_remaining = 80
+        self.eh2.time_remaining = 56
+        self.eh3.time_remaining = 60  # some tasks got re estimated today
+        self.eh1.save()
+        self.eh2.save()
+        self.eh3.save()
         response = self.client.get(
-            f"/api/velocity/?start={self.eh1.id}&end={eh4.id}&mode=average"
+            f"/api/velocity/?start={self.two_days_before.strftime('%Y-%m-%d')}&taskboard={self.tb.id}&mode=average"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["velocity"], 7.5)
+        self.assertEqual(response.data["velocity"], 8.0)
+        # with a velocity of 8.0 it takes 60/8 = 7.5
+        # aka finish before 8 days after today
+        end = self.today + timedelta(days=8)
+        self.assertEqual(response.data["x"], end.strftime("%Y-%m-%d"))
+
+    def test_get_monthly_average_velocity(self):
+        """Test getting the average velocity for monthly data."""
+        # get the last month without hard coding the date
+        last_month = self.today.replace(day=1) - timedelta(days=1)
+        start = last_month.replace(day=1)
+        # create history for the first and last day of last month
+        create_estimate_hisotry(self.tb, start, 100)
+        create_estimate_hisotry(self.tb, last_month, 20)
+        response = self.client.get(
+            f"/api/velocity/?start={start.strftime('%Y-%m-%d')}&taskboard={self.tb.id}&mode=average&interval=month"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["velocity"], 40.0)
