@@ -19,7 +19,9 @@ class VelocityViewSet(viewsets.ViewSet):
     def list(self, request):
         """Get a velocity depending on the given query parameters."""
         mode = request.query_params.get("mode")
-        start_date = request.query_params.get("start")
+        start_date = request.query_params.get(
+            "start", timezone.now().strftime("%Y-%m-%d")
+        )
         taskboard_id = request.query_params.get("taskboard")
         interval = request.query_params.get("interval", "day")
         if mode == "average":
@@ -142,23 +144,49 @@ class BurndownView(generic.TemplateView):
     template_name = "manager/burndown.html"
 
 
-class EstimateHistoryViewset(viewsets.ModelViewSet):
+class EstimateHistoryViewset(viewsets.ViewSet):
     """A viewset for EstimateHistory."""
-
-    serializer_class = EstimateHistorySerializer
-
-    def get_queryset(self):
-        """Return EstimateHistory objects based on taskboard id."""
-        taskboard_id = self.request.query_params.get("taskboard")
-        return EstimateHistory.objects.filter(taskboard=taskboard_id).order_by("date")
 
     def list(self, request):
         """
-        List EstimateHistory objects of a certain taskboard.
+        List all EstimateHistory objects.
 
+        If a taskboard_id is given return all EstimateHistory objects within
+        the taskboard. If not or the taskboard_id is invalid returns a
+        400 bad request. Returns grouped data if the interval is given.
         :param request: The HTTP request.
-        :return: Response with tasks.
+        :return: HttpResponse with EstimateHistory data.
         """
-        queryset = self.get_queryset()
+        taskboard_id = self.request.query_params.get("taskboard")
+        queryset = EstimateHistory.objects.filter(taskboard=taskboard_id).order_by(
+            "date"
+        )
+        interval = request.query_params.get("interval", "day")
+        if interval == "week":
+            # get the latest history objects for each week
+            latest_entries = (
+                queryset.annotate(weeks=TruncWeek("date"))
+                .values("weeks")
+                .annotate(most_recent=Max("date"))
+                .values_list("most_recent", flat=True)
+            )
+            # filter the db again for objects that are in the above query
+            queryset = EstimateHistory.objects.filter(date__in=latest_entries)
+        elif interval == "month":
+            # get the latest history objects for each month
+            latest_entries = (
+                queryset.annotate(months=TruncMonth("date"))
+                .values("months")
+                .annotate(most_recent=Max("date"))
+                .values_list("most_recent", flat=True)
+            )
+            # filter the db again for objects that are in the above query
+            queryset = EstimateHistory.objects.filter(date__in=latest_entries)
+        if not queryset:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = EstimateHistorySerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# hate the fact that this does not comply with DRY.
+# someone should probably refactor this.
