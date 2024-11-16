@@ -6,5 +6,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('a-level'),
     document.getElementById('other-exams')
   );
-  examContainers.renderExams();
+  examContainers.renderContent();
+  document.getElementById('save-btn').addEventListener('click', async () => {
+    examContainers.save();
+  });
 });

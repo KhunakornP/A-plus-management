@@ -1,34 +1,37 @@
 class AbstractExamFields {
   constructor(tContainer, aContainer, oContainer) {
-    this.examContainers = {
+    this.Containers = {
       'aptitude': tContainer,
       'aLevel': aContainer,
       'other': oContainer,
     };
+    this.userID = 1
   }
 
-  async fetchExamsJSON(examType) {}
-  generateExamCards(exam) {}
-  save() {}
-  saveAndRedirect() {}
+  async fetchCardContentJSON(examType) {}
+  async fetchSavedValueJSON(exam) {}
+  generateCards(exam) {}
+  async save() {}
+  async saveOne(exam, score) {}
+  redirect() {}
 
-  generateAndAppendExamCards(children, parent) {
+  generateAndAppendCards(children, parent) {
     if (parent !== null) {
       for (const child of children) {
-        parent.appendChild(this.generateExamCards(child));
+        parent.appendChild(this.generateCards(child));
       }
     }
   }
 
-  async renderExams() {
-    const tgat = await this.fetchExamsJSON('TGAT');
-    const tpat = await this.fetchExamsJSON('TPAT');
-    const aLevels = await this.fetchExamsJSON('A-Level');
-    const others = await this.fetchExamsJSON('Other');
-    this.generateAndAppendExamCards(tgat, this.examContainers.aptitude);
-    this.generateAndAppendExamCards(tpat, this.examContainers.aptitude);
-    this.generateAndAppendExamCards(aLevels, this.examContainers.aLevel);
-    this.generateAndAppendExamCards(others, this.examContainers.other);
+  async renderContent() {
+    const tgat = await this.fetchCardContentJSON('TGAT');
+    const tpat = await this.fetchCardContentJSON('TPAT');
+    const aLevels = await this.fetchCardContentJSON('A-Level');
+    const others = await this.fetchCardContentJSON('Other');
+    this.generateAndAppendCards(tgat, this.Containers.aptitude);
+    this.generateAndAppendCards(tpat, this.Containers.aptitude);
+    this.generateAndAppendCards(aLevels, this.Containers.aLevel);
+    this.generateAndAppendCards(others, this.Containers.other);
   }
 }
 
