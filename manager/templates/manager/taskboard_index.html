@@ -7,14 +7,14 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
   <script src="{% static 'manager/taskboard_index.js' %}" defer type="module"></script>
   {{ request.user.id|json_script:"user_id" }}
-  {% if user_id %}
-  {{ user_id|json_script:"student_id" }}
+  {% if viewed_user %}
+  {{ viewed_user.id|json_script:"student_id" }}
   {% endif %}
 {% endblock %}
 
 {% block content %}
-{% if user_id %}
-  <p> Currently viewing user {{user_id}}</p>
+{% if viewed_user %}
+  <p> Currently viewing {{viewed_user.studentinfo.displayed_name}}'s taskboards</p>
   {% endif %}
 <div class="container py-5">
   <div class="row justify-content-center" id="taskboard-container"></div>
