@@ -141,6 +141,11 @@ class BurndownView(generic.TemplateView):
 
     template_name = "manager/burndown.html"
 
+class PBurndownView(generic.TemplateView):
+    """A view for the burndown chart page."""
+
+    template_name = "manager/p_burndown.html"
+
 
 class EstimateHistoryViewset(viewsets.ModelViewSet):
     """A viewset for EstimateHistory."""

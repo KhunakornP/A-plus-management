@@ -18,27 +18,14 @@ async function fetchTaskJson(){
 }
 
 async function fetchTaskData(startDate, endDate){
-
-    console.log(startDate.toISOString().slice(0, 19))
-    console.log(endDate.toISOString().slice(0, 19))
-
     const response = await fetch(`/api/tasks/?start_date=${startDate.toISOString().slice(0, 19)}&end_date=${endDate.toISOString().slice(0, 19)}&taskboard=${taskboardID}`)
     const tasks = await response.json()
-
-    console.log(tasks)
-
     return tasks
 }
 
 async function fetchEventData(startDate, endDate){
-    console.log(startDate.toISOString().slice(0, 19))
-    console.log(endDate.toISOString().slice(0, 19))
-
     const response = await fetch(`/api/events/?start_date=${startDate.toISOString().slice(0, 19)}&end_date=${endDate.toISOString().slice(0, 19)}`)
     const events = await response.json()
-
-    console.log(events)
-
     return events
 }
 
@@ -516,12 +503,8 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
         return;
     }
 
-    console.log(estimateHistoryData)
-
     // Fill estimate history data
     const estHistData = fillEstHistData(estimateHistoryData);
-
-    console.log(estHistData)
 
     // Calculate velocity trend and update done-by estimate
     const { velocityEndDate, velocityTrend, velocitySlope } = calculateVelocityTrend(estHistData);
