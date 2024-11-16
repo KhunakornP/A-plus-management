@@ -47,7 +47,7 @@
             {% else %}
               <p class="form-control-plaintext me-3">Welcome, {{ user.studentinfo.displayed_name }}</p>
             {% endif %}
-            <a class="btn btn-outline-light btn-sm me-3" href="{% url 'manager:profile' %}">profile</a>
+            <a class="btn btn-outline-light btn-sm me-3" href="{% url 'manager:profile' %}">Profile</a>
             <button type="submit" class="btn btn-outline-info btn-sm text-nowrap">Log Out</button>
           </form>
           
