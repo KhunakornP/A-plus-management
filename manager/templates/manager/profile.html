@@ -88,21 +88,26 @@
     <div class="row">
       <h4>Children List</h4>
       <div style="overflow: auto;">
-      {% for info in related_users %}
-        <div class="card bg-body border border-white shadow-lg rounded-lg overflow-hidden m-3">
-          <div class="card-header text-center">
-            <form action="{% url 'manager:remove_child' %}" method="post" class="row">
-              {% csrf_token %}
-              <div class="col-sm-8">
-                <input readonly name="email" type="email" class="form-control-plaintext text-center" value="{{info.user.email}}">
-              </div>
-              <div class="col-sm-4">
-                <button type="submit" class="btn btn-sm btn-danger mt-1">Remove</button>
-              </div>
-            </form>
+      {% if related_users %}
+        {% for info in related_users %}
+          <div class="card bg-body border border-white shadow-lg rounded-lg overflow-hidden m-3">
+            <div class="card-header text-center">
+              <form action="{% url 'manager:remove_child' %}" method="post" class="row">
+                {% csrf_token %}
+                <div class="col-sm-8">
+                  <input readonly name="email" type="email" class="form-control-plaintext text-center" value="{{info.user.email}}">
+                </div>
+                <div class="col-sm-4">
+                  <button type="submit" class="btn btn-sm btn-danger mt-1">Remove</button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      {% endfor %}
+        {% endfor %}
+      {% else %}
+        <p class="text-center">You have no registered children</p>
+        <p class="text-center">Ask your children to register you as thier parent on thier profile page</p>
+      {% endif %}
       </div>
     </div>
     {% endif %}
