@@ -105,5 +105,53 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade modal-lg" id="help" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-4">Help : Calendar</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <h5>General</h5>
+            <p>Your events and tasks' due date are shown here.<br>
+              Events are rendered in blue and tasks are rendered in magenta.<br>
+              You can view thier details by clicking on them.</p>
+            <h5>Views</h5>
+            <ul>
+              There are a total of 4 views on this page
+              <li><u>Month view</u> : See events and tasks of a specific month in the calendar format</li>
+              <li><u>Week view</u> : See events and tasks of a specific week in the time grid format</li>
+              <li><u>Day view</u> : See events and tasks of a specific day in the time grid format</li>
+              <li><u>List view</u> : See events and tasks of a specific week in the list format</li>
+            </ul>
+            <h5>Adding New Event</h5>
+            <p>You can add a new event on various view:</p>
+            <ul>
+              <li><u>Month view</u> : Select a date/date range on the calendar</li>
+              <li><u>Week view</u> : Select a time range</li>
+              <li><u>Day view</u> : Select a time range</li>
+            </ul>
+            <p>Fill all information, then click the <i>Add</i> button.</p>
+            <h5>Editing Events</h5>
+            <p>
+              Events can be edited by clicking the <i>Edit</i> button on the event details modal.<br>
+              Events can be dragged and dropped or resize to change the start date/time and end date/time.<br>
+              *resize is only available in week view and day view and you have to resize from the end of an event.*
+            </p>
+            <h5>Deleting Events</h5>
+            <p>Events can be deleted by clicking the <i>Delete</i> button on the event details modal.</p>
+            <h5>FAQ</h5>
+            <ul>
+              <li><u>How to add tasks?</u><br>Tasks can only be added in the taskboard page.</li>
+              <li><u>How to edit tasks?</u><br>Tasks can only be edited in the taskboard page.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
