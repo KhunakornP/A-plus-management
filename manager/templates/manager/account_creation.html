@@ -22,7 +22,7 @@
               <div class="col mb-4">
             <div class="card" style="width: 18rem;" id="c1">
               <div class="card-body">
-                <img src="..." class="card-img-top" alt="parent img">
+                <img src="/static/manager/images/parents.png" class="card-img-top" alt="parent img">
                 <h5 class="card-title">I am a parent</h5>
                 <a href="#parent_selected" class="hidden-link stretched-link" id="parent">Continue</a>
               </div>
@@ -31,7 +31,7 @@
             <div class="col mb-4">
             <div class="card" style="width: 18rem;" id="c2">
               <div class="card-body">
-                <img src="..." class="card-img-top" alt="student img">
+                <img src="/static/manager/images/student.png" class="card-img-top" alt="student img">
                 <h5 class="card-title">I am a student</h5>
                 <a href="#student_selected" class="hidden-link stretched-link" id="student">Continue</a>
               </div>
@@ -56,8 +56,8 @@
               <div class="col mb-4">
             <div class="card" style="width: 18rem;" id="c3">
               <div class="card-body">
-                <img src="..." class="card-img-top" alt="A level img">
-                <h5 class="card-title">Yes, I am taking the A Levels.</h5>
+                <img src="/static/manager/images/checked.png" class="card-img-top" alt="Yes">
+                <h5 class="card-title">I'm taking the A-Levels</h5>
                 <a href="#examinee" class="hidden-link stretched-link" id="a_level">Continue</a>
               </div>
               </div>
@@ -65,20 +65,25 @@
               <div class="col mb-4">
             <div class="card" style="width: 18rem;" id="c4">
               <div class="card-body">
-                <img src="..." class="card-img-top" alt="A level img">
-                <h5 class="card-title">No, I am not</h5>
+                <img src="/static/manager/images/x-button.png" class="card-img-top" alt="No">
+                <h5 class="card-title">I'm not taking the A-Levels</h5>
                 <a href="#not_examinee" class="hidden-link stretched-link" id="not_a_level">Continue</a>
               </div>
             </div>
             </div>
             </div>
-            <a class="btn btn-primary btnPrevious">Back</a>
+            <div class="row">
+              <div class="col-md-1">
+                <a class="btn btn-primary btnPrevious">Back</a>
+              </div>
+            <div class="col-md-3">
             <form action="{% url 'manager:user_setup' %}" onsubmit="validateForm(event)" method="post">
               {% csrf_token %}
               <input type="hidden" id="type" name="type" value="">
               <input type="hidden" id="exam" name="exam" value="">
               <button type="submit" class="btn btn-primary" id="submit">Confirm</button>
             </form>
+            </div>
           </div>
         </div>
       </div>
