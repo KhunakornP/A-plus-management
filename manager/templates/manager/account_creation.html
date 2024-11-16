@@ -14,10 +14,12 @@
   <div class="tab-pane fade show active" id="nav-role" role="tabpanel" aria-labelledby="nav-role-tab">
     <div class="container py-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+      <div class="col-12 col-md-8 col-lg-16 col-xl-15">
         <div class="card shadow-2-strong d-flex" style="border-radius: 1rem;">
           <div class="card-body p-5 text-center">
             <h3 class="mb-5">Are you a parent or a student?</h3>
+            <div class="row row-cols-1 row-cols-md-2">
+              <div class="col mb-4">
             <div class="card" style="width: 18rem;" id="c1">
               <div class="card-body">
                 <img src="..." class="card-img-top" alt="parent img">
@@ -25,12 +27,16 @@
                 <a href="#parent_selected" class="hidden-link stretched-link" id="parent">Continue</a>
               </div>
             </div>
+            </div>
+            <div class="col mb-4">
             <div class="card" style="width: 18rem;" id="c2">
               <div class="card-body">
                 <img src="..." class="card-img-top" alt="student img">
                 <h5 class="card-title">I am a student</h5>
                 <a href="#student_selected" class="hidden-link stretched-link" id="student">Continue</a>
               </div>
+            </div>
+            </div>
             </div>
             <a class="btn btn-primary btnNext">Next</a>
           </div>
@@ -42,23 +48,29 @@
   <div class="tab-pane fade" id="nav-calculator" role="tabpanel" aria-labelledby="nav-calculator-tab">
     <div class="container py-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+      <div class="col-12 col-md-8 col-lg-16 col-xl-15">
         <div class="card shadow-2-strong" style="border-radius: 1rem;">
           <div class="card-body p-5 text-center">
             <h3 class="mb-5">Are you taking the A Levels?</h3>
+            <div class="row row-cols-1 row-cols-md-2">
+              <div class="col mb-4">
             <div class="card" style="width: 18rem;" id="c3">
               <div class="card-body">
                 <img src="..." class="card-img-top" alt="A level img">
                 <h5 class="card-title">Yes, I am taking the A Levels.</h5>
                 <a href="#examinee" class="hidden-link stretched-link" id="a_level">Continue</a>
               </div>
+              </div>
             </div>
+              <div class="col mb-4">
             <div class="card" style="width: 18rem;" id="c4">
               <div class="card-body">
                 <img src="..." class="card-img-top" alt="A level img">
                 <h5 class="card-title">No, I am not</h5>
                 <a href="#not_examinee" class="hidden-link stretched-link" id="not_a_level">Continue</a>
               </div>
+            </div>
+            </div>
             </div>
             <a class="btn btn-primary btnPrevious">Back</a>
             <form action="{% url 'manager:user_setup' %}" onsubmit="validateForm(event)" method="post">
