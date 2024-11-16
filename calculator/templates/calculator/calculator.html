@@ -5,6 +5,7 @@
   {% load static %}
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
   <script src="{% static 'calculator/calculator.js' %}" defer type="module"></script>
+  {{ request.user.id|json_script:"user_id" }}
 {% endblock %}
 {% block content %}
 <div class="container px-3 py-4">
@@ -37,7 +38,7 @@
         <div id="a-level" class="overflow-y-auto"></div>
       </div>
     </div>
-    
+
     <div class="col-lg-4 mb-4 mb-lg-0">
       <div class="p-4 rounded card" style="height: 60vh;">
         <h4 class="pt-3 text-center rounded">Other Exams</h4>

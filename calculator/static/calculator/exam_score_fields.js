@@ -3,6 +3,7 @@ import { AbstractExamFields } from './abstract_exam_fields.js';
 class ExamScoreFields extends AbstractExamFields {
   constructor(tContainer, aContainer, oContainer) {
     super(tContainer, aContainer, oContainer);
+    this.maxExamScore = {};
   }
 
   async fetchCardContentJSON(examType) {
@@ -16,10 +17,11 @@ class ExamScoreFields extends AbstractExamFields {
     examField.innerHTML = `
     <div class="card-body exam-card" id="${exam.id}">
           <label for="${exam.name}">${exam.name}</label>
-          <input class="form-control" id="${exam.id}-score" placeholder="${exam.max_score}">
+          <input type="number" min="0" max=${exam.max_score} class="form-control" id="${exam.id}-score" placeholder="${exam.max_score}">
           <small id="${exam.name}-help" class="form-text text-muted">สูงสุด ${exam.max_score}</small>
         </div>
     `;
+    this.maxExamScore[exam.id] = exam.max_score;
     return examField;
   }
 
@@ -32,7 +34,11 @@ class ExamScoreFields extends AbstractExamFields {
     }
   }
 
-  async saveOne(exam, score) {
+  async saveOne(examID, score) {
+    const maxScore = this.maxExamScore[examID];
+    if (score > maxScore) {
+      throw new Error('The score of exam cannot exceeds maximum score.');
+    }
     await fetch('/api/exam_score/', {
       method: 'POST',
       headers: {
@@ -41,7 +47,7 @@ class ExamScoreFields extends AbstractExamFields {
       },
       body: JSON.stringify({
         'student': this.userID,
-        'exam': exam,
+        'exam': examID,
         'score': score,
       }),
     });

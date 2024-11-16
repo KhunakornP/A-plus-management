@@ -5,14 +5,14 @@ class AbstractExamFields {
       'aLevel': aContainer,
       'other': oContainer,
     };
-    this.userID = 1
+    this.userID = JSON.parse(document.getElementById('user_id').textContent);
   }
 
   async fetchCardContentJSON(examType) {}
   async fetchSavedValueJSON(exam) {}
   generateCards(exam) {}
   async save() {}
-  async saveOne(exam, score) {}
+  async saveOne(examID, score) {}
   redirect() {}
 
   generateAndAppendCards(children, parent) {

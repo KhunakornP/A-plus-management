@@ -42,7 +42,7 @@ class ExamScoreTest(BaseTestCase):
         super().setUp()
         for i in range(1, 17):
             e = Exams.objects.create(name=f"Exam #{i}")
-            if i < 10:
+            if i <= 10:
                 ses = StudentExamScore.objects.create(
                     student=self.user1, exam=e, score=69
                 )
@@ -51,7 +51,7 @@ class ExamScoreTest(BaseTestCase):
     def test_list_all_scores(self):
         """List all scores of a user."""
         response = self.client.get("/api/exam_score/")
-        self.assertEqual(len(response.data), 9)
+        self.assertEqual(len(response.data), 10)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_updating_existing_score(self):
@@ -61,14 +61,18 @@ class ExamScoreTest(BaseTestCase):
             response = self.client.post("/api/exam_score/", data, format="json")
             self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(StudentExamScore.objects.filter(score=99).count(), 4)
+        self.assertEqual(StudentExamScore.objects.count(), 10)
 
     def test_create_new_exam_score(self):
         """Test creating a score of a new exam."""
-        e = Exams.objects.create(name="Exam #10")
+        e = Exams.objects.create(name="Exam #1212312121")
         exam_score = create_exam_score_json(self.user1.id, exam=e.id, score=3000)
         response = self.client.post("/api/exam_score/", exam_score, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(StudentExamScore.objects.filter(exam=e).count(), 1)
+        self.assertEqual(
+            StudentExamScore.objects.filter(exam__name="Exam #1212312121").count(), 1
+        )
+        self.assertEqual(StudentExamScore.objects.count(), 11)
 
     def test_calculating_score(self):
         """Test calculating the score."""
