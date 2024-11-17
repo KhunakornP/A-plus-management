@@ -40,8 +40,8 @@ class DashboardViewTestCase(TestCase):
         si1 = StudentInfo.objects.get(user=self.user1)
         si2 = StudentInfo.objects.get(user=self.user2)
         # update parent in the database
-        si1.parent = self.user3
-        si2.parent = self.user3
+        si1.parent.add(self.user3)
+        si2.parent.add(self.user3)
         si1.save()
         si2.save()
         # give the user parent permissions
