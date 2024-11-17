@@ -117,7 +117,6 @@ class TaskboardTests(BaseTestCase):
         )
         user2.save()
         tb = create_taskboard(user2, "A-levels")
-        url = reverse("manager:user_tb_details", args=(user2.id,tb.id))
+        url = reverse("manager:user_tb_details", args=(user2.id, tb.id))
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-

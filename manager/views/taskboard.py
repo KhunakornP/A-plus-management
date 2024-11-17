@@ -55,7 +55,7 @@ def get_user_taskboard(request, user_id: int):
     return render(request, "manager/taskboard_index.html", context)
 
 
-def get_taskboard_details(request, taskboard_id: int,user_id: int):
+def get_taskboard_details(request, taskboard_id: int, user_id: int):
     """
     Display the details of a taskboard belonging to the given user.
 
