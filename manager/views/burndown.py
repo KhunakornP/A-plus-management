@@ -46,8 +46,14 @@ class VelocityViewSet(viewsets.ViewSet):
             and the finishing date.
         """
         start_day = timezone.make_aware(datetime.fromisoformat(start_date))
-        start_estimate = EstimateHistory.objects.filter(date__lte=start_day).last()
-        end_estimate = EstimateHistory.objects.filter(taskboard__id=taskboard_id).last()
+        start_estimate = (
+            EstimateHistory.objects.filter(date__lte=start_day).order_by("date").last()
+        )
+        end_estimate = (
+            EstimateHistory.objects.filter(taskboard__id=taskboard_id)
+            .order_by("date")
+            .last()
+        )
         work_done = start_estimate.time_remaining - end_estimate.time_remaining
         # add 1 because start day is inclusive
         length = self.get_timeframe(start_day, unit)
@@ -68,8 +74,11 @@ class VelocityViewSet(viewsets.ViewSet):
                 timezone.now().isocalendar().week - start_day.isocalendar().week
             ) + 1
         elif interval == "month":
-            return (timezone.now().month - start_day.month) + 1
-        return (timezone.now().day - start_day.day) + 1
+            today = timezone.now()
+            return (
+                (today.year - start_day.year) * 12 + (today.month - start_day.month) + 1
+            )
+        return (timezone.now() - start_day).days + 1
 
     def compute_average_velocity(
         self, start_date: str, unit: str, taskboard_id: int
@@ -85,7 +94,9 @@ class VelocityViewSet(viewsets.ViewSet):
         :return: The average work done per unit of time and finishing date.
         """
         start_day = timezone.make_aware(datetime.fromisoformat(start_date))
-        start_estimate = EstimateHistory.objects.filter(date__lte=start_day).last()
+        start_estimate = (
+            EstimateHistory.objects.filter(date__lte=start_day).order_by("date").last()
+        )
         # add 1 because start day is inclusive
         length = self.get_timeframe(start_day, unit)
         history = self.aggregate_history_data(start_day, taskboard_id, unit)
@@ -112,7 +123,7 @@ class VelocityViewSet(viewsets.ViewSet):
         """
         taskboard_data = EstimateHistory.objects.filter(
             taskboard__id=taskboard_id, date__gte=start_day
-        )
+        ).order_by("date")
         if interval == "week":
             # get the latest history objects for each week
             latest_entries = (
