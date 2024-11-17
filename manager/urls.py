@@ -9,6 +9,4 @@ urlpatterns = [
     path("taskboard/<int:pk>/", views.TaskboardView.as_view(), name="taskboard"),
     path("calendar/", views.CalendarView.as_view(), name="calendar"),
     path("taskboard/<int:taskboard_id>/burndown/", views.BurndownView.as_view(), name="burndown_chart"),
-
-    path ("taskboard/<int:taskboard_id>/p_burndown/", views.PBurndownView.as_view(), name="p_burndown_chart")
 ]

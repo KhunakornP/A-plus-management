@@ -18,7 +18,7 @@
             </select>
           </div>
           <hr>
-          <div id="blank"></div>
+          <div id="no-data"></div>
           <canvas id="myChart"></canvas>
         </div>
       </div>
@@ -29,6 +29,7 @@
         <div class="card-body">
           <h5>Information</h5>
           <hr>
+          <p id="not-enough-data"></p>
           <p id="slope"></p>
           <p id="done-by"></p>
           <p id="warning"></p>
@@ -67,6 +68,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
 
 {% load static %}
-<script src="{% static 'manager/burndown.js' %}" defer></script>
+<script src="{% static 'manager/p_burndown.js' %}" defer></script>
 
 {% endblock %}
