@@ -90,3 +90,19 @@ class UniversityAPITest(CalculatorBaseTestCase):
         response = self.client.get("/api/criteria/?major=1")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
+
+    def test_retrieve_single_criteria_set(self):
+        """Retrieve a score of one Criteria Set."""
+        response = self.client.get("/api/criteria/1/")
+        self.assertEqual(
+            response.data,
+            {
+                "id": 1,
+                "criteria": [
+                    {"id": 1, "min_score": 20.0, "weight": 10.0, "exam": 1},
+                    {"id": 3, "min_score": 20.0, "weight": 40.0, "exam": 3},
+                    {"id": 5, "min_score": 20.0, "weight": 40.0, "exam": 5},
+                ],
+            },
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

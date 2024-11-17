@@ -67,3 +67,18 @@ class CriteriaViewSet(viewsets.ViewSet):
             serializer = CriteriaSetSerializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+    def retrieve(self, request, pk=None) -> Response:
+        """Retrieve one CriteriaSet object.
+
+        :param request: GET Request
+        :param pk: primary key of the object
+        :return: THE Criteria object.
+        """
+        try:
+            serializer = CriteriaSetSerializer(CriteriaSet.objects.get(id=pk))
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except CriteriaSet.DoesNotExist:
+            return Response(
+                {"error": "CriteriaSet not found"}, status=status.HTTP_404_NOT_FOUND
+            )

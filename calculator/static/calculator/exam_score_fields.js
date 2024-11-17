@@ -4,12 +4,7 @@ class ExamScoreFields extends AbstractExamFields {
   constructor(tContainer, aContainer, oContainer) {
     super(tContainer, aContainer, oContainer);
     this.maxExamScore = {};
-  }
-
-  async fetchCardContentJSON(examType) {
-    const response = await fetch(`/api/exams/?exam_type=${examType}`);
-    const exams = await response.json();
-    return exams;
+    this.userID = JSON.parse(document.getElementById('user_id').textContent);
   }
 
   async fetchSavedDataJSON() {

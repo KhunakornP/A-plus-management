@@ -1,3 +1,6 @@
+import { ExamWeightFields } from './exam_weight_fields.js';
+let currentCriteriaID = 0;
+
 async function fetchUniversities() {
   const response = await fetch('/api/universities/');
   const universities = await response.json();
@@ -40,6 +43,13 @@ function removeSelectOptions(selectElement) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const examContainer = new ExamWeightFields(
+    document.getElementById('tgat-tpat'),
+    document.getElementById('a-level'),
+    document.getElementById('other-exams')
+  );
+  examContainer.renderContent();
+
   const universitySelect = document.getElementById('university');
   const facultySelect = document.getElementById('faculty');
   const majorSelect = document.getElementById('major');
@@ -66,5 +76,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     removeSelectOptions(criteriaSelect);
     const criteria = await fetchCriteriaSet(majorSelect.value);
     addSelectOptions(criteriaSelect, criteria);
+  });
+
+  criteriaSelect.addEventListener('change', () => {
+    currentCriteriaID = criteriaSelect.value;
+    console.log(currentCriteriaID);
+    examContainer.insertScoreWeight(currentCriteriaID);
   });
 });

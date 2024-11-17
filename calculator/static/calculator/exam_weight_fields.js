@@ -3,7 +3,6 @@ import { AbstractExamFields } from './abstract_exam_fields.js';
 class ExamWeightFields extends AbstractExamFields {
   constructor(tContainer, aContainer, oContainer) {
     super(tContainer, aContainer, oContainer);
-    this.maxExamScore = {};
   }
 
   // TODO: change
@@ -13,45 +12,52 @@ class ExamWeightFields extends AbstractExamFields {
     return exams;
   }
 
-  // TODO: change
   async fetchSavedDataJSON(criteriaID) {
-    // fetch this god damn thing from criteria set instead.
-    // criteria is from input box
-    // University -> Faculty -> Major -> Criteria
-    // we may also need to addEventListener or something.
-    const response = await fetch('/api/exam_score/');
-    let scores = await response.json();
-    return scores.reduce(
-      (index, data) => ({ ...index, [data.exam]: data }),
-      {}
-    );
+    const response = await fetch(`/api/criteria/${criteriaID}`);
+    if (!response.ok) {
+      return null;
+    }
+    let criteria = await response.json();
+    const result = {};
+    for (const obj of criteria['criteria']) {
+      result[obj['id']] = {
+        'weight': obj['weight'],
+        'min_score': obj['min_score'],
+      };
+    }
+    return result;
   }
 
-  // TODO: change
   async generateAndAppendCards(children, parent) {
     if (parent !== null) {
-      const userScores = await this.fetchSavedDataJSON();
-      for (const exam of children) {
-        let examScore = 0;
-        if (exam.id in userScores) {
-          examScore = userScores[exam.id].score;
-        }
-        parent.appendChild(this.generateCards(exam, examScore));
+      for (let i = 0; i < children.length; i++) {
+        const exam = children[i];
+        parent.appendChild(this.generateCards(exam, 0));
       }
+    }
+  }
+
+  async insertScoreWeight(criteriaID) {
+    const scoreWeight = await this.fetchSavedDataJSON(criteriaID);
+    const weightInputs = document.querySelectorAll('.exam-weight-input');
+    for (const w of weightInputs) {
+      const examID = Number(w.id.split('-')[0]);
+      const weight = examID in scoreWeight ? scoreWeight[examID]['weight'] : '';
+      w.value = weight;
     }
   }
 
   // TODO: change
   generateCards(exam, savedValue) {
+    const placeholder = 'Percentage (0-100)';
+    const weightValue = savedValue ? savedValue !== 0 : '';
     const examField = document.createElement('div');
     examField.innerHTML = `
     <div class="card-body exam-card" id="${exam.id}">
     <label for="${exam.name}">${exam.name}</label>
-    <input type="number" min="0" max=${exam.max_score} class="form-control" id="${exam.id}-score" value="${savedValue}">
-    <small id="${exam.name}-help" class="form-text text-muted">สูงสุด ${exam.max_score}</small>
+    <input type="number" min="0" max="100" class="form-control exam-weight-input" id="${exam.id}-weight" value="${weightValue}", placeholder="${placeholder}">
     </div>
     `;
-    this.maxExamScore[exam.id] = exam.max_score;
     return examField;
   }
 

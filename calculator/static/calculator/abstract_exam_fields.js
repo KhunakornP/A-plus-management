@@ -5,14 +5,17 @@ class AbstractExamFields {
       'aLevel': aContainer,
       'other': oContainer,
     };
-    this.userID = JSON.parse(document.getElementById('user_id').textContent);
   }
 
   // abstract methods
   /* eslint-disable */
+
   async fetchCardContentJSON(examType) {
-    throw new Error('Not Implemented');
+    const response = await fetch(`/api/exams/?exam_type=${examType}`);
+    const exams = await response.json();
+    return exams;
   }
+
   async fetchSavedDataJSON(examID) {
     throw new Error('Not Implemented');
   }
