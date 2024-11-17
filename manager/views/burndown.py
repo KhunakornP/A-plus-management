@@ -68,3 +68,19 @@ def estimate_histories_json(request, taskboard_id):
     estimate_histories = get_estimate_history_data(taskboard_id)
     eh_serializer = EstimateHistorySerialzer(estimate_histories, many=True)
     return JsonResponse(eh_serializer.data, safe=False)
+
+
+class ChartIndexView(generic.ListView):
+    """A view that displays all burn-down charts of a student."""
+
+    template_name = "manager/chart_index.html"
+    context_object_name = "taskboards"
+
+    def get_queryset(self):
+        """
+        Get a list of all taskboards belonging to the user.
+
+        Get all taskboards to generate a link to the burndown
+        chart for each taskboard.
+        """
+        return Taskboard.objects.filter(user__id=self.kwargs["user_id"])

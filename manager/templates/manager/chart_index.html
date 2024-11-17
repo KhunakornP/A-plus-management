@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block headcontent %}
+  <title>Charts</title>
+  {% load static %}
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
+  <script src="{% static 'manager/chart_index.js' %}" defer type="module"></script>
+  {{ user_id|json_script:"user_id" }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="justify-content-center" id=chart-table"> {{taskboards}}</div>
+<div>
+{% endblock %}

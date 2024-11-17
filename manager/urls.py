@@ -12,5 +12,6 @@ urlpatterns = [
     path("calendar/", views.CalendarView.as_view(), name="calendar"),
     path("taskboard/<int:taskboard_id>/burndown/", views.BurndownView.as_view(), name="burndown_chart"),
     path("taskboard/<int:taskboard_id>/burndown/response/", views.estimate_histories_json, name="est_hist_json"),
-    path("taskboard/index/<int:user_id>/", views.get_user_taskboard, name="user_tb_index")
+    path("taskboard/index/<int:user_id>/", views.get_user_taskboard, name="user_tb_index"),
+    path("chart/index/<int:user_id>/", views.ChartIndexView.as_view(), name="chart_index")
 ]
