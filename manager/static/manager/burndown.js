@@ -316,13 +316,9 @@ async function main() {
     // Fill estimate history data
     const displayData = fillDates(estHistData)
 
-    console.log(estHistData)
-
     const maxElement = estHistData.reduce((max, current) => current.time_remaining > max.time_remaining ? current : max);
-    console.log(maxElement)
 
     const velocity = await fetchVelocityData(maxElement.date, interval)
-    console.log(velocity)
 
     if (!velocity.x || !velocity.velocity) {
         var element = document.getElementById('not-enough-data');
@@ -364,6 +360,10 @@ async function main() {
         const taskAnnotations = createLineAnnotations(tasks, 'red');
         const eventAnnotations = createLineAnnotations(events, 'yellow');
         const todayAnnotation = lineAnnotation(formatDate(today), 'Today', 'blue');
+
+        // Create checkboxes for tasks and events to update annotations dynamically
+        createCheckboxes(document.getElementById('task-checkboxes'), tasks, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData, velocityEndDate));
+        createCheckboxes(document.getElementById('event-checkboxes'), events, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData, velocityEndDate));
     
         // Calculate the nearest trend line
         const { x1, x2, y1, y2, color } = getNearestTrendData(displayData, taskAnnotations, eventAnnotations);
@@ -377,12 +377,25 @@ async function main() {
         const ctx = document.getElementById('myChart');
         let chart = initializeChart(ctx, dates, displayData, lineAnnotations, trendAnnotations, scaleMax);
 
-        // Create checkboxes for tasks and events to update annotations dynamically
-        createCheckboxes(document.getElementById('task-checkboxes'), tasks, 'task', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData, velocityEndDate));
-        createCheckboxes(document.getElementById('event-checkboxes'), events, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData, velocityEndDate));
-
         updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData, velocityEndDate)
     }
+
+    document.getElementById('timescaleSelector').addEventListener('change', function() {
+        const timescale = this.value;
+
+        if (timescale === 'month') {
+            interval = 'month';
+        } else if (timescale === 'week') {
+            interval = 'week';
+        } else {
+            interval = 'day';
+        }
+
+        const checkboxes = document.querySelectorAll('#task-checkboxes input, #event-checkboxes input');
+        checkboxes.forEach(checkbox => {
+            checkbox.disabled = (timescale !== 'day');
+        });
+    });
 
 }
 

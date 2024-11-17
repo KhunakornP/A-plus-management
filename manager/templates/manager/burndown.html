@@ -12,9 +12,9 @@
           <div class="d-flex justify-content-between align-items-center">
             <h5>Burndown Chart</h5>
             <select id="timescaleSelector">
-              <option value="dates">Dates</option>
-              <option value="months">Months</option>
-              <option value="years">Years</option>
+              <option value="day">Dates</option>
+              <option value="week">Weeks</option>
+              <option value="month">Months</option>
             </select>
           </div>
           <hr>
@@ -68,6 +68,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
 
 {% load static %}
-<script src="{% static 'manager/p_burndown.js' %}" defer></script>
+<script src="{% static 'manager/burndown.js' %}" defer></script>
 
 {% endblock %}
