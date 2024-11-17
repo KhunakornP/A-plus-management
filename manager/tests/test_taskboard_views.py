@@ -109,3 +109,15 @@ class TaskboardTests(BaseTestCase):
         with self.assertRaises(TypeError):
             # should not be any context data
             self.assertEqual(response.context["viewed_user"], 0)
+
+    def test_get_others_taskboard_detail(self):
+        """Test viewing the taskboard of a different user."""
+        user2 = User.objects.create_user(
+            username="bogus man", email="testuser@nowhere.com"
+        )
+        user2.save()
+        tb = create_taskboard(user2, "A-levels")
+        url = reverse("manager:user_tb_details", args=(user2.id,tb.id))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
