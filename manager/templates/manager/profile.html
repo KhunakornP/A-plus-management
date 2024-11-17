@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block headcontent %}
+  <title>Profile</title>
+  {{ request.user.id|json_script:"user_id" }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    {% if messages %}
+    <div class="row mb-3">
+      {% for message in messages %}
+      <div class="alert alert-light" role="alert">
+        {{message}}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <form action="{% url 'manager:update_displayed_name' %}" method="post">
+      {% csrf_token %}
+      <div class="row mb-3">
+        <label for="name" class="col-sm-3 col-form-label">Displayed Name</label>
+        <div class="col-sm-8">
+          <input type="text" name="name" id="name" class="form-control" value="{{displayed_name}}">
+        </div>
+        <div class="col-sm-1">
+          <button type="submit" class="btn btn-primary mb-3">Save</button>
+        </div>
+      </div>
+    </form>
+    {% if not perms.manager.is_parent %}
+      <form action="{% url 'manager:update_a_level' %}" method="post">
+        {% csrf_token %}
+        <div class="row mb-3">
+          <label for="choice" class="col-sm-3 col-form-label">Taking A-level ? :</label>
+          <div class="col-sm-8">
+            <select name="choice" id="choice" class="form-select">
+              {% if perms.manager.is_taking_A_levels %}
+                <option selected value="Yes">Yes</option>
+                <option value="No">No</option>
+              {% else %}
+                <option value="Yes">Yes</option>
+                <option selected value="No">No</option>
+              {% endif %}
+            </select>
+          </div>
+          <div class="col-sm-1">
+            <button type="submit" class="btn btn-primary mb-3">Save</button>
+          </div>
+        </div>
+      </form>
+
+      <form action="{% url 'manager:add_parent' %}" method="post">
+        {% csrf_token %}
+        <div class="row mb-3">
+          <label for="email" class="col-sm-3 col-form-label">Parent/Guardian Email</label>
+          <div class="col-sm-8">
+            <input type="email" name="email" id="email" class="form-control">
+          </div>
+          <div class="col-sm-1">
+            <button type="submit" class="btn btn-primary mb-3">Add</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="row">
+        <h4>Parent/Guardian List</h4>
+        <div style="overflow: auto;">
+        {% for user in related_users %}
+          <div class="card bg-body border border-white shadow-lg rounded-lg overflow-hidden m-3">
+            <div class="card-header text-center">
+              <form action="{% url 'manager:remove_parent' %}" method="post" class="row">
+                {% csrf_token %}
+                <div class="col-sm-8">
+                  <input readonly name="email" type="email" class="form-control-plaintext text-center" value="{{user.email}}">
+                </div>
+                <div class="col-sm-4">
+                  <button type="submit" class="btn btn-sm btn-danger mt-1">Remove</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    {% else %}
+    <div class="row">
+      <h4>Children List</h4>
+      <div style="overflow: auto;">
+      {% if related_users %}
+        {% for info in related_users %}
+          <div class="card bg-body border border-white shadow-lg rounded-lg overflow-hidden m-3">
+            <div class="card-header text-center">
+              <form action="{% url 'manager:remove_child' %}" method="post" class="row">
+                {% csrf_token %}
+                <div class="col-sm-8">
+                  <input readonly name="email" type="email" class="form-control-plaintext text-center" value="{{info.user.email}}">
+                </div>
+                <div class="col-sm-4">
+                  <button type="submit" class="btn btn-sm btn-danger mt-1">Remove</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-center">You have no registered children</p>
+        <p class="text-center">Ask your children to register you as thier parent on thier profile page</p>
+      {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

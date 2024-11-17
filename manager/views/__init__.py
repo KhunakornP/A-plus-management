@@ -5,3 +5,4 @@ from .tasks import *
 from .taskboard import *
 from .default_role import *
 from .dashboard import *
+from .profile import *
