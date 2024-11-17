@@ -41,7 +41,7 @@ class EstimateHistoryViewTests(TestCase):
     def test_get_invalid_taskboard(self):
         """Test getting a non-existent estimate history info."""
         response = self.client.get("/api/estimate_history/?taskboard=9999")
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data, None)
 
     def test_get_simple_velocity(self):
         """Test getting the velocity for data that is trending downward."""
