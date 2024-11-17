@@ -6,6 +6,9 @@
 <link rel="stylesheet" href="{% static 'manager/calendar.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
 <script src="{% static 'manager/taskboard.js' %}" defer type="module"></script>
+{% if user_id %}
+  {{ user_id|json_script:"student_id" }}
+{% endif %}
 {% endblock %}
 
 {% block content %}

@@ -44,6 +44,7 @@ def get_user_taskboard(request, user_id: int):
     """
     Display the taskboard index of a given user.
 
+    :param request: The HttpRequest
     :param user_id: The id of the user who owns the taskboards.
     """
     try:
@@ -52,3 +53,19 @@ def get_user_taskboard(request, user_id: int):
         return redirect(reverse("manager:dashboard"))
     context = {"viewed_user": user}
     return render(request, "manager/taskboard_index.html", context)
+
+
+def get_taskboard_details(request, taskboard_id: int,user_id: int):
+    """
+    Display the details of a taskboard belonging to the given user.
+
+    :param request: The HttpRequest
+    :param user_id: The id of the user who owns the taskboards.
+    :param taskboard_id: The id of the taskboard to view.
+    """
+    try:
+        user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return redirect(reverse("manager:dashboard"))
+    context = {"user_id": user.id}
+    return render(request, "manager/taskboard.html", context)

@@ -9,6 +9,19 @@
 
 {% block content %}
 <div class="container py-5">
-  <div class="justify-content-center" id=chart-table"> {{taskboards}}</div>
+  <div class="justify-content-center" id=chart-table">
+      <table>
+        <tr>
+          <th>Taskboard</th>
+          <th>Burndown chart</th>
+        </tr>
+        {% for taskboard in taskboards %}
+        <tr>
+          <td><a href="{% url 'manager:taskboard' taskboard.id %}">{{taskboard.name}}</a></td>
+          <td align="right"><a href="{% url 'manager:taskboard' taskboard.id %}">{{taskboard.name}}</a></td>
+        </tr>
+        {% endfor %}
+      </table>
+  </div>
 <div>
 {% endblock %}
