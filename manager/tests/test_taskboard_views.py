@@ -103,9 +103,9 @@ class TaskboardTests(BaseTestCase):
         user2.save()
         url = reverse("manager:user_tb_index", args=(user2.id,))
         response = self.client.get(url)
-        self.assertEqual(response.context["user_id"], user2.id)
+        self.assertEqual(response.context["viewed_user"].id, user2.id)
         url = reverse("manager:user_tb_index", args=(9999,))
         response = self.client.get(url)
         with self.assertRaises(TypeError):
             # should not be any context data
-            self.assertEqual(response.context["user_id"], 0)
+            self.assertEqual(response.context["viewed_user"], 0)
