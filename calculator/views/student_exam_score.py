@@ -15,14 +15,24 @@ from calculator.serializers import (
 )
 
 
-class StudentExamScoreViewSet(viewsets.GenericViewSet):
+class StudentExamScoreViewSet(viewsets.ViewSet):
     """A ViewSet for updating student's score."""
-
+    
     def list(self, request: HttpRequest) -> Response:
         """List all exam scores of a student."""
         queryset = StudentExamScore.objects.filter(student=request.user)
         serializer = ExamScoreSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, pk=None):
+        """Retrieve one StudentExamScore object."""
+        try:
+            serializer = ExamScoreSerializer(StudentExamScore.objects.get(id=pk))
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except StudentExamScore.DoesNotExist:
+            return Response(
+                {"error": "Exam Score not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
     def create(self, request: HttpRequest) -> Response:
         """Create the score of the student, update if that already exists."""

@@ -22,16 +22,12 @@ def create_exam_score_json(
 def create_mock_criteria(criteria: Iterable[dict[str, int | float]]) -> dict[str, Any]:
     """Create a mock criteria Json for score calculation.
 
-    You should,in theory, be able to pass the criteriaset Json that you fetched
+    You should,in theory, be able to pass the CriteriaSet Json that you fetched
     to the calculate_score function. Because this is literally that.
     Also please filter the event where any of the field is an empty string or
     invalid data types because serializer can't really detect those.
     """
-    data = {
-        "major": 1,
-        "criteria": criteria,
-    }
-    return data
+    return {"major": 1, "criteria": criteria}
 
 
 class ExamScoreTest(BaseTestCase):
@@ -62,6 +58,13 @@ class ExamScoreTest(BaseTestCase):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(StudentExamScore.objects.filter(score=99).count(), 4)
         self.assertEqual(StudentExamScore.objects.count(), 10)
+
+    def test_retrieve_score_of_one_exam(self):
+        """Retrieve a score of one exam."""
+        response = self.client.get("/api/exam_score/3/")
+        self.assertEqual(response.data["score"], 69)
+        self.assertEqual(response.data["exam"], 3)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_new_exam_score(self):
         """Test creating a score of a new exam."""

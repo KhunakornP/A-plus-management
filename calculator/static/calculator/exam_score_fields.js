@@ -12,12 +12,34 @@ class ExamScoreFields extends AbstractExamFields {
     return exams;
   }
 
-  generateCards(exam) {
+  async fetchSavedDataJSON() {
+    const response = await fetch('/api/exam_score/');
+    let scores = await response.json();
+    return scores.reduce(
+      (index, data) => ({ ...index, [data.exam]: data }),
+      {}
+    );
+  }
+
+  async generateAndAppendCards(children, parent) {
+    if (parent !== null) {
+      const userScores = await this.fetchSavedDataJSON();
+      for (const exam of children) {
+        let examScore = 0;
+        if (exam.id in userScores) {
+          examScore = userScores[exam.id].score;
+        }
+        parent.appendChild(this.generateCards(exam, examScore));
+      }
+    }
+  }
+
+  generateCards(exam, savedValue) {
     const examField = document.createElement('div');
     examField.innerHTML = `
     <div class="card-body exam-card" id="${exam.id}">
           <label for="${exam.name}">${exam.name}</label>
-          <input type="number" min="0" max=${exam.max_score} class="form-control" id="${exam.id}-score" placeholder="${exam.max_score}">
+          <input type="number" min="0" max=${exam.max_score} class="form-control" id="${exam.id}-score" value="${savedValue}">
           <small id="${exam.name}-help" class="form-text text-muted">สูงสุด ${exam.max_score}</small>
         </div>
     `;
