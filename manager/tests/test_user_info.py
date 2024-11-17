@@ -55,7 +55,7 @@ class StudentInfoModelTestCase(TestCase):
         """An updated StudentInfo object still retains its original User."""
         si = StudentInfo.objects.get(user=self.user1)
         si.displayed_name = "joker"
-        si.parent = self.user2
+        si.parent.add(self.user2)
         self.assertEqual(si.user, self.user1)
 
     def test_delete_parent(self):
@@ -69,13 +69,13 @@ class StudentInfoModelTestCase(TestCase):
             username="Jolyne", password="Aylmao123", email="bestmom@gmail.com"
         )
         parent.save()
-        si.parent = parent
-        self.assertEqual(si.parent, parent)
+        si.parent.add(parent)
+        self.assertEqual(si.parent.first(), parent)
         self.assertEqual(1, StudentInfo.objects.filter(user=self.user1).count())
         parent.delete()
         self.assertEqual(1, StudentInfo.objects.filter(user=self.user1).count())
         # refresh the object by calling it from the database
-        self.assertEqual(None, StudentInfo.objects.get(pk=1).parent)
+        self.assertEqual(0, StudentInfo.objects.get(pk=1).parent.count())
 
 
 class ParentInfoModelTestCase(TestCase):
@@ -109,8 +109,8 @@ class ParentInfoModelTestCase(TestCase):
         si1 = StudentInfo.objects.get(user=self.user1)
         si2 = StudentInfo.objects.get(user=self.user2)
         # update parent in the database
-        si1.parent = self.user3
-        si2.parent = self.user3
+        si1.parent.add(self.user3)
+        si2.parent.add(self.user3)
         si1.save()
         si2.save()
         pi = ParentInfo.objects.create(user=self.user3, displayed_name="Parent")
