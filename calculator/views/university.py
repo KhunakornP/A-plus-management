@@ -1,12 +1,13 @@
-"""APIs for getting university data for major selection page."""
+"""APIs for getting university, faculty, major and criteria data."""
 
-from calculator.models import University, Faculty, Major
+from calculator.models import University, Faculty, Major, CriteriaSet
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from calculator.serializers import (
     UniversitySerializer,
     FacultySerializer,
     MajorSerializer,
+    CriteriaSetSerializer,
 )
 
 
@@ -47,5 +48,22 @@ class MajorViewSet(viewsets.ViewSet):
         if faculty_id:
             queryset = Major.objects.filter(faculty=faculty_id)
             serializer = MajorSerializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+
+class CriteriaViewSet(viewsets.ViewSet):
+    """API to get a CriteriaSet(all criteria that the user can apply for this major)."""
+
+    def list(self, request) -> Response:
+        """List all CriteriaSet that belongs to a Major.
+
+        :param request: GET Request
+        :return: All criteria of a major. None if
+        """
+        major_id = request.query_params.get("major")
+        if major_id is not None:
+            queryset = CriteriaSet.objects.filter(major=major_id)
+            serializer = CriteriaSetSerializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({}, status=status.HTTP_204_NO_CONTENT)

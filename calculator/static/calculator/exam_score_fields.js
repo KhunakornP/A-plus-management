@@ -74,6 +74,10 @@ class ExamScoreFields extends AbstractExamFields {
       }),
     });
   }
+  async redirect() {
+    await this.save();
+    window.location.replace(window.location.href + '2');
+  }
 }
 
 export { ExamScoreFields };

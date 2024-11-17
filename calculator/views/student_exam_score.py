@@ -17,7 +17,7 @@ from calculator.serializers import (
 
 class StudentExamScoreViewSet(viewsets.ViewSet):
     """A ViewSet for updating student's score."""
-    
+
     def list(self, request: HttpRequest) -> Response:
         """List all exam scores of a student."""
         queryset = StudentExamScore.objects.filter(student=request.user)

@@ -25,7 +25,7 @@ class AbstractExamFields {
   async saveOne(examID, score) {
     throw new Error('Not Implemented');
   }
-  redirect() {
+  async redirect() {
     throw new Error('Not Implemented');
   }
 

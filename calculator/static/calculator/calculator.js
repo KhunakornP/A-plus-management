@@ -10,4 +10,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('save-btn').addEventListener('click', async () => {
     examContainers.save();
   });
+  document
+    .getElementById('continue-btn')
+    .addEventListener('click', async () => {
+      examContainers.redirect();
+    });
 });

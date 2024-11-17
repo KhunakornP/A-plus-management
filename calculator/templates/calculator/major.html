@@ -4,6 +4,7 @@
 
   {% load static %}
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
+  <script src="{% static 'calculator/major.js' %}" type="module" defer></script>
 {% endblock %}
 
 {% block content %}
@@ -11,9 +12,18 @@
 
     <h2 class="text-center rounded">Step 2/3: Select your Major</h2>
     <div class="row justify-content-between my-3">
-      <select name="test" class="col form-control mx-2" id="university"></select>
-      <select class="col form-control mx-2" id="faculty"></select>
-      <select class="col form-control mx-2" id="major"></select>
+      <select name="test" class="col form-control mx-2" id="university">
+        <option disabled selected value>- select a university -</option>
+      </select>
+      <select class="col form-control mx-2" id="faculty">
+        <option disabled selected value>- select a faculty -</option>
+      </select>
+      <select class="col form-control mx-2" id="major">
+        <option disabled selected value>- select a major -</option>
+      </select>
+      <select class="col form-control mx-2" id="criteria">
+        <option disabled selected value>- select a criterion -</option>
+      </select>
       <button type="submit" class=" col justify-content-end btn btn-primary mx-2">Show Results</button>
     </div>
     
