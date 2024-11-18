@@ -3,7 +3,7 @@
 import ast
 from django.contrib import messages
 from django.http import HttpResponse, HttpRequest
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -67,28 +67,25 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
             many=True,
         )
 
+        request.data.get("code")
+
         if not serializer.is_valid():
             return Response({}, status=status.HTTP_404_NOT_FOUND)
 
         result = 0
+        score = "N/A"
         for criterion in serializer.validated_data:
             try:
                 student_exam = StudentExamScore.objects.get(
                     exam=criterion["exam"], student=self.request.user
                 )
                 if student_exam.score < criterion["min_score"]:
-                    messages.error(
-                        request,
-                        f"FAILED MINIMUM REQUIREMENT: {criterion['exam'].name.upper()}",
+                    score = (
+                        f"FAILED MINIMUM REQUIREMENT: {criterion['exam'].name.upper()}"
                     )
-                    return redirect(reverse("calculator:score"))
                 result += student_exam.score * criterion["weight"] / 100
             except StudentExamScore.DoesNotExist:
-                messages.error(
-                    request,
-                    f"SCORE FOR {criterion["exam"].name.upper()} DOES NOT EXIST",
-                )
-                return redirect(reverse("calculator:score"))
+                score = f"SCORE FOR {criterion["exam"].name.upper()} DOES NOT EXIST"
 
-        messages.success(request, result)
-        return redirect(reverse("calculator:score"))
+        score = result
+        return render(request, "calculator/score.html", {"score": score})

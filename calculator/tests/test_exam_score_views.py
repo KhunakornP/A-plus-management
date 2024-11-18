@@ -86,9 +86,7 @@ class ExamScoreTest(BaseTestCase):
         response = self.client.post(
             "/api/exam_score/calculate_score/", data, format="json"
         )
-        messages = get_messages(response.wsgi_request)
-        self.assertTrue(any("69" in str(msg) for msg in messages))
-        self.assertEqual(len(messages), 1)
+        self.assertEqual(response.context["score"], 69)
 
     def test_score_below_requirement(self):
         """Test calculating score that does not meet the minimum required score."""

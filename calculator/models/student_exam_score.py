@@ -14,5 +14,5 @@ class StudentExamScore(models.Model):
     score = models.FloatField(validators=[MinValueValidator(0)])
 
     def __str__(self):
-        """Return info about score of a student on a certian exam."""
+        """Return info about score of a student on a certain exam."""
         return f"{self.student} take {self.exam}. Got {self.score} scores"
