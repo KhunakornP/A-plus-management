@@ -55,19 +55,24 @@ class VelocityViewSet(viewsets.ViewSet):
             .last()
         )
         work_done = start_estimate.time_remaining - end_estimate.time_remaining
-        # add 1 because start day is inclusive
         length = self.get_timeframe(start_day, unit)
+        if length == 0:
+            return {"x": "", "velocity": 0}
         velocity = work_done / length
         if velocity == 0:
             return {"x": "", "velocity": velocity}
-        fin_date = ceil(end_estimate.time_remaining / velocity)
-        day = (timezone.now() + timezone.timedelta(days=fin_date)).strftime("%Y-%m-%d")
+        units_needed = ceil(end_estimate.time_remaining / velocity)
+        day = self.get_finishing_date(units_needed, unit)
         return {"x": day, "velocity": velocity}
 
-    def get_timeframe(self, start_day, interval):
+    def get_timeframe(self, start_day: datetime, interval: str):
         """
         Get the total duration of work for calculating the basic velocity
         based on the time interval.
+
+        :param start_day: The first recorded date from the chart.
+        :param interval: The interval between each data point.
+        :return: The number of intervals between the start date and today.
         """
         if interval == "week":
             return (
@@ -78,7 +83,7 @@ class VelocityViewSet(viewsets.ViewSet):
             return (
                 (today.year - start_day.year) * 12 + (today.month - start_day.month) + 1
             )
-        return (timezone.now() - start_day).days + 1
+        return (timezone.now() - start_day).days
 
     def compute_average_velocity(
         self, start_date: str, unit: str, taskboard_id: int
@@ -97,8 +102,9 @@ class VelocityViewSet(viewsets.ViewSet):
         start_estimate = (
             EstimateHistory.objects.filter(date__lte=start_day).order_by("date").last()
         )
-        # add 1 because start day is inclusive
         length = self.get_timeframe(start_day, unit)
+        if length == 0:
+            return {"x": "", "velocity": 0}
         history = self.aggregate_history_data(start_day, taskboard_id, unit)
         total_work = 0
         diff = start_estimate.time_remaining - history[0].time_remaining
@@ -112,14 +118,37 @@ class VelocityViewSet(viewsets.ViewSet):
         today = history.last()
         if velocity == 0:
             return {"x": "", "velocity": velocity}
-        fin_date = ceil(today.time_remaining / velocity)
-        day = (timezone.now() + timezone.timedelta(days=fin_date)).strftime("%Y-%m-%d")
+        units_needed = ceil(today.time_remaining / velocity)
+        day = self.get_finishing_date(units_needed, unit)
         return {"x": day, "velocity": velocity}
 
-    def aggregate_history_data(self, start_day, taskboard_id, interval):
+    def get_finishing_date(self, units: int, interval: str) -> datetime:
+        """
+        Get the predicted finishing date for clearing all tasks.
+
+        :param units: The number of intervals between today and the start date.
+        :param interval: The interval of the data.
+        :return: The predicted date where all tasks are finished.
+        """
+        today = timezone.now()
+        if interval == "week":
+            return (today + timezone.timedelta(days=units*7)).strftime("%Y-%m-%d")
+        elif interval == "month":
+            finish_date = today.replace(month=today.month+units)
+            return finish_date.strftime("%Y-%m-%d")
+        return (today + timezone.timedelta(days=units)).strftime("%Y-%m-%d")
+
+    def aggregate_history_data(
+        self, start_day: datetime, taskboard_id: int, interval: str
+    ):
         """
         Group the data for each estimateHistory object based on the given
         interval.
+
+        :param start_day: The first recorded date from the chart.
+        :param taskboard_id: The taskboard which contains the EstimateHistory.
+        :param interval: The interval to group data to.
+        :return: A Query set containing aggregated EstimatedHistory objects.
         """
         taskboard_data = EstimateHistory.objects.filter(
             taskboard__id=taskboard_id, date__gte=start_day
