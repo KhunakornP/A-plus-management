@@ -5,12 +5,6 @@ class ExamWeightFields extends AbstractExamFields {
     super(tContainer, aContainer, oContainer);
   }
 
-  // TODO: change
-  async fetchCardContentJSON(examType) {
-    const response = await fetch(`/api/exams/?exam_type=${examType}`);
-    const exams = await response.json();
-    return exams;
-  }
 
   async fetchSavedDataJSON(criteriaID) {
     const response = await fetch(`/api/criteria/${criteriaID}`);

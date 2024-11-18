@@ -85,7 +85,7 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
                     )
                 result += student_exam.score * criterion["weight"] / 100
             except StudentExamScore.DoesNotExist:
-                score = f"SCORE FOR {criterion["exam"].name.upper()} DOES NOT EXIST"
+                score = f"SCORE FOR {criterion['exam'].name.upper()} DOES NOT EXIST"
 
         score = result
         return render(request, "calculator/score.html", {"score": score})

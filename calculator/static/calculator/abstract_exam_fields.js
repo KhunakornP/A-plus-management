@@ -10,8 +10,9 @@ class AbstractExamFields {
   // abstract methods
   /* eslint-disable */
 
-  async fetchCardContentJSON(examType) {
-    const response = await fetch(`/api/exams/?exam_type=${examType}`);
+  async fetchCardContentJSON(query) {
+    const url= `/api/exams/?${query}`
+    const response = await fetch(url);
     const exams = await response.json();
     return exams;
   }
@@ -36,10 +37,10 @@ class AbstractExamFields {
   /* eslint-enable */
 
   async renderContent() {
-    const tgat = await this.fetchCardContentJSON('TGAT');
-    const tpat = await this.fetchCardContentJSON('TPAT');
-    const aLevels = await this.fetchCardContentJSON('A-Level');
-    const others = await this.fetchCardContentJSON('Other');
+    const tgat = await this.fetchCardContentJSON('exam_type=TGAT');
+    const tpat = await this.fetchCardContentJSON('exam_type=TPAT');
+    const aLevels = await this.fetchCardContentJSON('exam_type=A-Level');
+    const others = await this.fetchCardContentJSON('core=False');
     await this.generateAndAppendCards(tgat, this.Containers.aptitude);
     await this.generateAndAppendCards(tpat, this.Containers.aptitude);
     await this.generateAndAppendCards(aLevels, this.Containers.aLevel);
