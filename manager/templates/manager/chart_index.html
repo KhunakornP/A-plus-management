@@ -3,25 +3,37 @@
   <title>Charts</title>
   {% load static %}
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="{% static 'manager/chart_index.js' %}" defer type="module"></script>
   {{ user_id|json_script:"user_id" }}
 {% endblock %}
 
 {% block content %}
 <div class="container py-5">
-  <div class="justify-content-center" id=chart-table">
-      <table>
-        <tr>
-          <th>Taskboard</th>
-          <th>Burndown chart</th>
-        </tr>
+    <div class="row d-flex justify-content-center align-items-center">
+        <h3 class="text-center">Overview of taskboard progress</h3>
+        <div class="col-md-10 mb-4">
+          <div class="card">
+            <div class="card-body">
+                <canvas id="overview-chart"></canvas>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="row d-flex justify-content-center align-items-center">
+        <h3 class="text-center">Burndown charts</h3>
         {% for taskboard in taskboards %}
-        <tr>
-          <td><a href="{% url 'manager:taskboard' taskboard.id %}">{{taskboard.name}}</a></td>
-          <td align="right"><a href="{% url 'manager:taskboard' taskboard.id %}">{{taskboard.name}}</a></td>
-        </tr>
+        <div class="col-md-8 mb-2">
+          <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Taskboard: {{ taskboard.name }}</h5>
+                <div>table placeholder</div>
+                <a href="{% url 'manager:taskboard' taskboard.id %}" class="btn btn-primary">Go to chart</a>
+            </div>
+          </div>
+        </div>
         {% endfor %}
-      </table>
+    </div>
   </div>
 <div>
 {% endblock %}
