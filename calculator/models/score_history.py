@@ -1,4 +1,5 @@
 """A module of ScoreHistory object."""
+
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .university import Major

@@ -61,12 +61,9 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
         the user to the score page and show the score.
         """
         serializer = CriterionSerializer(
-            # change string of dict to dict: https://stackoverflow.com/q/988228
             data=request.data["criteria"],
             many=True,
         )
-
-        request.data.get("code")
 
         if not serializer.is_valid():
             return Response({}, status=status.HTTP_404_NOT_FOUND)

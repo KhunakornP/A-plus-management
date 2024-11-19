@@ -27,7 +27,7 @@ def create_mock_criteria(criteria: Iterable[dict[str, int | float]]) -> dict[str
     Also please filter the event where any of the field is an empty string or
     invalid data types because serializer can't really detect those.
     """
-    return {"major": 1, "criteria": criteria}
+    return {"criteria": list(criteria)}
 
 
 class ExamScoreTest(BaseTestCase):
@@ -80,25 +80,15 @@ class ExamScoreTest(BaseTestCase):
     def test_calculating_score(self):
         """Test calculating the score."""
         data = create_mock_criteria(
-            map(lambda x: {"exam": x, "min_score": x * 10, "weight": 25}, range(1, 5))
+            map(lambda x: {"exam": x, "weight": 25}, range(1, 5))
         )
 
         response = self.client.post(
-            "/api/exam_score/calculate_score/", data, format="json"
+            "/api/exam_score/calculate_score/", data, content_type="application/json"
         )
-        self.assertEqual(response.context["score"], 69)
-
-    def test_score_below_requirement(self):
-        """Test calculating score that does not meet the minimum required score."""
-        data = create_mock_criteria(
-            map(lambda x: {"exam": x, "min_score": x * 25, "weight": 25}, range(1, 5))
-        )
-        response = self.client.post(
-            "/api/exam_score/calculate_score/", data, format="json"
-        )
-        messages = get_messages(response.wsgi_request)
-        self.assertTrue(any("FAILED MINIMUM" in str(msg) for msg in messages))
-        self.assertEqual(len(messages), 1)
+        session = self.client.session
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(session["score"], 69)
 
     def test_score_does_not_exist(self):
         """Test calculating score of exam that the user has not taken yet."""
@@ -108,7 +98,7 @@ class ExamScoreTest(BaseTestCase):
             )
         )
         response = self.client.post(
-            "/api/exam_score/calculate_score/", data, format="json"
+            "/api/exam_score/calculate_score/", data, content_type="application/json"
         )
         messages = get_messages(response.wsgi_request)
         self.assertTrue(any("DOES NOT EXIST" in str(msg) for msg in messages))

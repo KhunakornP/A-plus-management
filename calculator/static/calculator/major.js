@@ -83,13 +83,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   criteriaSelect.addEventListener('change', () => {
     currentCriteriaID = criteriaSelect.value;
-    console.log(currentCriteriaID);
     examContainer.insertScoreWeight(currentCriteriaID);
   });
 
   resultsButton.addEventListener('click', async () => {
     const weightData = Array.from(weightInputs, (input) => {
-      return { 'weight': input.value, 'exam': input.id };
+      return { 'weight': input.value!=='' ? input.value : '0', 'exam': input.id };
     });
     const response = await fetch('/api/exam_score/calculate_score/', {
       method: 'POST',

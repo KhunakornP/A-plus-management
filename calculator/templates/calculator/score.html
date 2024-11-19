@@ -7,8 +7,54 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-  <h2 class="pt-3 text-center rounded">Your Score is</h2>
-  Your Score is: {{request.session.score}}
+<div class="container-fluid">
+  <h2 class="p-4 text-center rounded">Calculation Results</h2>
+  <div class="row justify-content-center flex-row h-100 mx-3">
+    <div class="col d-flex flex-column">
+      <div>
+        <h3>
+          Your Score is:
+        </h3> 
+      </div>
+
+      <div style="font-size: 7rem;">
+        {{request.session.score}}/100
+      </div>
+
+      <div class="min-criteria" id="{{request.session.criteria}}">
+        <h4>Minimum Criteria</h4>
+      </div>
+
+    </div>
+    <div class="col d-flex flex-column">
+      <h3>Last Year's statistics</h3>
+
+      <div class="py-2" id="min-score">
+        Minimum Score:
+      </div>
+
+      <div class="py-2" id="max-score">
+        Maximum Score:
+      </div>
+
+      <div class="py-2" id="max-seat">
+        Total Seats:
+      </div>
+
+      <div class="py-2" id="register">
+        Applicants:
+      </div>
+
+      <div class="py-2" id="admitted">
+        Admitted:
+      </div>
+
+      <div class="py-2" id="mytcas-link">
+        More Information: 
+        <a href="www.google.com">google</a>
+      </div>
+
+    </div>
+  </div>
 </div>
 {% endblock %}
