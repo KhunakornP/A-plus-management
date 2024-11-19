@@ -63,7 +63,7 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
         """
         serializer = CriterionSerializer(
             # change string of dict to dict: https://stackoverflow.com/q/988228
-            data=[ast.literal_eval(i) for i in request.data.getlist("criteria")],
+            data=request.data["criteria"],
             many=True,
         )
 
