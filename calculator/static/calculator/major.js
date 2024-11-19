@@ -48,13 +48,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('a-level'),
     document.getElementById('other-exams')
   );
-  examContainer.renderContent();
+  await examContainer.renderContent();
 
   const universitySelect = document.getElementById('university');
   const facultySelect = document.getElementById('faculty');
   const majorSelect = document.getElementById('major');
   const criteriaSelect = document.getElementById('criteria');
+  const resultsButton = document.getElementById('results-btn');
   const universities = await fetchUniversities();
+  const weightInputs = document.querySelectorAll('.exam-weight-input');
+  let criteria;
   addSelectOptions(universitySelect, universities);
 
   universitySelect.addEventListener('change', async () => {
@@ -74,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   majorSelect.addEventListener('change', async () => {
     removeSelectOptions(criteriaSelect);
-    const criteria = await fetchCriteriaSet(majorSelect.value);
+    criteria = await fetchCriteriaSet(majorSelect.value);
     addSelectOptions(criteriaSelect, criteria);
   });
 
@@ -82,5 +85,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentCriteriaID = criteriaSelect.value;
     console.log(currentCriteriaID);
     examContainer.insertScoreWeight(currentCriteriaID);
+  });
+
+  resultsButton.addEventListener('click', async () => {
+    const weightData = Array.from(weightInputs, (input) => {
+      return { 'weight': input.value, 'exam': input.id };
+    });
+    const response = await fetch('/api/exam_score/calculate_score/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      },
+      body: JSON.stringify({
+        criteria: weightData,
+      }),
+    });
+    window.location = response.url;
   });
 });

@@ -1,9 +1,8 @@
 """API Views to handle saving student's exam score.."""
 
-import ast
 from django.contrib import messages
 from django.http import HttpResponse, HttpRequest
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.urls import reverse
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -73,19 +72,15 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
             return Response({}, status=status.HTTP_404_NOT_FOUND)
 
         result = 0
-        score = "N/A"
         for criterion in serializer.validated_data:
             try:
                 student_exam = StudentExamScore.objects.get(
                     exam=criterion["exam"], student=self.request.user
                 )
-                if student_exam.score < criterion["min_score"]:
-                    score = (
-                        f"FAILED MINIMUM REQUIREMENT: {criterion['exam'].name.upper()}"
-                    )
                 result += student_exam.score * criterion["weight"] / 100
             except StudentExamScore.DoesNotExist:
-                score = f"SCORE FOR {criterion['exam'].name.upper()} DOES NOT EXIST"
+                txt = f"SCORE FOR {criterion['exam'].name.upper()} DOES NOT EXIST"
+                messages.warning(request, txt)
 
-        score = result
-        return render(request, "calculator/score.html", {"score": score})
+        request.session["score"] = result
+        return redirect(reverse("calculator:score"))
