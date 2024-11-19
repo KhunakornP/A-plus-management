@@ -164,7 +164,7 @@ async function renderColumns() {
   for (const column of columns) {
     column.innerHTML = '';
   }
-  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}/?user_id=${studentID}`);
+  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}&user_id=${studentID}`);
   const tasks = await response.json();
   const toDoTasks = tasks.filter((task) => task.status === 'TODO');
   const inProgressTasks = tasks.filter((task) => task.status === 'IN PROGRESS');
