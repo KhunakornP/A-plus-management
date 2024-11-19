@@ -3,7 +3,8 @@
   <title>Charts</title>
   {% load static %}
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
   <script src="{% static 'manager/chart_index.js' %}" defer type="module"></script>
   {{ user_id|json_script:"user_id" }}
 {% endblock %}
@@ -34,6 +35,7 @@
         </div>
         {% endfor %}
     </div>
+    <a href="{% url 'manager:dashboard' %}" class="btn btn-primary">Back to dashboard</a>
   </div>
 <div>
 {% endblock %}
