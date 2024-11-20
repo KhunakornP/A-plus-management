@@ -18,7 +18,10 @@ async function fetchRecentVelocity(taskboardID) {
 
 const taskboardVelocities = document.querySelectorAll('[id^="tb-"]');
 for (let i = 0; i < taskboardVelocities.length; i++) {
-    let velocity = await fetchRecentVelocity(taskboardVelocities[i].id.split('-').slice(-1)[0])
+// actual code
+//    let velocity = await fetchRecentVelocity(taskboardVelocities[i].id.split('-').slice(-1)[0])
+// place holder code
+    const velocity = 4;
     if (velocity > 0){
     taskboardVelocities[i].innerHTML = `<div>Recent velocity: ${velocity}</div>`;
     } else {
@@ -57,21 +60,21 @@ const options = {
                 const percentage = value / total * 100
                 if (percentage > 0){
                 return percentage.toFixed(2) + "%";
-                } else {
-                return ''
                 }
+                return ''
             },
             color: '#fff',
         }
     }
 };
 
-const myChart = new Chart(ctx, {
+new Chart(ctx, {
     type: 'pie',
     data: {
         labels: ['TODO', 'Finished', 'Late', 'In Progress'],
         datasets: data
     },
     options: options,
-    plugins: [ChartDataLabels],
+    // ignoring next line since ChartDataLabels is a library
+    plugins: [ChartDataLabels], // eslint-disable-line
 });

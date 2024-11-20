@@ -119,9 +119,7 @@ class TaskViewTests(TestCase):
         user2.save()
         tb3 = create_taskboard(user2, "Daily board")
         create_task("Go shopping", "TODO", tb3)
-        response = self.client.get(
-            f"/api/tasks/?user={self.user1.id}"
-        )
+        response = self.client.get(f"/api/tasks/?user={self.user1.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
 
