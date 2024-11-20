@@ -52,7 +52,7 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=_status)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post", "get"])
     def calculate_score(self, request: HttpRequest) -> HttpResponse:
         """Calculate the user's score based on the score weights.
 
@@ -60,16 +60,21 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
         :return: 404 if the format of the request is not valid. Otherwise, redirects
         the user to the score page and show the score.
         """
+        if "criteria" not in request.data:
+            return Response(
+                {"error": "No Criteria Data"}, status=status.HTTP_404_NOT_FOUND
+            )
         serializer = CriterionSerializer(
             data=request.data["criteria"],
             many=True,
         )
+        if not serializer.is_valid():
+            return Response({}, status=status.HTTP_404_NOT_FOUND)
+
         criteria_id = int(request.data["criteria_id"])
         major_code = 0
         if int(request.data["major_id"]) != 0:
             major_code = Major.objects.get(pk=int(request.data["major_id"])).code
-        if not serializer.is_valid():
-            return Response({}, status=status.HTTP_404_NOT_FOUND)
 
         result = 0
         for criterion in serializer.validated_data:

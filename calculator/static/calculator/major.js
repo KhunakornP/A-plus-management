@@ -63,6 +63,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   weightInputs.forEach((input) => {
     input.addEventListener('keydown', preventNonNumeric);
+    input.addEventListener('change', () => {
+      if (Number(input.value) > 100) {
+        input.value = 100;
+      }
+    });
   });
 
   universitySelect.addEventListener('change', async () => {
@@ -98,18 +103,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         'exam': input.id,
       };
     });
-    const response = await fetch('/api/exam_score/calculate_score/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': Cookies.get('csrftoken'),
-      },
-      body: JSON.stringify({
-        'criteria': weightData,
-        'criteria_id': criteriaSelect.value !== '' ? criteriaSelect.value : 0,
-        'major_id': majorSelect.value !== '' ? criteriaSelect.value : 0,
-      }),
-    });
-    window.location = response.url;
+
+    const totalWeight = weightData.reduce((sum, item) => sum + Number(item.weight),0);
+    if (totalWeight !== 100 && criteriaSelect.value === '') {
+      alert(
+        `The sum of the score weight must equal 100 (Current Weight: ${totalWeight})`
+      );
+    } else {
+      const response = await fetch('/api/exam_score/calculate_score/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': Cookies.get('csrftoken'),
+        },
+        body: JSON.stringify({
+          'criteria': weightData,
+          'criteria_id': criteriaSelect.value !== '' ? criteriaSelect.value : 0,
+          'major_id': majorSelect.value !== '' ? criteriaSelect.value : 0,
+        }),
+      });
+      window.location = response.url;
+    }
   });
 });

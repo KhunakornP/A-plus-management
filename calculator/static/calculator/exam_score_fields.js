@@ -52,7 +52,7 @@ class ExamScoreFields extends AbstractExamFields {
         await this.saveOne(examID, examScore);
         examInput.classList.remove('is-invalid');
       } catch (error) {
-        console.log(error)
+        console.log(error);
         examInput.classList.add('is-invalid');
       }
     }
@@ -78,9 +78,7 @@ class ExamScoreFields extends AbstractExamFields {
       }),
     });
     if (!response.ok) {
-      throw new Error(
-        `The score of exam ${examID} is not in a valid format.`
-      );
+      throw new Error(`The score of exam ${examID} is not in a valid format.`);
     }
   }
   async redirect() {

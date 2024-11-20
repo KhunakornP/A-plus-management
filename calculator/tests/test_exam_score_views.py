@@ -6,6 +6,7 @@ from django.contrib.messages import get_messages
 from rest_framework import status
 from calculator.models import StudentExamScore, Exams
 from manager.tests import BaseTestCase
+from .calculator_base_test_case import CalculatorBaseTestCase
 
 
 def create_exam_score_json(
@@ -27,10 +28,14 @@ def create_mock_criteria(criteria: Iterable[dict[str, int | float]]) -> dict[str
     Also please filter the event where any of the field is an empty string or
     invalid data types because serializer can't really detect those.
     """
-    return {"criteria": list(criteria)}
+    return {
+        "criteria": list(criteria),
+        "criteria_id": 0,
+        "major_id": 1,
+    }
 
 
-class ExamScoreTest(BaseTestCase):
+class ExamScoreTest(BaseTestCase, CalculatorBaseTestCase):
     """Test API for saving and getting score of a certain user."""
 
     def setUp(self):
