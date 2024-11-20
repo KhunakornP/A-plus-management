@@ -105,9 +105,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const totalWeight = weightData.reduce((sum, item) => sum + Number(item.weight),0);
-    if (totalWeight !== 100 && criteriaSelect.value === '') {
+    if (totalWeight !== 100) {
       alert(
-        `The sum of the score weight must equal 100 (Current Weight: ${totalWeight})`
+        `The sum of the score weight must be exactly 100 (Current Weight: ${totalWeight})`
       );
     } else {
       const response = await fetch('/api/exam_score/calculate_score/', {

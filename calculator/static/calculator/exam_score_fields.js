@@ -52,7 +52,7 @@ class ExamScoreFields extends AbstractExamFields {
         await this.saveOne(examID, examScore);
         examInput.classList.remove('is-invalid');
       } catch (error) {
-        console.log(error);
+        console.error(error);
         examInput.classList.add('is-invalid');
       }
     }

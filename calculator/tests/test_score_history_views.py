@@ -94,7 +94,7 @@ class ScoreHistoryViewTest(CalculatorExtraTestCase):
             all(filter(lambda x: x["year"] == 2566, response_with_year.data))
         )
         self.assertTrue(all(filter(lambda x: x["major"] == 1, response_with_year.data)))
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response_with_year.data), 2)
 
     def test_list_score_history_with_invalid_year(self):
         """List score history with either criteria and exam but with invalid year."""
