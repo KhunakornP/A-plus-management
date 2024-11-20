@@ -532,15 +532,17 @@ async function main() {
 
     document.getElementById('timescaleSelector').addEventListener('change', function() {
         const timescale = this.value;
+        const element = document.getElementById('not-enough-data');
 
         chart.destroy();
 
         if (timescale === 'week') {
 
             if (!weekVelocity.x || !weekVelocity.velocity) {
-                const element = document.getElementById('not-enough-data');
                 element.textContent = "Not enough data to estimate velocity.";
                 element.style.color = 'yellow';
+            } else {
+                element.textContent = "";
             }
             
             updateVelocityEstimate(weekVelocity.velocity, timescale);
@@ -555,6 +557,8 @@ async function main() {
                 const element = document.getElementById('not-enough-data');
                 element.textContent = "Not enough data to estimate velocity.";
                 element.style.color = 'yellow';
+            } else {
+                element.textContent = "";
             }
             
             updateVelocityEstimate(monthVelocity.velocity, timescale);
@@ -569,6 +573,8 @@ async function main() {
                 const element = document.getElementById('not-enough-data');
                 element.textContent = "Not enough data to estimate velocity.";
                 element.style.color = 'yellow';
+            } else {
+                element.textContent = "";
             }
 
             updateVelocityEstimate(dayVelocity.velocity, timescale);
