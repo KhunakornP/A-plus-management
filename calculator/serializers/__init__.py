@@ -2,3 +2,4 @@ from .uni_serializer import UniversitySerializer, FacultySerializer, MajorSerial
 from .exam_serializer import ExamSerializer
 from .criteria_serializer import CriteriaSetSerializer, CriterionSerializer
 from .exam_score_serializer import ExamScoreSerializer
+from .score_history_serializer import ScoreHistorySerializer

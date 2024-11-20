@@ -1,29 +1,11 @@
 """Test cases for APIs relating to getting university-related data."""
 
-from .calculator_base_test_case import CalculatorBaseTestCase
-from calculator.models import CriteriaSet, Criterion, Major, Exams
+from .calculator_base_test_case import CalculatorExtraTestCase
 from rest_framework import status
 
 
-class UniversityAPITest(CalculatorBaseTestCase):
+class UniversityAPITest(CalculatorExtraTestCase):
     """Test University, Faculty and Major APIs."""
-
-    def setUp(self):
-        """Set up some criteria."""
-        super().setUp()
-        major = Major.objects.get(pk=1)
-
-        self.cs1 = CriteriaSet(major=major)
-        self.cs2 = CriteriaSet(major=major)
-        self.cs1.save()
-        self.cs2.save()
-        name = ["Maths", "Biology", "English"]
-        w = [10, 50, 40, 30, 40, 20]
-        for i in range(6):
-            e = Exams.objects.create(name=name[i % 3])
-            c = Criterion.objects.create(exam=e, min_score=20, weight=w[i])
-            c.save()
-            self.cs1.criteria.add(c) if i % 2 == 0 else self.cs2.criteria.add(c)
 
     def test_getting_university(self):
         """Test fetching university data from the api view."""
@@ -59,11 +41,11 @@ class UniversityAPITest(CalculatorBaseTestCase):
         """Test getting valid major data."""
         response = self.client.get("/api/majors/?faculty=1")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 4)
+        self.assertEqual(len(response.data), 3)
 
         response2 = self.client.get("/api/majors/?faculty=2")
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response2.data), 3)
+        self.assertEqual(len(response2.data), 4)
 
     def test_getting_major_with_invalid_faculty_id(self):
         """Getting majors of invalid faculty should return an empty list."""

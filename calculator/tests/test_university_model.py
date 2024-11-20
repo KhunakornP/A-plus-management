@@ -36,7 +36,7 @@ class UniversityTest(CalculatorBaseTestCase):
                 name=f"Major #{i}", code=f"Sddm{i*1000}", faculty=self.faculty1
             )
             m.save()
-        self.assertEqual(Major.objects.filter(faculty=self.faculty1).count(), 7)
+        self.assertEqual(Major.objects.filter(faculty=self.faculty1).count(), 6)
 
     def test_major_cannot_have_same_code(self):
         """Different major must have unique code."""
