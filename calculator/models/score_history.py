@@ -26,4 +26,4 @@ class ScoreHistory(models.Model):
 
     def __str__(self):
         """Return a string Representation of the ScoreHistory Model."""
-        return f"{self.major.name} score of year"
+        return f"{self.major.name} score of year {self.year}"

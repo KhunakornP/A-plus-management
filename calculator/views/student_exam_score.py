@@ -7,7 +7,7 @@ from django.urls import reverse
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from calculator.models import StudentExamScore
+from calculator.models import StudentExamScore, Major
 from calculator.serializers import (
     ExamScoreSerializer,
     CriterionSerializer,
@@ -64,7 +64,10 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
             data=request.data["criteria"],
             many=True,
         )
-
+        criteria_id = int(request.data["criteria_id"])
+        major_code = 0
+        if int(request.data["major_id"]) != 0:
+            major_code = Major.objects.get(pk=int(request.data["major_id"])).code
         if not serializer.is_valid():
             return Response({}, status=status.HTTP_404_NOT_FOUND)
 
@@ -80,4 +83,6 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
                 messages.warning(request, txt)
 
         request.session["score"] = result
+        request.session["criteria_id"] = criteria_id
+        request.session["major"] = major_code
         return redirect(reverse("calculator:score"))

@@ -26,3 +26,17 @@ class ExamsViewSet(viewsets.ViewSet):
             queryset = Exams.objects.filter(name__contains=exam_type)
         serializer = ExamSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, pk=None) -> Response:
+        """Retrieve ONE exam object.
+
+        :param request: GET Request
+        :param pk: primary key of that exam object.
+        :return: Response with ONE exam data or 404 if error
+        """
+        try:
+            return Response(
+                ExamSerializer(Exams.objects.get(id=pk)).data, status=status.HTTP_200_OK
+            )
+        except Exams.DoesNotExist:
+            return Response("Exam Does Not Exists", status=status.HTTP_404_NOT_FOUND)
