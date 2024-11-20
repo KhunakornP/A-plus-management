@@ -46,17 +46,26 @@ class ExamScoreFields extends AbstractExamFields {
     const examFields = document.querySelectorAll('.exam-card');
     for (const examField of examFields) {
       const examID = examField.id;
-      const examScore = document.getElementById(`${examID}-score`).value;
-      await this.saveOne(examID, examScore);
+      const examInput = document.getElementById(`${examID}-score`);
+      const examScore = examInput.value;
+      try {
+        await this.saveOne(examID, examScore);
+        examInput.classList.remove('is-invalid');
+      } catch (error) {
+        console.log(error)
+        examInput.classList.add('is-invalid');
+      }
     }
   }
 
   async saveOne(examID, score) {
     const maxScore = this.maxExamScore[examID];
     if (score > maxScore) {
-      throw new Error('The score of exam cannot exceeds maximum score.');
+      throw new Error(
+        `The score of exam ${examID} cannot exceeds maximum score.`
+      );
     }
-    await fetch('/api/exam_score/', {
+    const response = await fetch('/api/exam_score/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,10 +77,18 @@ class ExamScoreFields extends AbstractExamFields {
         'score': score,
       }),
     });
+    if (!response.ok) {
+      throw new Error(
+        `The score of exam ${examID} is not in a valid format.`
+      );
+    }
   }
   async redirect() {
     await this.save();
-    window.location.replace(window.location.href + '2');
+    const invalidInput = document.querySelectorAll('.is-invalid');
+    if (invalidInput.length === 0) {
+      window.location.replace(window.location.href + '2');
+    }
   }
 }
 

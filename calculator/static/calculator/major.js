@@ -1,4 +1,5 @@
 import { ExamWeightFields } from './exam_weight_fields.js';
+import { preventNonNumeric } from './abstract_exam_fields.js';
 let currentCriteriaID = 0;
 
 async function fetchUniversities() {
@@ -60,6 +61,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   let criteria;
   addSelectOptions(universitySelect, universities);
 
+  weightInputs.forEach((input) => {
+    input.addEventListener('keydown', preventNonNumeric);
+  });
+
   universitySelect.addEventListener('change', async () => {
     removeSelectOptions(facultySelect);
     removeSelectOptions(majorSelect);
@@ -88,7 +93,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   resultsButton.addEventListener('click', async () => {
     const weightData = Array.from(weightInputs, (input) => {
-      return { 'weight': input.value!=='' ? input.value : '0', 'exam': input.id };
+      return {
+        'weight': input.value !== '' ? input.value : '0',
+        'exam': input.id,
+      };
     });
     const response = await fetch('/api/exam_score/calculate_score/', {
       method: 'POST',
@@ -97,7 +105,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         'X-CSRFToken': Cookies.get('csrftoken'),
       },
       body: JSON.stringify({
-        criteria: weightData,
+        'criteria': weightData,
+        'criteria_id': criteriaSelect.value !== '' ? criteriaSelect.value : 0,
+        'major_id': majorSelect.value !== '' ? criteriaSelect.value : 0,
       }),
     });
     window.location = response.url;

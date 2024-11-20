@@ -11,7 +11,7 @@ class AbstractExamFields {
   /* eslint-disable */
 
   async fetchCardContentJSON(query) {
-    const url= `/api/exams/?${query}`
+    const url = `/api/exams/?${query}`;
     const response = await fetch(url);
     const exams = await response.json();
     return exams;
@@ -48,4 +48,16 @@ class AbstractExamFields {
   }
 }
 
-export { AbstractExamFields };
+function preventNonNumeric(event) {
+  if (
+    !(
+      (event.keyCode >= 48 && event.keyCode <= 57) ||
+      (event.keyCode >= 96 && event.keyCode <= 105) ||
+      [8, 110, 190].includes(event.keyCode)
+    )
+  ) {
+    event.preventDefault();
+  }
+}
+
+export { AbstractExamFields, preventNonNumeric };
