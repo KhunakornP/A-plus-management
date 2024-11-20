@@ -10,6 +10,7 @@ const inProgressCount = tasks.filter((task) => task.status === 'IN PROGRESS').le
 const doneCount = tasks.filter((task) => task.status === 'DONE').length;
 const lateCount = tasks.filter((task) => task.end_date <= todayString && task.status !== 'DONE').length;
 
+// eslint-disable-next-line
 async function fetchRecentVelocity(taskboardID) {
     const response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${prevWeek}&mode=average`);
     const Velocity = await response.json();
