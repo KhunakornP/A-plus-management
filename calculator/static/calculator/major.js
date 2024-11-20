@@ -118,8 +118,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         body: JSON.stringify({
           'criteria': weightData,
+          'major_id': majorSelect.value !== '' ? majorSelect.value : 0,
           'criteria_id': criteriaSelect.value !== '' ? criteriaSelect.value : 0,
-          'major_id': majorSelect.value !== '' ? criteriaSelect.value : 0,
         }),
       });
       window.location = response.url;
