@@ -49,9 +49,9 @@ class EstimateHistoryViewTests(TestCase):
             f"/api/velocity/?start={self.two_days_before.strftime('%Y-%m-%d')}&taskboard={self.tb.id}"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["velocity"], 10.0)
-        # remaining 40hr/10 vel per day = 4 days till completion
-        end = self.today + timedelta(days=4)
+        self.assertEqual(response.data["velocity"], 15.0)
+        # remaining 40hr/15 vel per day = 3 days till completion
+        end = self.today + timedelta(days=3)
         self.assertEqual(response.data["x"], end.strftime("%Y-%m-%d"))
 
     def test_get_average_velocity(self):
@@ -66,10 +66,10 @@ class EstimateHistoryViewTests(TestCase):
             f"/api/velocity/?start={self.two_days_before.strftime('%Y-%m-%d')}&taskboard={self.tb.id}&mode=average"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["velocity"], 8.0)
-        # with a velocity of 8.0 it takes 60/8 = 7.5
+        self.assertEqual(response.data["velocity"], 12.0)
+        # with a velocity of 12.0 it takes 60/12 = 5
         # aka finish before 8 days after today
-        end = self.today + timedelta(days=8)
+        end = self.today + timedelta(days=5)
         self.assertEqual(response.data["x"], end.strftime("%Y-%m-%d"))
 
     def test_get_monthly_average_velocity(self):
@@ -85,3 +85,6 @@ class EstimateHistoryViewTests(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["velocity"], 40.0)
+        # 40 hr left this month should finish by next month
+        next_month = self.today.replace(month=self.today.month + 1)
+        self.assertEqual(response.data["x"], next_month.strftime("%Y-%m-%d"))
