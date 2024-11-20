@@ -7,38 +7,48 @@
 {% block content %}
 {% if child_list %}
 {% load index %}
-<h3>Your children</h3>
-{% for child in child_list %}
-<div class="card">
-  <div class="card-body">
-    <h5 class="card-title">{{ child.displayed_name }}</h5>
-    <p>Task statistics</p>
-    <table>
-      <tr>
-        <th>Status</th>
-        <th>Count</th>
-      </tr>
-      <tr>
-        <td>Due today</td>
-        <td align="right">{{ today|index:forloop.counter0 }}</td>
-      </tr>
-      <tr>
-        <td>Late</td>
-        <td align="right">{{ late|index:forloop.counter0 }}</td>
-      </tr>
-      <tr>
-        <td>Finished</td>
-        <td align="right">{{ fin|index:forloop.counter0 }}</td>
-      </tr>
-    </table>
-    <a href="{% url 'manager:user_tb_index' child.user.id %}" class="card-link">Taskboards</a>
-    <a href="{% url 'manager:chart_index' child.user.id %}" class="card-link">Burndown charts</a>
+<div class="container py-5">
+  <div class="row d-flex justify-content-center align-items-center">
+    <div class="col mb-4">
+      <h3 class="p-2">Your children</h3>
+        {% for child in child_list %}
+            <div class="col mb-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">{{ child.displayed_name }}</h5>
+              {% if child.displayed_name != child.user.email %}
+              <p>({{child.user.email}})</p>
+              {% endif %}
+              <table>
+                <caption style="caption-side: top; font-weight:bold; color:white">Task statistics</caption>
+                <tr>
+                  <th>Status</th>
+                  <th>Count</th>
+                </tr>
+                <tr>
+                  <td>Due today</td>
+                  <td align="right">{{ today|index:forloop.counter0 }}</td>
+                </tr>
+                <tr>
+                  <td>Late</td>
+                  <td align="right">{{ late|index:forloop.counter0 }}</td>
+                </tr>
+                <tr>
+                  <td>Finished</td>
+                  <td align="right">{{ fin|index:forloop.counter0 }}</td>
+                </tr>
+              </table>
+              <a href="{% url 'manager:user_tb_index' child.user.id %}" class="card-link btn btn-primary">Taskboards</a>
+              <a href="{% url 'manager:chart_index' child.user.id %}" class="card-link btn btn-primary">Burndown charts</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
   </div>
 </div>
-{% endfor %}
 {% else %}
 <p> You currently do not have any children associated!</p>
 <p> please ask them to add you via the profile page.</p>
 {% endif %}
-<a href="{% url 'manager:taskboard_index' %}"> back to index</a>
+<a href="{% url 'manager:taskboard_index' %}" class="p-2 btn btn-primary"> back to index</a>
 {% endblock %}

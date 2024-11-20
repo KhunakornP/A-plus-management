@@ -14,7 +14,7 @@
 
 {% block content %}
 {% if viewed_user %}
-  <p> Currently viewing {{viewed_user.studentinfo.displayed_name}}'s taskboards</p>
+  <p class="p-2"> Currently viewing {{viewed_user.studentinfo.displayed_name}}'s taskboards</p>
   {% endif %}
 <div class="container py-5">
   <div class="row justify-content-center" id="taskboard-container"></div>
