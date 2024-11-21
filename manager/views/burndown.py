@@ -47,13 +47,15 @@ class VelocityViewSet(viewsets.ViewSet):
         """
         start_day = timezone.make_aware(datetime.fromisoformat(start_date))
         start_estimate = (
-            EstimateHistory.objects.filter(date__lte=start_day).order_by("date").last()
+            EstimateHistory.objects.filter(taskboard__id=taskboard_id, date__lte=start_day).order_by("date").last()
         )
         end_estimate = (
             EstimateHistory.objects.filter(taskboard__id=taskboard_id)
             .order_by("date")
             .last()
         )
+        if not start_estimate or not end_estimate:
+            return {"x": "", "velocity": 0}
         work_done = start_estimate.time_remaining - end_estimate.time_remaining
         length = self.get_timeframe(start_day, unit)
         if length == 0:
@@ -100,12 +102,14 @@ class VelocityViewSet(viewsets.ViewSet):
         """
         start_day = timezone.make_aware(datetime.fromisoformat(start_date))
         start_estimate = (
-            EstimateHistory.objects.filter(date__lte=start_day).order_by("date").last()
+            EstimateHistory.objects.filter(taskboard__id=taskboard_id, date__lte=start_day).order_by("date").last()
         )
         length = self.get_timeframe(start_day, unit)
         if length == 0:
             return {"x": "", "velocity": 0}
         history = self.aggregate_history_data(start_day, taskboard_id, unit)
+        if not start_estimate or not history:
+            return {"x": "", "velocity": 0}
         total_work = 0
         diff = start_estimate.time_remaining - history[0].time_remaining
         if diff > 0:
@@ -211,7 +215,7 @@ class EstimateHistoryViewset(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            queryset = EstimateHistory.objects.filter(date__in=latest_entries)
+            queryset = EstimateHistory.objects.filter(date__in=latest_entries).order_by("date")
         elif interval == "month":
             # get the latest history objects for each month
             latest_entries = (
@@ -221,7 +225,7 @@ class EstimateHistoryViewset(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            queryset = EstimateHistory.objects.filter(date__in=latest_entries)
+            queryset = EstimateHistory.objects.filter(date__in=latest_entries).order_by("date")
         if not queryset:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = EstimateHistorySerializer(queryset, many=True)
