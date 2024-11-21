@@ -104,7 +104,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
     });
 
-    const totalWeight = weightData.reduce((sum, item) => sum + Number(item.weight),0);
+    const totalWeight = weightData.reduce(
+      (sum, item) => sum + Number(item.weight),
+      0
+    );
     if (totalWeight !== 100) {
       alert(
         `The sum of the score weight must be exactly 100 (Current Weight: ${totalWeight})`
@@ -118,8 +121,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         body: JSON.stringify({
           'criteria': weightData,
-          'major_id': majorSelect.value !== '' ? majorSelect.value : 0,
-          'criteria_id': criteriaSelect.value !== '' ? criteriaSelect.value : 0,
+          'major_id': majorSelect.value,
+          'criteria_id': criteriaSelect.value,
         }),
       });
       window.location = response.url;

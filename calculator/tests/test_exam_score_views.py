@@ -3,6 +3,7 @@
 from collections.abc import Iterable
 from typing import Any
 from django.contrib.messages import get_messages
+from django.urls import reverse
 from rest_framework import status
 from calculator.models import StudentExamScore, Exams
 from manager.tests import BaseTestCase
@@ -33,6 +34,27 @@ def create_mock_criteria(criteria: Iterable[dict[str, int | float]]) -> dict[str
         "criteria_id": 0,
         "major_id": 1,
     }
+
+
+class ScoreViewTest(BaseTestCase, CalculatorBaseTestCase):
+    """Tests for ScoreView TemplateView."""
+
+    def test_never_computed_score(self):
+        """The score page redirect to calculator if user never use it in the session."""
+        response = self.client.get(reverse("calculator:score"))
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, reverse("calculator:calculator"))
+
+    def test_have_computed_score(self):
+        """The score page is accessible if user has computed score before."""
+        data = create_mock_criteria(
+            map(lambda x: {"exam": x, "weight": 25}, range(1, 5))
+        )
+        self.client.post(
+            "/api/exam_score/calculate_score/", data, content_type="application/json"
+        )
+        response = self.client.get(reverse("calculator:score"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class ExamScoreTest(BaseTestCase, CalculatorBaseTestCase):
@@ -94,6 +116,17 @@ class ExamScoreTest(BaseTestCase, CalculatorBaseTestCase):
         session = self.client.session
         self.assertEqual(response.status_code, status.HTTP_302_FOUND)
         self.assertEqual(session["score"], 69)
+
+    def test_exam_max_score_not_equal_to_100(self):
+        """Calculating score where maximum exam score is not 100."""
+        e = Exams.objects.create(name="Funny", max_score=300)
+        StudentExamScore.objects.create(student=self.user1, exam=e, score=30 * 3)
+        data = create_mock_criteria([{"exam": e.id, "weight": 100}])
+        response = self.client.post(
+            "/api/exam_score/calculate_score/", data, content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(self.client.session["score"], 30)
 
     def test_score_does_not_exist(self):
         """Test calculating score of exam that the user has not taken yet."""

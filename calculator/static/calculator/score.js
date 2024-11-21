@@ -51,8 +51,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       `Applicants: ${statistics.register}`;
     document.getElementById('admitted').innerHTML =
       `Admitted: ${statistics.admitted}`;
-    document.getElementById('my-tcas-link').href = getMyTcasLink(
-      document.querySelector('.mytcas-link-container').id
-    );
+  }
+  const majorCode = document.querySelector('.mytcas-link-container').id;
+  if (majorCode !== '') {
+    document.getElementById('my-tcas-link').href = getMyTcasLink(majorCode);
   }
 });

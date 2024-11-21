@@ -52,7 +52,7 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=_status)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=["post", "get"])
+    @action(detail=False, methods=["post"])
     def calculate_score(self, request: HttpRequest) -> HttpResponse:
         """Calculate the user's score based on the score weights.
 
@@ -62,31 +62,37 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
         """
         if "criteria" not in request.data:
             return Response(
-                {"error": "No Criteria Data"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "No Criteria Data"}, status=status.HTTP_400_BAD_REQUEST
             )
         serializer = CriterionSerializer(
             data=request.data["criteria"],
             many=True,
         )
         if not serializer.is_valid():
-            return Response({}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Invalid POST Data"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
-        criteria_id = int(request.data["criteria_id"])
-        major_code = 0
-        if int(request.data["major_id"]) != 0:
+        criteria_id = request.data["criteria_id"]
+        major_code = ""
+        if request.data["major_id"] != "":
             major_code = Major.objects.get(pk=int(request.data["major_id"])).code
 
         result = 0
         for criterion in serializer.validated_data:
             try:
-                student_exam = StudentExamScore.objects.get(
-                    exam=criterion["exam"], student=self.request.user
+                exam = criterion["exam"]
+                student_score = StudentExamScore.objects.get(
+                    exam=exam, student=self.request.user
+                ).score
+                result += (
+                    student_score * (100 / exam.max_score) * criterion["weight"] / 100
                 )
-                result += student_exam.score * criterion["weight"] / 100
             except StudentExamScore.DoesNotExist:
                 txt = f"SCORE FOR {criterion['exam'].name.upper()} DOES NOT EXIST"
                 messages.warning(request, txt)
 
+        request.session["has_score"] = True
         request.session["score"] = result
         request.session["criteria_id"] = criteria_id
         request.session["major"] = major_code
