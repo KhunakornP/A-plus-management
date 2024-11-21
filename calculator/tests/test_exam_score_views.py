@@ -47,6 +47,13 @@ class ScoreViewTest(BaseTestCase, CalculatorBaseTestCase):
 
     def test_have_computed_score(self):
         """The score page is accessible if user has computed score before."""
+        for i in range(1, 5):
+            e = Exams.objects.create(name=f"Exam #{i}")
+            if i <= 10:
+                ses = StudentExamScore.objects.create(
+                    student=self.user1, exam=e, score=69
+                )
+                ses.save()
         data = create_mock_criteria(
             map(lambda x: {"exam": x, "weight": 25}, range(1, 5))
         )
