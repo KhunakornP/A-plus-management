@@ -7,6 +7,8 @@ from urllib.parse import urljoin
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_not_required
+from django.utils.decorators import method_decorator
 from django.shortcuts import redirect
 import requests
 from django.urls import reverse
@@ -53,6 +55,7 @@ class GoogleOAuth2IatValidationAdapter(GoogleOAuth2Adapter):
         return super().complete_login(request, app, token, response, **kwargs)
 
 
+@method_decorator(login_not_required, name="dispatch")
 class GoogleLoginCallback(APIView):
     """Class for handling token exchange between Google and Server."""
 
@@ -92,6 +95,7 @@ class GoogleLoginCallback(APIView):
             return redirect(reverse("manager:main_login"))
 
 
+@method_decorator(login_not_required, name="dispatch")
 class GoogleLogin(SocialLoginView):
     """Social Login View for Google OAuth."""
 

@@ -5,10 +5,13 @@ from manager.models import StudentInfo
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_not_required
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.conf import settings
 
 
+@method_decorator(login_not_required, name="dispatch")
 class LoginView(TemplateView):
     """View for rendering the login page."""
 
@@ -26,6 +29,7 @@ class LoginView(TemplateView):
         return context
 
 
+@method_decorator(login_not_required, name="dispatch")
 @receiver(post_save, sender=User)
 def create_default_info_on_user_creation(sender, instance, created, **kwargs):
     """

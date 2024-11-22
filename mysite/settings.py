@@ -59,6 +59,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
@@ -141,6 +142,7 @@ REST_FRAMEWORK = {
 }
 
 SITE_ID = config('SITE_ID', cast=int, default=3)
+LOGIN_URL = 'manager:main_login'
 LOGOUT_REDIRECT_URL = 'manager:main_login'
 
 #  The maximum difference between the iat and server time allowed in seconds
