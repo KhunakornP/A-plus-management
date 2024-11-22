@@ -5,10 +5,10 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
 {% endblock %}
 {% block content %}
-{% if child_list %}
 {% load index %}
 <div class="container py-5">
   <div class="row d-flex justify-content-center align-items-center">
+    {% if child_list %}
     <div class="col mb-4">
       <h3 class="p-2">Your children</h3>
         {% for child in child_list %}
@@ -44,11 +44,11 @@
           </div>
         {% endfor %}
       </div>
+      {% else %}
+      <h3 class="text-center"> You currently do not have any children associated!</h3>
+      <h3 class="text-center"> please ask them to add you via the profile page.</h3>
+      {% endif %}
+      <a href="{% url 'manager:taskboard_index' %}" class="p-2 btn btn-primary m-2"> back to index</a>
   </div>
 </div>
-{% else %}
-<p> You currently do not have any children associated!</p>
-<p> please ask them to add you via the profile page.</p>
-{% endif %}
-<a href="{% url 'manager:taskboard_index' %}" class="p-2 btn btn-primary"> back to index</a>
 {% endblock %}

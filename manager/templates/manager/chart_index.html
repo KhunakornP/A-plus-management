@@ -13,7 +13,7 @@
 <div class="container py-5">
     <div class="row d-flex justify-content-center align-items-center">
         <h3 class="text-center">Overview of taskboard progress</h3>
-        <div class="col-md-10 mb-4">
+        <div class="col-md-8 mb-4">
           <div class="card">
             <div class="card-body">
                 <canvas id="overview-chart"></canvas>
@@ -21,6 +21,7 @@
           </div>
         </div>
     </div>
+    {% if taskboards %}
     <div class="row d-flex justify-content-center align-items-center">
         <h3 class="text-center">Burndown charts</h3>
         {% for taskboard in taskboards %}
@@ -34,8 +35,14 @@
           </div>
         </div>
         {% endfor %}
+    <div class="col-md-8 mb-2 m-2" align="center">
+    <a href="{% url 'manager:dashboard' %}" class="btn btn-primary">Back to dashboard</a>
     </div>
+    </div>
+    {% else %}
+    <p>Your child currently doesn't have any taskboards</p>
     <a href="{% url 'manager:dashboard' %}" class="btn btn-primary">Back to dashboard</a>
   </div>
+    {% endif %}
 <div>
 {% endblock %}
