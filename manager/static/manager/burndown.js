@@ -15,10 +15,14 @@ async function fetchEstimateHistoryData(interval) {
     return estimateHistories;
 }
 
-async function fetchVelocityData(startDate, interval, mode) {
-    const response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${startDate}&interval=${interval}&mode=${mode}`);
-    const Velocity = await response.json();
-    return Velocity
+async function fetchVelocityData(startDate, interval) {
+    let response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${startDate}&interval=${interval}`);
+    let velocity = await response.json();
+    if (!velocity.x || !velocity.velocity) {
+        response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${startDate}&interval=${interval}&mode=average`);
+        velocity = response.json();
+    }
+    return velocity
 }
 
 async function fetchTaskData(startDate, endDate){
@@ -107,15 +111,20 @@ function fillDates(data) {
     
     let result = [];
     let nextIndex = data.findIndex(item => new Date(item.date) >= previewStartDate);
-    let currentIndex = nextIndex - 1;
-    
-    if (currentIndex < 0) {
+    let currentIndex = nextIndex - 1;  
+
+    if (nextIndex === -1) {
+        currentIndex = data.length -1
+        nextIndex = data.length
+    }
+    else if (currentIndex < 0) {
         currentIndex = nextIndex;
         nextIndex = nextIndex + 1;
-    }
-    
+    } 
+
     for (let i = currentIndex; i < data.length; i++) {
-        let currentDate = previewStartDate;
+        let currentDate = new Date(data[currentIndex].date) <= previewStartDate ? previewStartDate : new Date(data[currentIndex].date);
+
         let nextDate = i + 1 < data.length ? new Date(data[i + 1].date) : new Date();
         let currentTR = data.find(item => item.date === formatDate(currentDate)) ?
         data.find(item => item.date === formatDate(currentDate)).time_remaining :
@@ -158,13 +167,31 @@ function fillWeeks(data) {
             }
         }
         result.push({
-            x: formatWeek({year: year, week: week}),
+            x: formatWeek({ year: year, week: week }),
             y: time_remaining
         });
         previousYear = year;
         previousWeek = week;
         previousTimeRemaining = time_remaining;
     });
+
+    // Fill from the last element to the current week
+    if (previousYear !== null && previousWeek !== null) {
+        const today = new Date();
+        const { year: currentYear, week: currentWeek } = getWeek(today);
+
+        while (previousYear < currentYear || previousWeek < currentWeek) {
+            previousWeek += 1;
+            if (previousWeek > 52) {
+                previousYear += 1;
+                previousWeek = 1;
+            }
+            result.push({
+                x: `${previousYear}-W${String(previousWeek).padStart(2, '0')}`,
+                y: previousTimeRemaining
+            });
+        }
+    }
 
     return result;
 }
@@ -199,6 +226,23 @@ function fillMonths(data) {
                 });
             }
         }
+    }
+
+    // Fill until the current month if needed
+    const lastElement = result[result.length - 1];
+    const lastDate = new Date(lastElement.x);
+    const currentDate = new Date();
+
+    while (
+        lastDate.getFullYear() < currentDate.getFullYear() ||
+        (lastDate.getFullYear() === currentDate.getFullYear() &&
+            lastDate.getMonth() < currentDate.getMonth())
+    ) {
+        lastDate.setMonth(lastDate.getMonth() + 1);
+        result.push({
+            x: formatMonth(lastDate),
+            y: lastElement.y,
+        });
     }
 
     return result;
@@ -345,7 +389,7 @@ function initializeChart(ctx, range, displayData, lineAnnotations, trendAnnotati
     });
 }
 
-function updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData, velocityEndDate) {
+function updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData) {
     const updateDisplayStatus = (annotations, type) => {
         annotations.forEach((annotation, index) => {
             const checkbox = document.getElementById(`${type}-checkbox-${index}`);
@@ -353,9 +397,8 @@ function updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData
         });
     };
 
-    const updateTrendLine = (trendLine, x2, y1, y2, velocityEndDate) => {
-        const trendEndDate = new Date(x2);
-        if (x2 && y1 > 0 && trendEndDate <= velocityEndDate) {
+    const updateTrendLine = (trendLine, x2, y1, y2) => {
+        if (x2 && y1 > 0) {
             trendLine.xMax = x2;
             trendLine.yMax = y2;
             trendLine.display = true;
@@ -367,12 +410,12 @@ function updateAnnotations(taskAnnotations, eventAnnotations, chart, displayData
     updateDisplayStatus(taskAnnotations, 'task');
     updateDisplayStatus(eventAnnotations, 'event');
 
-    const { x1, x2, y1, y2 } = getNearestTrendData(displayData, taskAnnotations, eventAnnotations);
+    const { x1, x2, y1, y2, color } = getNearestTrendData(displayData, taskAnnotations, eventAnnotations);
     const trendLine = chart.options.plugins.annotation.annotations.find(annotation => 
-        annotation.borderColor === 'rgba(255, 100, 100, 1)' && annotation.mode === 'xy'
+        annotation.borderColor === color && annotation.mode === 'xy'
     );
-
-    updateTrendLine(trendLine, x2, y1, y2, velocityEndDate);
+    
+    if (trendLine !== undefined) { updateTrendLine(trendLine, x2, y1, y2) }
 
     if (trendLine && trendLine.display) {
         const slope = calculateSlope(x1, x2, y1, y2);
@@ -417,6 +460,7 @@ function updateWarningEstimate(velocitySlope) {
 }
 
 async function main() {
+    // Get EstimateHistory data
     const dayEstHistData = await fetchEstimateHistoryData('day');
     if (dayEstHistData.length === 0) {
         const ctx = document.getElementById('no-data');
@@ -432,30 +476,19 @@ async function main() {
     }
     const weekEstHistData = await fetchEstimateHistoryData('week');
     const monthEstHistData = await fetchEstimateHistoryData('month');
+    console.log(dayEstHistData)
 
+    // Get data that will be displayed on the chart
     const dayDisplayData = fillDates(dayEstHistData);
     const weekDisplayData = fillWeeks(weekEstHistData);
     const monthDisplayData = fillMonths(monthEstHistData)
 
-    const dayVelocity = await fetchVelocityData(dayDisplayData[0].x, 'day')
-    // dayVelocity = (!dayVelocity.x || !dayVelocity.velocity) ? await fetchVelocityData(dayDisplayData[0].x, 'day', 'average') : dayVelocity
-    // dayVelocity = (!dayVelocity.x || !dayVelocity.velocity) ? {x: '', velocity: 0} : dayVelocity
-    // if (!dayVelocity.x || !dayVelocity.velocity) {
-    //     const element = document.getElementById('not-enough-data');
-    //     element.textContent = "Not enough data to estimate velocity.";
-    //     element.style.color = 'yellow';
-
-    //     const ctx = document.getElementById('myChart');
-    //     initializeChart(ctx, [], dayDisplayData, [lineAnnotation(formatDate(today), 'Today', 'blue')], [], scaleMax);
-
-    //     createCheckboxes(document.getElementById('task-checkboxes'), [], 'task');
-    //     createCheckboxes(document.getElementById('event-checkboxes'), [], 'event');
-
-    //     return;
-    // }
+    // Get velocity data
+    const dayVelocity = await fetchVelocityData(dayEstHistData[0].date, 'day')
     const weekVelocity = await fetchVelocityData(weekEstHistData[0].date,  'week')
     const monthVelocity = await fetchVelocityData(monthEstHistData[0].date, 'month')
 
+    // Generate the x axis for the chart
     const dayRange = generateRange(dayEstHistData[0].date, dayVelocity.x, 'day')
     const weekRange = generateRange(dayEstHistData[0].date, weekVelocity.x, 'week')
     const monthRange = generateRange(dayEstHistData[0].date, monthVelocity.x, 'month')
@@ -467,10 +500,19 @@ async function main() {
 
         const annoMaxDate = new Date(dayDisplayData[0].x);
         annoMaxDate.setDate(annoMaxDate.getDate() + scaleMax);
-        const annoEndDate = velocityEndDate < annoMaxDate ? velocityEndDate : annoMaxDate;
+        let annoEndDate;
+        let tasks;
+        let events;
+        if (!isNaN(velocityEndDate.getTime())){
+            annoEndDate = velocityEndDate < annoMaxDate ? velocityEndDate : annoMaxDate; // TODO fix this all tasks and events will appear
+            tasks = await fetchTaskData(today, annoEndDate)
+            events = await fetchEventData(today, annoEndDate)
+        } else {
+            tasks = [];
+            events = [];
+        }
 
-        const tasks = await fetchTaskData(today, annoEndDate)
-        const events = await fetchEventData(today, annoEndDate)
+
 
 
     // Create line annotations for tasks, events, and today
@@ -503,13 +545,13 @@ async function main() {
     let dayTrendAnnotations = []
     let weekTrendAnnotations = []
     let monthTrendAnnotations = []
-    if (dayVelocity.x && dayVelocity.velocity) {
+    if (dayVelocity.x !== '' && dayVelocity.velocity !== 0) {
         dayTrendAnnotations = [dayVelocityTrend, nearestTrend];
     }
-    if (weekVelocity.x && weekVelocity.velocity) {
+    if (weekVelocity.x !== '' && weekVelocity.velocity !== 0) {
         weekTrendAnnotations = [weekVelocityTrend, {}];
     }
-    if (monthVelocity.x && monthVelocity.velocity) {
+    if (monthVelocity.x !== '' && monthVelocity.velocity !== 0) {
         monthTrendAnnotations = [monthVelocityTrend, {}];
     }
 
@@ -526,8 +568,8 @@ async function main() {
     let chart = initializeChart(ctx, dayRange, dayDisplayData, dayLineAnnotations, dayTrendAnnotations, scaleMax);
 
     // Create checkboxes for tasks and events to update annotations dynamically
-    createCheckboxes(document.getElementById('task-checkboxes'), tasks, 'task', () => updateAnnotations(dayTaskAnnotations, dayEventAnnotations, chart, dayDisplayData, velocityEndDate));
-    createCheckboxes(document.getElementById('event-checkboxes'), events, 'event', () => updateAnnotations(dayTaskAnnotations, dayEventAnnotations, chart, dayDisplayData, velocityEndDate));
+    createCheckboxes(document.getElementById('task-checkboxes'), tasks, 'task', () => updateAnnotations(dayTaskAnnotations, dayEventAnnotations, chart, dayDisplayData));
+    createCheckboxes(document.getElementById('event-checkboxes'), events, 'event', () => updateAnnotations(dayTaskAnnotations, dayEventAnnotations, chart, dayDisplayData));
     updateAnnotations(dayTaskAnnotations, dayEventAnnotations, chart, dayDisplayData, new Date(dayVelocity.x).setHours(23, 59, 59, 999));
 
     document.getElementById('timescaleSelector').addEventListener('change', function() {
@@ -582,15 +624,15 @@ async function main() {
 
             chart = initializeChart(ctx, dayRange, dayDisplayData, dayLineAnnotations, dayTrendAnnotations, scaleMax);
 
-            updateAnnotations(dayTaskAnnotations, dayEventAnnotations, chart, dayDisplayData, new Date(dayVelocity.x).setHours(23, 59, 59, 999));
+            updateAnnotations(dayTaskAnnotations, dayEventAnnotations, chart, dayDisplayData);
         }
 
         const checkboxes = document.querySelectorAll('#task-checkboxes input, #event-checkboxes input');
         checkboxes.forEach(checkbox => {
             checkbox.disabled = (timescale !== 'day');
         });
-        const annotations = chart.config.options.plugins.annotation.annotations;
-        annotations[annotations.length - 1].display = (timescale === 'day');
+        let annotations = chart.config.options.plugins.annotation.annotations.find(annotation => annotation.borderColor === 'rgba(255, 100, 100, 1)');
+        annotations = (timescale === 'day');
         chart.update();
     });
 

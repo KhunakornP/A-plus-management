@@ -132,9 +132,9 @@ class VelocityViewSet(viewsets.ViewSet):
         """
         today = timezone.now()
         if interval == "week":
-            return (today + timezone.timedelta(days=units*7)).strftime("%Y-%m-%d")
+            return (today + timezone.timedelta(days=units * 7)).strftime("%Y-%m-%d")
         elif interval == "month":
-            finish_date = today.replace(month=today.month+units)
+            finish_date = today.replace(month=today.month + units)
             return finish_date.strftime("%Y-%m-%d")
         return (today + timezone.timedelta(days=units)).strftime("%Y-%m-%d")
 
@@ -222,8 +222,8 @@ class EstimateHistoryViewset(viewsets.ViewSet):
             )
             # filter the db again for objects that are in the above query
             queryset = EstimateHistory.objects.filter(date__in=latest_entries)
-        if not queryset:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        # if not queryset:
+        #     return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = EstimateHistorySerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
