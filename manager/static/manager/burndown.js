@@ -87,12 +87,14 @@ function generateRange(startDate, endDate, interval) {
             array.push(formatDate(currentDate));
             currentDate.setDate(currentDate.getDate() + 1);
         }
-    } else if (interval === 'week') {            
+    } else if (interval === 'week') {
+        array.push('initial'); 
         while (start <= end) {
             array.push(formatWeek(getWeek(start)));
             start.setUTCDate(start.getUTCDate() + 7);
         }
     } else if (interval === 'month') {
+        array.push('initial'); 
         let currentDate = start;
         while (currentDate <= end) {
             array.push(formatMonth(currentDate));
@@ -144,7 +146,7 @@ function fillDates(data) {
     return result;
 }
 
-function fillWeeks(data) {
+function fillWeeks(data, initial) {
     data.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const mappedData = data.map(item => {
@@ -152,7 +154,7 @@ function fillWeeks(data) {
         return { year, week, timeRemaining: item.time_remaining };
     });
 
-    const result = [];
+    const result = [{x: 'initial', y: initial.time_remaining }];
     let previousYear = null;
     let previousWeek = null;
     let previousTimeRemaining = null;
@@ -201,7 +203,7 @@ function fillWeeks(data) {
     return result;
 }
 
-function fillMonths(data) {
+function fillMonths(data, initial) {
     data.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const mappedData = data.map(item => {
@@ -209,7 +211,7 @@ function fillMonths(data) {
         return { x: formatMonth(date), y: item.time_remaining };
     });
 
-    const result = [];
+    const result = [{x : 'initial', y : initial.time_remaining}];
     for (let i = 0; i < mappedData.length; i++) {
         const current = mappedData[i];
         result.push(current);
@@ -464,6 +466,44 @@ function updateWarningEstimate(velocitySlope) {
     }
 }
 
+function getMaxTimeRemainingOfFirstWeek(dayEstHistData) {
+    if (!dayEstHistData.length) return null;
+
+    const firstDate = new Date(dayEstHistData[0].date);
+    const { year, week } = getWeek(firstDate);
+
+    const sameWeekData = dayEstHistData.filter(item => {
+        const itemDate = new Date(item.date);
+        const itemWeek = getWeek(itemDate);
+        return itemWeek.year === year && itemWeek.week === week;
+    });
+
+    if (!sameWeekData.length) return null;
+
+    return sameWeekData.reduce((max, item) => 
+        item.time_remaining > max.time_remaining ? item : max
+    );
+}
+
+function getMaxTimeRemainingOfFirstMonth(dayEstHistData) {
+    if (!dayEstHistData.length) return null;
+
+    const firstDate = new Date(dayEstHistData[0].date);
+    const { year, month } = { year: firstDate.getUTCFullYear(), month: firstDate.getUTCMonth() + 1 };
+
+    const sameMonthData = dayEstHistData.filter(item => {
+        const itemDate = new Date(item.date);
+        const itemMonth = { year: itemDate.getUTCFullYear(), month: itemDate.getUTCMonth() + 1 };
+        return itemMonth.year === year && itemMonth.month === month;
+    });
+
+    if (!sameMonthData.length) return null;
+
+    return sameMonthData.reduce((max, item) => 
+        item.time_remaining > max.time_remaining ? item : max
+    );
+}
+
 async function main() {
     // Get EstimateHistory data
     const dayEstHistData = await fetchEstimateHistoryData('day');
@@ -484,10 +524,8 @@ async function main() {
 
     // Get data that will be displayed on the chart
     const dayDisplayData = fillDates(dayEstHistData);
-    const weekDisplayData = fillWeeks(weekEstHistData);
-    const monthDisplayData = fillMonths(monthEstHistData)
-
-    console.log(dayDisplayData)
+    const weekDisplayData = fillWeeks(weekEstHistData, getMaxTimeRemainingOfFirstWeek(dayEstHistData));
+    const monthDisplayData = fillMonths(monthEstHistData, getMaxTimeRemainingOfFirstMonth(dayEstHistData))
 
     // Get velocity data
     const dayVelocity = await fetchVelocityData(dayEstHistData[0].date, 'day')
@@ -510,7 +548,7 @@ async function main() {
         let tasks;
         let events;
         if (!isNaN(velocityEndDate.getTime())){
-            annoEndDate = velocityEndDate < annoMaxDate ? velocityEndDate : annoMaxDate; // TODO fix this all tasks and events will appear
+            annoEndDate = velocityEndDate < annoMaxDate ? velocityEndDate : annoMaxDate;
             tasks = await fetchTaskData(today, annoEndDate)
             events = await fetchEventData(today, annoEndDate)
         } else {
