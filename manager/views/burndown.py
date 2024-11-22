@@ -137,7 +137,7 @@ class VelocityViewSet(viewsets.ViewSet):
         if interval == "week":
             return (today + timezone.timedelta(days=units * 7)).strftime("%Y-%m-%d")
         elif interval == "month":
-            finish_date = today.replace(month=today.month + units)
+            finish_date = today.replace(month=min((today.month + units)%12, 1))
             return finish_date.strftime("%Y-%m-%d")
         return (today + timezone.timedelta(days=units)).strftime("%Y-%m-%d")
 
