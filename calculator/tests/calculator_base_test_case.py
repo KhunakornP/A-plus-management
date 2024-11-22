@@ -1,10 +1,11 @@
 """Base test case for Calculator app models."""
 
-from django.test import TestCase
+from manager.tests import BaseTestCase
+from django.contrib.auth.models import Permission
 from calculator.models import University, Faculty, Major, CriteriaSet, Criterion, Exams
 
 
-class CalculatorBaseTestCase(TestCase):
+class CalculatorBaseTestCase(BaseTestCase):
     """Set up 2 universities, each with one faculty.
 
     Faculty #1 has has 3 majors. While #2 has 4.
@@ -12,6 +13,10 @@ class CalculatorBaseTestCase(TestCase):
 
     def setUp(self):
         """Set Up universities, faculties and majors."""
+        super().setUp()
+        self.user1.user_permissions.add(
+            Permission.objects.get(codename="is_taking_A_levels")
+        )
         faculty_name = "Engineering"
         self.university1 = University.objects.create(name="Kasetsart")
         self.faculty1 = Faculty.objects.create(

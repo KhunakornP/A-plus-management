@@ -141,6 +141,11 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S.%fZ",
 }
 
+if not DEBUG:
+    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = (
+            "rest_framework.renderers.JSONRenderer",
+        )
+
 SITE_ID = config('SITE_ID', cast=int, default=3)
 LOGIN_URL = 'manager:main_login'
 LOGOUT_REDIRECT_URL = 'manager:main_login'

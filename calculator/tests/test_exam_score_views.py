@@ -6,7 +6,6 @@ from django.contrib.messages import get_messages
 from django.urls import reverse
 from rest_framework import status
 from calculator.models import StudentExamScore, Exams
-from manager.tests import BaseTestCase
 from .calculator_base_test_case import CalculatorBaseTestCase
 
 
@@ -36,7 +35,7 @@ def create_mock_criteria(criteria: Iterable[dict[str, int | float]]) -> dict[str
     }
 
 
-class ScoreViewTest(BaseTestCase, CalculatorBaseTestCase):
+class ScoreViewTest(CalculatorBaseTestCase):
     """Tests for ScoreView TemplateView."""
 
     def test_never_computed_score(self):
@@ -64,7 +63,7 @@ class ScoreViewTest(BaseTestCase, CalculatorBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-class ExamScoreTest(BaseTestCase, CalculatorBaseTestCase):
+class ExamScoreTest(CalculatorBaseTestCase):
     """Test API for saving and getting score of a certain user."""
 
     def setUp(self):
