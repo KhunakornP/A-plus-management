@@ -67,8 +67,7 @@ class VelocityViewSet(viewsets.ViewSet):
 
     def get_timeframe(self, start_day: datetime, interval: str):
         """
-        Get the total duration of work for calculating the basic velocity
-        based on the time interval.
+        Get the total duration of work for based on the time interval.
 
         :param start_day: The first recorded date from the chart.
         :param interval: The interval between each data point.
@@ -142,8 +141,7 @@ class VelocityViewSet(viewsets.ViewSet):
         self, start_day: datetime, taskboard_id: int, interval: str
     ):
         """
-        Group the data for each estimateHistory object based on the given
-        interval.
+        Group the data for each estimateHistory object based on the given interval.
 
         :param start_day: The first recorded date from the chart.
         :param taskboard_id: The taskboard which contains the EstimateHistory.
