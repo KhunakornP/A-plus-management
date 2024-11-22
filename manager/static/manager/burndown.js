@@ -18,12 +18,10 @@ async function fetchEstimateHistoryData(interval) {
 async function fetchVelocityData(startDate, interval) {
     let response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${startDate}&interval=${interval}`);
     let velocity = await response.json();
-    console.log('basic', velocity)
-    if (!velocity.x || !velocity.velocity) {
+    if (!(velocity.x === '') || (!velocity.velocity === 0)) {
         response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${startDate}&interval=${interval}&mode=average`);
         velocity = await response.json();
     }
-    console.log('average', velocity)
     return velocity
 }
 
@@ -69,7 +67,6 @@ function formatMonth(date) {
     return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
 }
 
-
 function getWeek(date) {
     const tempDate = new Date(date.getTime());
     tempDate.setUTCHours(0, 0, 0, 0);
@@ -113,7 +110,7 @@ function fillDates(data) {
     
     let result = [];
     let nextIndex = data.findIndex(item => new Date(item.date) >= previewStartDate);
-    let currentIndex = nextIndex - 1;  
+    let currentIndex = nextIndex - 1;
 
     if (nextIndex === -1) {
         currentIndex = data.length -1
@@ -122,18 +119,24 @@ function fillDates(data) {
     else if (currentIndex < 0) {
         currentIndex = nextIndex;
         nextIndex = nextIndex + 1;
-    } 
+    }
 
     for (let i = currentIndex; i < data.length; i++) {
-        let currentDate = new Date(data[currentIndex].date) <= previewStartDate ? previewStartDate : new Date(data[currentIndex].date);
+        let currentDate = new Date(data[currentIndex].date) <= previewStartDate ? previewStartDate : new Date(data[i].date);
 
         let nextDate = i + 1 < data.length ? new Date(data[i + 1].date) : new Date();
-        let currentTR = data.find(item => item.date === formatDate(currentDate)) ?
-        data.find(item => item.date === formatDate(currentDate)).time_remaining :
-        data[i].time_remaining
-        
+
+        let currentTR = data[i].time_remaining
+                
         while (currentDate <= nextDate) {
-            result.push({ x: formatDate(currentDate), y: currentTR });
+            const formattedDate = formatDate(currentDate);
+
+            const lastElement = result[result.length - 1];
+            if (lastElement && lastElement.x === formattedDate) {
+                result.pop();
+            }
+
+            result.push({ x: formattedDate, y: currentTR });
             currentDate.setDate(currentDate.getDate() + 1);
         }
     }
@@ -478,12 +481,13 @@ async function main() {
     }
     const weekEstHistData = await fetchEstimateHistoryData('week');
     const monthEstHistData = await fetchEstimateHistoryData('month');
-    console.log(dayEstHistData)
 
     // Get data that will be displayed on the chart
     const dayDisplayData = fillDates(dayEstHistData);
     const weekDisplayData = fillWeeks(weekEstHistData);
     const monthDisplayData = fillMonths(monthEstHistData)
+
+    console.log(dayDisplayData)
 
     // Get velocity data
     const dayVelocity = await fetchVelocityData(dayEstHistData[0].date, 'day')
@@ -513,8 +517,6 @@ async function main() {
             tasks = [];
             events = [];
         }
-
-
 
 
     // Create line annotations for tasks, events, and today
