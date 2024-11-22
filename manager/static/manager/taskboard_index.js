@@ -40,7 +40,7 @@ function generateTaskboardCard(taskboard) {
       <div class="card-body">
         <div class="d-grid gap-2 d-md-block">
             <a href="/manager/taskboard/${studentID}/${taskboard.id}/" class="btn btn-info mx-2">Go to board</a>
-            <button class="btn btn-danger mx-2 delete-btn" id=${taskboard.id}>Delete</button>
+            <button class="btn btn-danger mx-2 delete-btn" id=${taskboard.id} disabled>Delete</button>
         </div>
       </div>
     </div>
@@ -62,7 +62,9 @@ async function renderTaskboards() {
     document.getElementById('taskboard-container').innerHTML =
       noTaskboardMessage;
   }
+  if (studentID !== ''){
   bindDeleteButtons();
+  }
 }
 
 async function bindDeleteButtons() {
