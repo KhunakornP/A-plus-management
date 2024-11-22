@@ -1,4 +1,5 @@
 """A script to import admission data from MyTCAS' csv file."""
+
 import csv
 import os
 from functools import reduce
@@ -7,6 +8,7 @@ from calculator.models import University, Faculty, Major
 PATH = os.path.join(
     os.getcwd(), os.path.join("calculator", os.path.join("data", "TCAS67_maxmin.csv"))
 )
+
 
 def run():
     """Run the import script."""
@@ -18,7 +20,8 @@ def run():
         )
         demo_faculty = ("คณะวิศวกรรมศาสตร์", "คณะอักษรศาสตร์", "คณะบริหารธุรกิจ")
         sample_data = filter(
-            lambda x: x["university"] in demo_university and x["faculty"] in demo_faculty,
+            lambda x: x["university"] in demo_university
+            and x["faculty"] in demo_faculty,
             map(
                 lambda r: {
                     "university": r["สถาบัน"],
