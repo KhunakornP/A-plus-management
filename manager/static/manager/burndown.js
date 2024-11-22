@@ -351,13 +351,13 @@ function getNearestTrendData(dsiplayData, taskAnnotations, eventAnnotations) {
     return { x1, x2, y1, y2, color };
 }
 
-function initializeChart(ctx, range, displayData, lineAnnotations, trendAnnotations, scaleMax) {
+function initializeChart(ctx, range, displayData, lineAnnotations, trendAnnotations) {
 
     const chartStartDate = lineAnnotations[lineAnnotations.length - 1].value;
 
     const startIndex = range.indexOf(chartStartDate);
     const adjustedStartIndex = startIndex <= 14 ? 0 : startIndex - 14;
-    const endIndex = startIndex + scaleMax;
+    const endIndex = adjustedStartIndex + scaleMax;
 
     return new Chart(ctx, {
         type: 'bar',
@@ -569,7 +569,7 @@ async function main() {
     updateDoneByEstimate(dayVelocity.x, 'day');
 
     const ctx = document.getElementById('myChart');
-    let chart = initializeChart(ctx, dayRange, dayDisplayData, dayLineAnnotations, dayTrendAnnotations, scaleMax);
+    let chart = initializeChart(ctx, dayRange, dayDisplayData, dayLineAnnotations, dayTrendAnnotations);
 
     // Create checkboxes for tasks and events to update annotations dynamically
     createCheckboxes(document.getElementById('task-checkboxes'), tasks, 'task', () => updateAnnotations(dayTaskAnnotations, dayEventAnnotations, chart, dayDisplayData));
