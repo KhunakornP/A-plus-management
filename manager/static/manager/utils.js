@@ -79,6 +79,31 @@ function toggleInputFields(toggleables, on) {
   }
 }
 
+function getErrorDiv(message, id) {
+  let errorDiv = document.getElementById(id);
+  if (errorDiv === null) {
+    errorDiv = document.createElement('div');
+    errorDiv.setAttribute('class', 'text-center text-danger error');
+    errorDiv.innerHTML = `<small>${message}</small>`;
+    errorDiv.id = id;
+  }
+  return errorDiv;
+}
+
+function insertErrorDiv(inputField, errorDiv) {
+  const div = document.getElementById(errorDiv.id);
+  if (div === null) {
+    inputField.parentNode.insertBefore(errorDiv, inputField.nextSibling);
+  }
+}
+
+function removeErrorDivs() {
+  const errorDivs = document.querySelectorAll('.error');
+  errorDivs.forEach((div) => {
+    div.remove();
+  });
+}
+
 export {
   formatLocalISO,
   getValidDateISOString,
@@ -87,4 +112,7 @@ export {
   toggleInputFields,
   taskNearDueDate,
   taskPassedDueDate,
+  getErrorDiv,
+  insertErrorDiv,
+  removeErrorDivs,
 };
