@@ -1,22 +1,6 @@
-const eventModalElement = document.getElementById('eventDetailsModal');
-const eventDetailsModal = new bootstrap.Modal(
-  document.getElementById('eventDetailsModal'),
-  {
-    focus: true,
-  }
-);
-const taskDetailsModal = new bootstrap.Modal(
-  document.getElementById('taskDetailsModal'),
-  {
-    focus: true,
-  }
-);
-const addEventModal = new bootstrap.Modal(
-  document.getElementById('addEventModal'),
-  {
-    focus: true,
-  }
-);
+const eventDetailsModal = new bootstrap.Modal('#eventDetailsModal');
+const taskDetailsModal = new bootstrap.Modal('#taskDetailsModal');
+const addEventModal = new bootstrap.Modal('#addEventModal');
 const newTitle = document.getElementById('newTitle');
 const newStart = document.getElementById('newStart');
 const newEnd = document.getElementById('newEnd');
@@ -29,29 +13,46 @@ const eventEnd = document.getElementById('eventEnd');
 const eventDetails = document.getElementById('eventDetails');
 const editButton = document.getElementById('editButton');
 const cancelButton = document.getElementById('cancelButton');
-let doneButton = document.getElementById('doneButton');
-let deleteButton = document.getElementById('deleteButton');
+const deleteButton = document.getElementById('deleteButton');
+let currentEventID = 0;
+let calendar;
 
-import { formatLocalISO } from './utils.js';
+import {
+  formatLocalISO,
+  getErrorDiv,
+  insertErrorDiv,
+  removeErrorDivs,
+} from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const calendarElement = document.getElementById('calendar');
-  let calendar = new FullCalendar.Calendar(calendarElement, {
+  calendar = new FullCalendar.Calendar(calendarElement, {
     initialView: 'dayGridMonth',
     nowIndicator: true,
     allDaySlot: false,
+    slotEventOverlap: false,
+    scrollTime: '00:00:00',
     customButtons: {
       addEvent: {
-        text: 'Add Event',
+        text: '❓',
         click: () => {
-          addEventModal.show();
+          new bootstrap.Modal('#help').show();
         },
       },
     },
     headerToolbar: {
-      left: 'prev,next today',
+      left: 'prevYear,prev,next,nextYear today',
       center: 'title',
       right: 'addEvent dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+    },
+    views: {
+      timeGridWeek: {
+        eventMaxStack: 2,
+        moreLinkClick: 'day',
+      },
+      timeGridDay: {
+        eventMaxStack: 4,
+      }
     },
     height: '90vh',
     navLinks: true,
@@ -75,12 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
     eventClick: (eventClickInfo) => {
       const eventObj = eventClickInfo.event;
       const popover = document.querySelector('.fc-popover');
+      currentEventID = eventObj.id;
       if (popover !== null) {
         popover.style.display = 'none';
       }
 
       if (eventObj.extendedProps.type === 'event') {
-        updateEventModalInfo(eventObj);
+        loadEventModalInfo(eventObj);
         eventDetailsModal.show();
       } else if (eventObj.extendedProps.type === 'task') {
         const taskDue = formatLocalISO(eventObj.start);
@@ -92,46 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
         taskDetailsModal.show();
       }
 
-      const deleteButtonClone = deleteButton.cloneNode(true);
-      deleteButton.parentNode.replaceChild(deleteButtonClone, deleteButton);
-      deleteButton = deleteButtonClone;
-      deleteButton.addEventListener('click', async () => {
-        await fetch(`/api/events/${eventObj.id}/`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': Cookies.get('csrftoken'),
-          },
-        });
-        calendar.getEventSourceById(420).refetch();
-        eventDetailsModal.hide();
-      });
-
-      const doneButtonClone = doneButton.cloneNode(true);
-      doneButton.parentNode.replaceChild(doneButtonClone, doneButton);
-      doneButton = doneButtonClone;
-      doneButton.addEventListener('click', async () => {
-        const startDate = new Date(eventStart.value);
-        const endDate = new Date(eventEnd.value);
-        await fetch(`/api/events/${eventObj.id}/`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': Cookies.get('csrftoken'),
-          },
-          body: JSON.stringify({
-            'title': eventTitle.value,
-            'start': startDate.toISOString(),
-            'end': endDate.toISOString(),
-            'details': eventDetails.value,
-          }),
-        });
-        calendar.getEventSourceById(420).refetch();
-        toggleEventInput(false);
-      });
-
       cancelButton.addEventListener('click', () => {
-        updateEventModalInfo(eventObj);
+        removeErrorDivs();
+        eventTitle.classList.remove('is-invalid');
+        loadEventModalInfo(eventObj);
         toggleEventInput(false);
       });
     },
@@ -144,44 +110,198 @@ document.addEventListener('DOMContentLoaded', () => {
     select: (selectionInfo) => {
       newStart.value = formatLocalISO(selectionInfo.start);
       newEnd.value = formatLocalISO(selectionInfo.end);
+      addEventModal.show();
     },
   });
 
   addButton.addEventListener('click', async () => {
+    const errorMessages = [];
     const startDate = new Date(newStart.value);
     const endDate = new Date(newEnd.value);
     const userID = JSON.parse(document.getElementById('user_id').textContent);
-    await fetch('/api/events/', {
-      method: 'POST',
+    removeErrorDivs();
+    newTitle.classList.remove('is-invalid');
+    newStart.classList.remove('is-invalid');
+    newEnd.classList.remove('is-invalid');
+    try {
+      if (newTitle.value === '') {
+        errorMessages.push({
+          name: 'Title',
+          message: 'Event title cannot be blanked.',
+        });
+      }
+      if (newStart.value === '') {
+        errorMessages.push({ name: 'Start', message: 'Invalid start date.' });
+      }
+      if (newEnd.value === '') {
+        errorMessages.push({ name: 'End', message: 'Invalid end date.' });
+      }
+      if (endDate <= startDate) {
+        errorMessages.push({
+          name: 'Date',
+          message: 'Event end date must be after start date.',
+        });
+      }
+      if (errorMessages.length > 0) {
+        throw new Error();
+      }
+      await fetch('/api/events/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': Cookies.get('csrftoken'),
+        },
+        body: JSON.stringify({
+          'title': newTitle.value,
+          'start': startDate.toISOString(),
+          'end': endDate.toISOString(),
+          'details': newDetails.value,
+          'user': userID,
+        }),
+      });
+      newTitle.value = '';
+      newStart.value = '';
+      newEnd.value = '';
+      newDetails.value = '';
+      calendar.getEventSourceById(420).refetch();
+      addEventModal.hide();
+    } catch {
+      errorMessages.forEach((e) => {
+        if (e.name === 'Title') {
+          newTitle.classList.add('is-invalid');
+          const errorTitleText = getErrorDiv(e.message, 'error-title-add');
+          insertErrorDiv(newTitle, errorTitleText);
+        }
+        if (e.name === 'Start') {
+          newStart.classList.add('is-invalid');
+          const errorStartText = getErrorDiv(e.message, 'error-start-add');
+          insertErrorDiv(newStart, errorStartText);
+        }
+        if (e.name === 'End') {
+          newEnd.classList.add('is-invalid');
+          const errorEndText = getErrorDiv(e.message, 'error-end-add');
+          insertErrorDiv(newEnd, errorEndText);
+        }
+        if (e.name === 'Date') {
+          newEnd.classList.add('is-invalid');
+          const errorDateText = getErrorDiv(e.message, 'error-date-add');
+          insertErrorDiv(newEnd, errorDateText);
+        }
+      });
+    }
+  });
+
+  editButton.addEventListener('click', () => {
+    if (editButton.innerText === 'Edit') {
+      toggleEventInput(true);
+    } else {
+      updateEvent();
+    }
+  });
+
+  document
+    .getElementById('eventDetailsModal')
+    .addEventListener('hide.bs.modal', () => {
+      toggleEventInput(false);
+      eventTitle.classList.remove('is-invalid');
+      removeErrorDivs();
+    });
+
+  document
+    .getElementById('addEventModal')
+    .addEventListener('hide.bs.modal', () => {
+      newTitle.classList.remove('is-invalid');
+      newStart.classList.remove('is-invalid');
+      newEnd.classList.remove('is-invalid');
+      removeErrorDivs();
+    });
+
+  deleteButton.addEventListener('click', async () => {
+    await fetch(`/api/events/${currentEventID}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      },
+    });
+    calendar.getEventSourceById(420).refetch();
+    eventDetailsModal.hide();
+  });
+
+  calendar.render();
+});
+
+async function updateEvent() {
+  const errorMessages = [];
+  const startDate = new Date(eventStart.value);
+  const endDate = new Date(eventEnd.value);
+  removeErrorDivs();
+  eventTitle.classList.remove('is-invalid');
+  eventStart.classList.remove('is-invalid');
+  eventEnd.classList.remove('is-invalid');
+  try {
+    if (eventTitle.value === '') {
+      errorMessages.push({
+        name: 'Title',
+        message: 'Event title cannot be blanked.',
+      });
+    }
+    if (eventStart.value === '') {
+      errorMessages.push({ name: 'Start', message: 'Invalid start date.' });
+    }
+    if (eventEnd.value === '') {
+      errorMessages.push({ name: 'End', message: 'Invalid end date.' });
+    }
+    if (endDate <= startDate) {
+      errorMessages.push({
+        name: 'Date',
+        message: 'Event end date must be after start date.',
+      });
+    }
+    if (errorMessages.length > 0) {
+      throw new Error();
+    }
+    await fetch(`/api/events/${currentEventID}/`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': Cookies.get('csrftoken'),
       },
       body: JSON.stringify({
-        'title': newTitle.value,
+        'title': eventTitle.value,
         'start': startDate.toISOString(),
         'end': endDate.toISOString(),
-        'details': newDetails.value,
-        'user': userID,
+        'details': eventDetails.value,
       }),
     });
-    newTitle.value = '';
-    newStart.value = '';
-    newEnd.value = '';
-    newDetails.value = '';
     calendar.getEventSourceById(420).refetch();
-  });
-
-  editButton.addEventListener('click', () => {
-    toggleEventInput(true);
-  });
-
-  eventModalElement.addEventListener('hide.bs.modal', () => {
+    eventModalTitle.innerHTML = eventTitle.value;
     toggleEventInput(false);
-  });
-
-  calendar.render();
-});
+  } catch {
+    errorMessages.forEach((e) => {
+      if (e.name === 'Title') {
+        eventTitle.classList.add('is-invalid');
+        const errorTitleText = getErrorDiv(e.message, 'error-title-update');
+        insertErrorDiv(eventTitle, errorTitleText);
+      }
+      if (e.name === 'Start') {
+        eventStart.classList.add('is-invalid');
+        const errorStartText = getErrorDiv(e.message, 'error-start-update');
+        insertErrorDiv(eventStart, errorStartText);
+      }
+      if (e.name === 'End') {
+        eventEnd.classList.add('is-invalid');
+        const errorEndText = getErrorDiv(e.message, 'error-end-update');
+        insertErrorDiv(eventEnd, errorEndText);
+      }
+      if (e.name === 'Date') {
+        eventEnd.classList.add('is-invalid');
+        const errorDateText = getErrorDiv(e.message, 'error-date-update');
+        insertErrorDiv(eventEnd, errorDateText);
+      }
+    });
+  }
+}
 
 async function updateEventTime(eventInfo) {
   let eventObj = eventInfo.event;
@@ -199,7 +319,7 @@ async function updateEventTime(eventInfo) {
   });
 }
 
-function updateEventModalInfo(eventObj) {
+function loadEventModalInfo(eventObj) {
   const eventStartLocal = formatLocalISO(eventObj.start);
   const eventEndLocal = formatLocalISO(eventObj.end);
   eventModalTitle.innerHTML = eventObj.title;
@@ -211,9 +331,8 @@ function updateEventModalInfo(eventObj) {
 
 function toggleEventInput(on) {
   if (on) {
-    editButton.classList.add('hidden');
+    editButton.innerHTML = 'Done';
     deleteButton.classList.add('hidden');
-    doneButton.classList.remove('hidden');
     cancelButton.classList.remove('hidden');
     eventTitle.parentNode.classList.remove('hidden');
     eventStart.removeAttribute('readonly');
@@ -223,9 +342,8 @@ function toggleEventInput(on) {
     eventDetails.removeAttribute('readonly');
     eventDetails.setAttribute('class', 'form-control');
   } else {
-    editButton.classList.remove('hidden');
+    editButton.innerHTML = 'Edit';
     deleteButton.classList.remove('hidden');
-    doneButton.classList.add('hidden');
     cancelButton.classList.add('hidden');
     eventTitle.parentNode.classList.add('hidden');
     eventStart.setAttribute('readonly', true);

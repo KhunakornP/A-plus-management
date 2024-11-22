@@ -5,6 +5,8 @@ const deleteBtn = document.getElementById('del-task-btn');
 const editBtn = document.getElementById('edit-task-btn');
 const createBtn = document.getElementById('create-task-btn');
 
+const toggleables = document.querySelectorAll('.toggleable');
+
 const taskOffcanvasTitle = document.getElementById('task-title');
 const taskOffcanvasDetails = document.getElementById('task-details');
 const taskOffcanvasEndDate = document.getElementById('task-enddate');
@@ -23,6 +25,9 @@ import {
   formatLocalISO,
   getValidDateISOString,
   getValidEstimatedTime,
+  getErrorDiv,
+  insertErrorDiv,
+  removeErrorDivs,
   processAndAppend,
   toggleInputFields,
   taskNearDueDate,
@@ -30,22 +35,37 @@ import {
 } from './utils.js';
 
 async function updateTask() {
-  await fetch(`/api/tasks/${currentTaskID}/`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': Cookies.get('csrftoken'),
-    },
-    body: JSON.stringify({
-      'title': taskOffcanvasTitle.value,
-      'details': taskOffcanvasDetails.value,
-      'status': taskOffcanvasStatus.value,
-      'end_date': getValidDateISOString(taskOffcanvasEndDate.value),
-      'time_estimate': getValidEstimatedTime(taskOffcanvasET.value),
-    }),
-  });
-  renderColumns();
+  try {
+    const response = await fetch(`/api/tasks/${currentTaskID}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken'),
+      },
+      body: JSON.stringify({
+        'title': taskOffcanvasTitle.value,
+        'details': taskOffcanvasDetails.value,
+        'status': taskOffcanvasStatus.value,
+        'end_date': getValidDateISOString(taskOffcanvasEndDate.value),
+        'time_estimate': getValidEstimatedTime(taskOffcanvasET.value),
+      }),
+    });
+    if (!response.ok) {
+      throw new Error('Title cannot be blanked.');
+    }
+    renderColumns();
+    toggleInputFields(toggleables, false);
+    toggleSelectField(taskOffcanvasStatus, false);
+    removeErrorDivs();
+    taskOffcanvasTitle.classList.remove('is-invalid');
+  } catch (error) {
+    taskOffcanvasTitle.classList.add('is-invalid');
+    const errorText = getErrorDiv(error.message, 'error-title-update');
+    insertErrorDiv(taskOffcanvasTitle, errorText);
+  }
 }
+
+
 
 function generateTaskCard(task) {
   const card = document.createElement('div');
@@ -176,6 +196,18 @@ function getDragAfterElement(dropArea, y) {
   ).element;
 }
 
+function toggleSelectField(selectField, on) {
+  if (on) {
+    selectField.removeAttribute('disabled');
+    selectField.classList.remove('form-control-plaintext');
+    selectField.classList.add('form-control');
+  } else {
+    selectField.setAttribute('disabled', 'true');
+    selectField.classList.remove('form-control');
+    selectField.classList.add('form-control-plaintext');
+}
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   renderColumns();
   document.getElementById('tb-name').innerHTML = await getTaskboardName();
@@ -191,41 +223,43 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   editBtn.addEventListener('click', () => {
-    const toggleables = document.querySelectorAll('.toggleable');
     if (editBtn.innerHTML === 'Edit') {
       toggleInputFields(toggleables, true);
-      taskOffcanvasStatus.removeAttribute('disabled');
-      taskOffcanvasStatus.classList.remove('form-control-plaintext');
-      taskOffcanvasStatus.classList.add('form-control');
+      toggleSelectField(taskOffcanvasStatus, true);
       editBtn.innerHTML = 'Done';
     } else {
-      toggleInputFields(toggleables, false);
-      taskOffcanvasStatus.setAttribute('disabled', 'true');
-      taskOffcanvasStatus.classList.remove('form-control');
-      taskOffcanvasStatus.classList.add('form-control-plaintext');
       editBtn.innerHTML = 'Edit';
       updateTask();
     }
   });
 
   createBtn.addEventListener('click', async () => {
-    await fetch('/api/tasks/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': Cookies.get('csrftoken'),
-      },
-      body: JSON.stringify({
-        'title': taskModalTitle.value,
-        'start': getValidDateISOString(taskModalEndDate.value),
-        'taskboard': taskboardID,
-        'status': taskModalStatus.value,
-        'details': taskModalDetails.value,
-        'time_estimate': getValidEstimatedTime(taskModalET.value),
-      }),
-    });
-    createTaskModal.hide();
-    renderColumns();
+    try {
+      const response = await fetch('/api/tasks/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': Cookies.get('csrftoken'),
+        },
+        body: JSON.stringify({
+          'title': taskModalTitle.value,
+          'start': getValidDateISOString(taskModalEndDate.value),
+          'taskboard': taskboardID,
+          'status': taskModalStatus.value,
+          'details': taskModalDetails.value,
+          'time_estimate': getValidEstimatedTime(taskModalET.value),
+        }),
+      });
+      if (!response.ok) {
+        throw new Error('Please input a title.');
+      }
+      renderColumns();
+      createTaskModal.hide();
+    } catch (error) {
+      taskModalTitle.classList.add('is-invalid');
+      const errorText = getErrorDiv(error.message, 'error-title-create');
+      insertErrorDiv(taskModalTitle, errorText);
+    }
   });
 
   document.getElementById('addTask').addEventListener('hidden.bs.modal', () => {
@@ -234,7 +268,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     taskModalET.value = '';
     taskModalStatus.selectedIndex = 0;
     taskModalDetails.value = '';
+    removeErrorDivs();
+    taskModalTitle.classList.remove('is-invalid');
   });
+
+  document
+    .getElementById('task-offcanvas')
+    .addEventListener('hidden.bs.offcanvas', () => {
+      toggleInputFields(toggleables, false);
+      toggleSelectField(taskOffcanvasStatus, false);
+      removeErrorDivs();
+      taskOffcanvasTitle.classList.remove('is-invalid');
+      editBtn.innerHTML = 'Edit';
+    });
 
   columns.forEach((dropArea) => {
     dropArea.addEventListener('dragover', async (event) => {
