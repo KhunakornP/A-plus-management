@@ -64,7 +64,7 @@
 
       <div class="mb-3">
         <label for="offcanvas-task-title" class="form-label fw-bold">Estimated Time (Hours):</label>
-        <input type="number" min="0" readonly class="form-control-plaintext toggleable" id="task-et">
+        <input type="number" min="0" readonly class="form-control-plaintext toggleable" id="task-et" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
       </div>
 
       <div class="mb-3">
@@ -120,7 +120,7 @@
           
           <div class="mb-3">
             <label for="modal-task-et" class="form-label">Estimated Time (Hours)</label>
-            <input type="number" min="0" name="estimated-time" class="form-control" id="modal-task-et" placeholder="Estimated time to finish the task (Optional)">
+            <input type="number" min="0" name="estimated-time" class="form-control" id="modal-task-et" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="Estimated time to finish the task (Optional)">
           </div>
 
           <div class="mb-3">

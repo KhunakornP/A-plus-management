@@ -10,3 +10,15 @@ textarea {
 .hidden {
   display: none;
 }
+
+:root {
+  --fc-list-event-hover-bg-color: #636363;
+  --fc-neutral-bg-color: #343a40;
+}
+
+.fc-theme-standard {
+
+  & .fc-popover {
+    background: #636363;
+  }
+}

@@ -4,3 +4,4 @@ from .events import *
 from .tasks import *
 from .taskboard import *
 from .default_role import *
+from .profile import *

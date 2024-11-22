@@ -28,7 +28,13 @@ class TaskViewSet(viewsets.ViewSet):
 
     def list(self, request):
         """
-        List all Task objects.
+        List Tasks based on query parameters.
+
+        There are 2 query parameters: taskboard and exclude.
+        :taskboard: used to get all Tasks related to a specific Taskboard.
+        :exclude:   used to filter out one specific Tasks status
+                    and Tasks that belonged to other user.
+        If none of the query parameters are given, it will list all Tasks.
 
         :param request: The HTTP request.
         :return: Response with tasks.
