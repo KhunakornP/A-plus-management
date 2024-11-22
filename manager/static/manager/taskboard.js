@@ -29,6 +29,16 @@ let studentID;
   studentID = '';
   }
 
+
+document.addEventListener('DOMContentLoaded', async () => {
+if (studentID !== ''){
+    createBtn.setAttribute('disabled', true);
+    deleteBtn.setAttribute('disabled', true);
+    editBtn.setAttribute('disabled', true);
+    document.getElementById('add-task').setAttribute('disabled', true);
+}
+})
+
 import {
   formatLocalISO,
   getValidDateISOString,
@@ -89,7 +99,9 @@ function generateTaskCard(task) {
     'text-center',
     'py-2'
   );
+  if (studentID === ''){
   card.setAttribute('draggable', true);
+  }
 
   const innerCard = document.createElement('div');
   innerCard.classList.add('my-0', 'py-0', 'link-light', 'task-card');
