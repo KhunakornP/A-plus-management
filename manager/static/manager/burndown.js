@@ -21,7 +21,7 @@ async function fetchVelocityData(startDate, interval) {
     console.log('basic', velocity)
     if (!velocity.x || !velocity.velocity) {
         response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${startDate}&interval=${interval}&mode=average`);
-        velocity = response.json();
+        velocity = await response.json();
     }
     console.log('average', velocity)
     return velocity
