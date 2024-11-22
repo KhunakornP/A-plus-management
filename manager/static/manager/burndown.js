@@ -18,10 +18,12 @@ async function fetchEstimateHistoryData(interval) {
 async function fetchVelocityData(startDate, interval) {
     let response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${startDate}&interval=${interval}`);
     let velocity = await response.json();
+    console.log('basic', velocity)
     if (!velocity.x || !velocity.velocity) {
         response = await fetch(`/api/velocity/?taskboard=${taskboardID}&start=${startDate}&interval=${interval}&mode=average`);
         velocity = response.json();
     }
+    console.log('average', velocity)
     return velocity
 }
 
@@ -43,7 +45,7 @@ function calculateSlope(d1, d2, t1, t2) {
     const startDate = new Date(d1);
     const endDate = new Date(d2);
 
-    daysBetween = (endDate - startDate) / numberOfMiliseconds;
+    const daysBetween = (endDate - startDate) / numberOfMiliseconds;
 
     if (daysBetween === 0) {
         return -t1;
@@ -144,7 +146,7 @@ function fillWeeks(data) {
 
     const mappedData = data.map(item => {
         const { year, week } = getWeek(new Date(item.date));
-        return { year, week, time_remaining: item.time_remaining };
+        return { year, week, timeRemaining: item.time_remaining };
     });
 
     const result = [];
@@ -152,7 +154,7 @@ function fillWeeks(data) {
     let previousWeek = null;
     let previousTimeRemaining = null;
 
-    mappedData.forEach(({ year, week, time_remaining }) => {
+    mappedData.forEach(({ year, week, timeRemaining }) => {
         if (previousYear !== null && previousWeek !== null) {
             while (previousYear < year || previousWeek + 1 < week) {
                 previousWeek += 1;
@@ -168,11 +170,11 @@ function fillWeeks(data) {
         }
         result.push({
             x: formatWeek({ year: year, week: week }),
-            y: time_remaining
+            y: timeRemaining
         });
         previousYear = year;
         previousWeek = week;
-        previousTimeRemaining = time_remaining;
+        previousTimeRemaining = timeRemaining;
     });
 
     // Fill from the last element to the current week
@@ -631,8 +633,9 @@ async function main() {
         checkboxes.forEach(checkbox => {
             checkbox.disabled = (timescale !== 'day');
         });
-        let annotations = chart.config.options.plugins.annotation.annotations.find(annotation => annotation.borderColor === 'rgba(255, 100, 100, 1)');
-        annotations = (timescale === 'day');
+        let length = chart.config.options.plugins.annotation.annotations.length
+        let annotation = chart.options.plugins.annotation.annotations[length - 1];
+        annotation.display = (timescale === 'day');
         chart.update();
     });
 
