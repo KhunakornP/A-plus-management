@@ -54,6 +54,8 @@ class VelocityViewSet(viewsets.ViewSet):
             .order_by("date")
             .last()
         )
+        if not start_estimate or not end_estimate:
+            return {"x": "", "velocity": 0}
         work_done = start_estimate.time_remaining - end_estimate.time_remaining
         length = self.get_timeframe(start_day, unit)
         if length == 0:
@@ -106,6 +108,8 @@ class VelocityViewSet(viewsets.ViewSet):
             return {"x": "", "velocity": 0}
         history = self.aggregate_history_data(start_day, taskboard_id, unit)
         total_work = 0
+        if not history or not start_estimate:
+            return {"x": "", "velocity": 0}
         diff = start_estimate.time_remaining - history[0].time_remaining
         if diff > 0:
             total_work += diff

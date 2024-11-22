@@ -192,8 +192,8 @@ class EventViewSetTests(BaseTestCase):
         """Test getting events within a given range of days."""
         create_event(self.user1, "My birthday", start_date=timezone.now())
         create_event(self.user1, "Go outside", start_date=timezone.now())
-        future = timezone.now() + timezone.timedelta(days=1000)
-        create_event(self.user1, "Reach heaven", start_date=future)
+        past = timezone.now() - timezone.timedelta(days=1000)
+        create_event(self.user1, "Reach heaven", start_date=past)
         response = self.client.get(
             f"/api/events/?start_date={TODAY_ISO_STR}&end_date={TOMORROW_ISO_STR}"
         )
