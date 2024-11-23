@@ -71,7 +71,7 @@ class TaskViewSet(viewsets.ViewSet):
         """
         Return a queryset of tasks that are between the start and end dates.
 
-        :param start_date: The start date in ISO format.
+        :param start_date: The start date in ISO format. This date is exclusive.
         :param end_date: The end date in ISO format.
         :param taskboard_id: The id of the taskboard to get tasks from.
             If None gets the data from all available tasks instead.
@@ -82,7 +82,7 @@ class TaskViewSet(viewsets.ViewSet):
         end_day = timezone.make_aware(datetime.fromisoformat(end_date))
         if taskboard_id:
             queryset = Task.objects.filter(
-                end_date__gte=start_day,
+                end_date__gt=start_day,
                 end_date__lte=end_day,
                 taskboard__id=taskboard_id,
             )
