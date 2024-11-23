@@ -1,73 +1,188 @@
 """Module for views relating to burndown chart pages."""
 
-from django.shortcuts import render
-from django.http import JsonResponse
-from manager.serializers import EstimateHistorySerialzer
-from manager.models import EstimateHistory
+from manager.models import EstimateHistory, Taskboard
 from django.views import generic
-from django.shortcuts import get_object_or_404
-from django.http import Http404
-from typing import Optional
-from manager.models import Taskboard
+from rest_framework import status, viewsets
+from rest_framework.response import Response
+from django.utils import timezone
+from datetime import datetime
+from typing import Any
+from math import ceil
+from django.db.models import Max
+from django.db.models.functions import TruncMonth, TruncWeek
 
 
-def get_taskboard(taskboard_id: int) -> Optional[Taskboard]:
-    """Return a Taskboard which has a specific taskboard id.
+class VelocityViewSet(viewsets.ViewSet):
+    """Viewset for getting velocity."""
 
-    :param taskboard_id: the ID of the taskboard
-    :return: a Taskboard object, return None if it does not exists
-    """
-    try:
-        return get_object_or_404(Taskboard, pk=taskboard_id)
-    except Http404:
-        return None
+    def list(self, request):
+        """Get a velocity depending on the given query parameters."""
+        mode = request.query_params.get("mode")
+        start_date = request.query_params.get(
+            "start", timezone.now().strftime("%Y-%m-%d")
+        )
+        taskboard_id = request.query_params.get("taskboard")
+        interval = request.query_params.get("interval", "day")
+        if mode == "average":
+            data = self.compute_average_velocity(start_date, interval, taskboard_id)
+        else:
+            data = self.compute_basic_velocity(start_date, interval, taskboard_id)
+        return Response(data, status=status.HTTP_200_OK)
 
+    def compute_basic_velocity(
+        self, start_date: str, unit: str, taskboard_id: int
+    ) -> dict[str, Any]:
+        """
+        Return the velocity from the given estimate history objects.
 
-def get_estimate_history_data(taskboard_id):
-    """Get EstimateHistory data."""
-    taskboard = get_taskboard(taskboard_id)
-    return EstimateHistory.objects.filter(taskboard=taskboard).order_by("date")
+        This computation does not take work created between the start and
+        end date into account which sacrifices precision for speed.
 
+        :param start_date: The ISO string of the starting date.
+        :param unit: The unit or interval of time to find the velocity.
+        :param taskboard_id: The id of the taskboard to calculate velocity for.
+        :return: The averaged difference of velocity from the start to end date.
+            and the finishing date.
+        """
+        start_day = timezone.make_aware(datetime.fromisoformat(start_date))
+        start_estimate = (
+            EstimateHistory.objects.filter(date__lte=start_day).order_by("date").last()
+        )
+        end_estimate = (
+            EstimateHistory.objects.filter(taskboard__id=taskboard_id)
+            .order_by("date")
+            .last()
+        )
+        if not start_estimate or not end_estimate:
+            return {"x": "", "velocity": 0}
+        work_done = start_estimate.time_remaining - end_estimate.time_remaining
+        length = self.get_timeframe(start_day, unit)
+        if length == 0:
+            return {"x": "", "velocity": 0}
+        velocity = work_done / length
+        if velocity == 0:
+            return {"x": "", "velocity": velocity}
+        units_needed = ceil(end_estimate.time_remaining / velocity)
+        day = self.get_finishing_date(units_needed, unit)
+        return {"x": day, "velocity": velocity}
 
-def create_figure(estimate_histories):
-    """Create figure from estimate_history data."""
-    pass
+    def get_timeframe(self, start_day: datetime, interval: str):
+        """
+        Get the total duration of work for based on the time interval.
 
+        :param start_day: The first recorded date from the chart.
+        :param interval: The interval between each data point.
+        :return: The number of intervals between the start date and today.
+        """
+        if interval == "week":
+            return (
+                timezone.now().isocalendar().week - start_day.isocalendar().week
+            ) + 1
+        elif interval == "month":
+            today = timezone.now()
+            return (
+                (today.year - start_day.year) * 12 + (today.month - start_day.month) + 1
+            )
+        return (timezone.now() - start_day).days
 
-class BurndownView(generic.View):
-    """A view for the burndown chart page."""
+    def compute_average_velocity(
+        self, start_date: str, unit: str, taskboard_id: int
+    ) -> dict[str, Any]:
+        """
+        Return the average velocity of the user based on work done.
 
-    template_name = "manager/burndown.html"
+        Calculates the amount of work done between the starting date and today
+        then computes the average work done per given unit of time.
+        :param start_date: The ISO string of the start date.
+        :param taskboard_id: The id of the taskboard to calculate velocity for.
+        :param unit: The unit or interval of time to find the velocity.
+        :return: The average work done per unit of time and finishing date.
+        """
+        start_day = timezone.make_aware(datetime.fromisoformat(start_date))
+        start_estimate = (
+            EstimateHistory.objects.filter(date__lte=start_day).order_by("date").last()
+        )
+        length = self.get_timeframe(start_day, unit)
+        if length == 0:
+            return {"x": "", "velocity": 0}
+        history = self.aggregate_history_data(start_day, taskboard_id, unit)
+        total_work = 0
+        if not history or not start_estimate:
+            return {"x": "", "velocity": 0}
+        diff = start_estimate.time_remaining - history[0].time_remaining
+        if diff > 0:
+            total_work += diff
+        for day in range(1, len(history)):
+            diff = history[day - 1].time_remaining - history[day].time_remaining
+            if 0 < diff:
+                total_work += diff
+        velocity = total_work / length
+        today = history.last()
+        if velocity == 0:
+            return {"x": "", "velocity": velocity}
+        units_needed = ceil(today.time_remaining / velocity)
+        day = self.get_finishing_date(units_needed, unit)
+        return {"x": day, "velocity": velocity}
 
-    def get_context_data(self, **kwargs):
-        """Get context data for burndown chart view."""
-        context = {}
-        taskboard_id = self.kwargs.get("taskboard_id")
-        context["taskboard_id"] = taskboard_id
-        if "events" in kwargs:
-            context["events"] = kwargs["events"]
-        estimate_histories = get_estimate_history_data(taskboard_id)
-        fig = create_figure(estimate_histories)
-        context["burndown"] = fig
-        return context
+    def get_finishing_date(self, units: int, interval: str) -> datetime:
+        """
+        Get the predicted finishing date for clearing all tasks.
 
-    def get(self, request, *args, **kwargs):
-        """Render burndown chart page when there's a GET request."""
-        context = self.get_context_data(**kwargs)
-        return render(request, self.template_name, context)
+        :param units: The number of intervals between today and the start date.
+        :param interval: The interval of the data.
+        :return: The predicted date where all tasks are finished.
+        """
+        today = timezone.now()
+        if interval == "week":
+            return (today + timezone.timedelta(days=units * 7)).strftime("%Y-%m-%d")
+        elif interval == "month":
+            finish_date = today.replace(
+                month=max((today.month + units - 1) % 12 + 1, 1)
+            )
+            return finish_date.strftime("%Y-%m-%d")
+        return (today + timezone.timedelta(days=units)).strftime("%Y-%m-%d")
 
-    def post(self, request, *args, **kwargs):
-        """Render burndown chart page when there's a POST request."""
-        kwargs["events"] = request.POST.getlist("events")
-        context = self.get_context_data(**kwargs)
-        return render(request, self.template_name, context)
+    def aggregate_history_data(
+        self, start_day: datetime, taskboard_id: int, interval: str
+    ):
+        """
+        Group the data for each estimateHistory object based on the given interval.
 
-
-def estimate_histories_json(request, taskboard_id):
-    """Return EstimateHistory as a json file."""
-    estimate_histories = get_estimate_history_data(taskboard_id)
-    eh_serializer = EstimateHistorySerialzer(estimate_histories, many=True)
-    return JsonResponse(eh_serializer.data, safe=False)
+        :param start_day: The first recorded date from the chart.
+        :param taskboard_id: The taskboard which contains the EstimateHistory.
+        :param interval: The interval to group data to.
+        :return: A Query set containing aggregated EstimatedHistory objects.
+        """
+        taskboard_data = EstimateHistory.objects.filter(
+            taskboard__id=taskboard_id, date__gte=start_day
+        ).order_by("date")
+        if interval == "week":
+            # get the latest history objects for each week
+            latest_entries = (
+                taskboard_data.annotate(weeks=TruncWeek("date"))
+                .values("weeks")
+                .annotate(most_recent=Max("date"))
+                .values_list("most_recent", flat=True)
+            )
+            # filter the db again for objects that are in the above query
+            data = EstimateHistory.objects.filter(
+                date__in=latest_entries, taskboard=taskboard_id
+            )
+            return data.order_by("date")
+        elif interval == "month":
+            # get the latest history objects for each month
+            latest_entries = (
+                taskboard_data.annotate(months=TruncMonth("date"))
+                .values("months")
+                .annotate(most_recent=Max("date"))
+                .values_list("most_recent", flat=True)
+            )
+            # filter the db again for objects that are in the above query
+            data = EstimateHistory.objects.filter(
+                date__in=latest_entries, taskboard=taskboard_id
+            )
+            return data.order_by("date")
+        return taskboard_data
 
 
 class ChartIndexView(generic.ListView):
@@ -90,3 +205,9 @@ class ChartIndexView(generic.ListView):
         context = super().get_context_data(**kwargs)
         context["user_id"] = self.kwargs["user_id"]
         return context
+
+
+class BurndownView(generic.TemplateView):
+    """A view for the burndown chart page."""
+
+    template_name = "manager/burndown.html"

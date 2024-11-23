@@ -4,11 +4,11 @@ from rest_framework import serializers
 from manager.models import EstimateHistory
 
 
-class EstimateHistorySerialzer(serializers.ModelSerializer):
-    """TODO: write docstring."""
+class EstimateHistorySerializer(serializers.ModelSerializer):
+    """Serializer for EstimateHistory Model."""
 
     class Meta:
-        """TODO: write docstring."""
+        """Meta definition for EstimateHistory."""
 
         model = EstimateHistory
-        fields = ["id", "taskboard", "date", "time_remaining"]
+        fields = "__all__"
