@@ -91,10 +91,19 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'default': ({
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME', default='database_name'),
+        'USER': config('DB_USERNAME', default='username'),
+        'PASSWORD': config('DB_PASSWORD', default='password'),
+        'HOST': config('DB_HOST', default='123.345.678.1'),
+        'PORT': config('DB_PORT', default='111111')
+    }
+    if config('PRODUCTION', default=False, cast=bool) else
+    {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    })
 }
 
 
@@ -158,6 +167,9 @@ GOOGLE_CLIENT_ID = config("CLIENT_ID", default="bogusID.google.com")
 
 SOCIALACCOUNT_STORE_TOKENS = True
 
+CSRF_COOKIE_SECURE = True
+
+SESSION_COOKIE_SECURE = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
