@@ -94,7 +94,7 @@ class GoogleLoginCallback(APIView):
                 user,
                 backend="allauth.account.auth_backends.AuthenticationBackend",
             )
-            return redirect(reverse("manager:taskboard_index"))
+            return redirect(reverse("manager:user_setup"))
         except (ValueError, IndexError) as e:
             print(e)
             messages.error(request, "Authentication Error: Please login again.")
