@@ -30,6 +30,11 @@ DEBUG = config('DEBUG', cast=bool, default='False')
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv(),
                        default='localhost, 127.0.0.1, ::1, testserver')
 
+PRODUCTION = config('PRODUCTION', default=False, cast=bool)
+
+if PRODUCTION:
+    CSRF_TRUSTED_ORIGINS = config('TRUSTED_ORIGINS', cast=Csv(),
+                           default='https://verysecuresite.js')
 
 # Application definition
 
@@ -56,6 +61,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -98,12 +104,11 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD', default='password'),
         'HOST': config('DB_HOST', default='123.345.678.1'),
         'PORT': config('DB_PORT', default='111111')
-    }
-    if config('PRODUCTION', default=False, cast=bool) else
-    {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    })
+    } if PRODUCTION else
+        {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        })
 }
 
 
@@ -187,6 +192,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+if not DEBUG:
+    # Tell Django to copy static assets into a path called
+    # `staticfiles` (this is specific to Render).
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    # Enable the WhiteNoise storage backend,
+    # which compresses static files to reduce disk use and renames the files
+    # with unique names for each version to support long-term caching.
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

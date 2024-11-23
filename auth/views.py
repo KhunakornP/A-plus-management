@@ -74,7 +74,8 @@ class GoogleLoginCallback(APIView):
             return redirect(reverse("manager:main_login"))
 
         token_endpoint_url = urljoin(
-            config("BASE_URL", default="http://localhost:8000/"), reverse("google_login")
+            config("BASE_URL", default="http://localhost:8000/"),
+            reverse("google_login"),
         )
 
         params = {
