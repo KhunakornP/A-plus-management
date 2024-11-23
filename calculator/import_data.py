@@ -2,17 +2,39 @@
 
 import csv
 import os
+import re
 from functools import reduce
-from calculator.models import University, Faculty, Major
+from calculator.models import University, Faculty, Major, Exams
 
-PATH = os.path.join(
-    os.getcwd(), os.path.join("calculator", os.path.join("data", "TCAS67_maxmin.csv"))
-)
+PATH = os.path.join(os.getcwd(), os.path.join("calculator", "data"))
 
 
-def run():
-    """Run the import script."""
-    with open(PATH, encoding="utf-8-sig") as f:
+def load_uni_faculty_major():
+    """Create University, Faculty and Major objects."""
+    data = get_non_duplicate_major_sample()
+    for row in data:
+        university = University.objects.get_or_create(name=row["university"])[0]
+        faculty = Faculty.objects.get_or_create(
+            name=row["faculty"], university=university
+        )[0]
+        major = Major.objects.get_or_create(
+            name=row["major"], code=row["major_code"], faculty=faculty
+        )[0]
+        university.save()
+        faculty.save()
+        major.save()
+    print("Successfully imported University, Faculty and Major data")
+
+
+def get_non_duplicate_major_sample():
+    """Get sample of Unviersity, Faculty and Major.
+
+    Due to time constraints, we only create demo for 3 universities.
+    (Chulalongkorn, Kasetsart and KMITL)
+    and only some faculties.
+    (Engineering, Arts and Business Administration)
+    """
+    with open(os.path.join(PATH, "TCAS67_maxmin.csv"), encoding="utf-8-sig") as f:
         demo_university = (
             "จุฬาลงกรณ์มหาวิทยาลัย",
             "มหาวิทยาลัยเกษตรศาสตร์",
@@ -23,11 +45,17 @@ def run():
             lambda x: x["university"] in demo_university
             and x["faculty"] in demo_faculty,
             map(
-                lambda r: {
-                    "university": r["สถาบัน"],
-                    "faculty": r["คณะ"],
-                    "major": r["หลักสูตร"],
-                    "major_code": r["รหัสหลักสูตร"],
+                lambda row: {
+                    "university": row["สถาบัน"],
+                    "faculty": row["คณะ"],
+                    "major": row["หลักสูตร"],
+                    "major_code": row["รหัสหลักสูตร"],
+                    "min_score": string_to_numeric(row["คะแนนต่ำสุด หลังประมวลผลรอบ 2"]),
+                    "max_score": string_to_numeric(row["คะแนนสูงสุด หลังประมวลผลรอบ 2"]),
+                    "register": string_to_numeric(row["สมัคร"]),
+                    "max_seat": string_to_numeric(row["รับ"]),
+                    "admitted": string_to_numeric(row["ผ่าน(รอบ2)"]),
+                    "year": 2567,
                 },
                 csv.DictReader(f),
             ),
@@ -37,16 +65,41 @@ def run():
             lambda cum, i: cum + [i] if i not in cum else cum, sample_data, []
         )
 
-        for row in non_duplicated_sample:
-            university = University.objects.get_or_create(name=row["university"])[0]
-            faculty = Faculty.objects.get_or_create(
-                name=row["faculty"], university=university
-            )[0]
-            major = Major.objects.get_or_create(
-                name=row["major"], code=row["major_code"], faculty=faculty
-            )[0]
-            university.save()
-            faculty.save()
-            major.save()
+    return non_duplicated_sample
 
-    print("Successfully imported University, Faculty and Major data")
+
+def string_to_numeric(n: str) -> float | int:
+    """Clean and check for empty string from csv.
+
+    :param n: the sting of number
+    :return: float or int of the string. 0 if the string is empty.
+    """
+    cleaned_n = re.sub(",", "", n)
+    if cleaned_n == "":
+        return 0
+    if "." in cleaned_n:
+        return float(cleaned_n)
+    return int(cleaned_n)
+
+
+def load_exams():
+    """Create Exams objects."""
+    with open(os.path.join(PATH, "exams.csv"), encoding="utf-8-sig") as f:
+        rows = csv.DictReader(f)
+        for row in rows:
+            exam = Exams.objects.get_or_create(
+                name=row["name"], max_score=row["max_score"]
+            )[0]
+            exam.core = eval(row["core"])
+            exam.save()
+
+        print("Successfully imported exams data.")
+
+
+def run():
+    """Run the import script."""
+    load_uni_faculty_major()
+    load_exams()
+
+
+run()
