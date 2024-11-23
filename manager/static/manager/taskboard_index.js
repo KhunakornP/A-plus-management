@@ -62,7 +62,8 @@ async function renderTaskboards() {
     document.getElementById('taskboard-container').innerHTML =
       noTaskboardMessage;
   }
-  if (studentID !== ''){
+  console.log(studentID)
+  if (studentID === ''){
   bindDeleteButtons();
   }
 }
