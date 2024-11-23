@@ -76,7 +76,7 @@ function getWeek(date) {
     return { year: tempDate.getUTCFullYear(), week: weekNumber };
 }
 
-function generateRange(startDate, endDate, interval) {
+function generateRange(startDate, endDate, interval, extra) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const array = [];
@@ -87,16 +87,29 @@ function generateRange(startDate, endDate, interval) {
             array.push(formatDate(currentDate));
             currentDate.setDate(currentDate.getDate() + 1);
         }
+        for (let i = 0; i < extra; i++) {
+            array.push(formatDate(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
     } else if (interval === 'week') {
+        let currentDate = start;
         array.push('initial'); 
-        while (start <= end) {
-            array.push(formatWeek(getWeek(start)));
-            start.setUTCDate(start.getUTCDate() + 7);
+        while (currentDate <= end) {
+            array.push(formatWeek(getWeek(currentDate)));
+            currentDate.setUTCDate(currentDate.getUTCDate() + 7);
+        }
+        for (let i = 0; i < extra; i++) {
+            array.push(formatWeek(getWeek(currentDate)));
+            currentDate.setUTCDate(currentDate.getUTCDate() + 7);
         }
     } else if (interval === 'month') {
         array.push('initial'); 
         let currentDate = start;
         while (currentDate <= end) {
+            array.push(formatMonth(currentDate));
+            currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+        for (let i = 0; i < extra; i++) {
             array.push(formatMonth(currentDate));
             currentDate.setMonth(currentDate.getMonth() + 1);
         }
@@ -527,16 +540,57 @@ async function main() {
     const weekDisplayData = fillWeeks(weekEstHistData, getMaxTimeRemainingOfFirstWeek(dayEstHistData));
     const monthDisplayData = fillMonths(monthEstHistData, getMaxTimeRemainingOfFirstMonth(dayEstHistData))
 
+    const newDate = new Date();
+    const fourteenDaysAgo = new Date(newDate);
+    fourteenDaysAgo.setDate(newDate.getDate() - 14);
+
+    let VelocityStart = null;
+
+    for (let i = 0; i < dayDisplayData.length; i++) {
+    const element = dayDisplayData[i];
+    const date = new Date(element.x);
+    if (date >= fourteenDaysAgo && date <= newDate) {
+            if (!VelocityStart || element.y > VelocityStart.y) {
+                VelocityStart = element;
+            }
+        }
+    }
+
+    const weekMaxElement = weekDisplayData.reduce((max, current) => {
+        return current.y > max.y ? current : max;
+      }, weekDisplayData[0]);
+
+    const monthMaxElement = monthDisplayData.reduce((max, current) => {
+        return current.y > max.y ? current : max;
+    }, weekDisplayData[0]);
+
     // Get velocity data
-    const dayVelocity = await fetchVelocityData(dayEstHistData[0].date, 'day')
+    const dayVelocity = await fetchVelocityData(VelocityStart.x, 'day')
     const weekVelocity = await fetchVelocityData(weekEstHistData[0].date,  'week')
     const monthVelocity = await fetchVelocityData(monthEstHistData[0].date, 'month')
 
-    // Generate the x axis for the chart
-    const dayRange = generateRange(dayEstHistData[0].date, dayVelocity.x, 'day')
-    const weekRange = generateRange(dayEstHistData[0].date, weekVelocity.x, 'week')
-    const monthRange = generateRange(dayEstHistData[0].date, monthVelocity.x, 'month')
+    const assumedDayStudyTime = 2;
+    const assumedWeekStudyTime = 12;
+    const assumedMonthStudyTime = 20;
 
+    let extraDays = 0
+    let extraWeeks = 0
+    let extraMonths = 0
+    
+    if (dayVelocity.x === '') {
+        extraDays = Math.ceil(dayDisplayData[dayDisplayData.length-1].y / assumedDayStudyTime)
+    }
+    if (weekVelocity.x === '') {
+        extraWeeks = Math.ceil(weekDisplayData[weekDisplayData.length-1].y / assumedWeekStudyTime)
+    }    
+    if (monthVelocity.x === '') {
+        extraMonths = Math.ceil(monthDisplayData[monthDisplayData.length-1].y / assumedMonthStudyTime)
+    }
+
+    // Generate the x axis for the chart
+    const dayRange = generateRange(dayEstHistData[0].date, dayVelocity.x, 'day', extraDays)
+    const weekRange = generateRange(dayEstHistData[0].date, weekVelocity.x, 'week', extraWeeks)
+    const monthRange = generateRange(dayEstHistData[0].date, monthVelocity.x, 'month', extraMonths)
 
         // Get tasks and evets after today and before the velocityEndDate and annoEndDate
         const velocityEndDate = new Date(dayVelocity.x)
@@ -547,13 +601,19 @@ async function main() {
         let annoEndDate;
         let tasks;
         let events;
+
         if (!isNaN(velocityEndDate.getTime())){
             annoEndDate = velocityEndDate < annoMaxDate ? velocityEndDate : annoMaxDate;
-            tasks = await fetchTaskData(today, annoEndDate)
-            events = await fetchEventData(today, annoEndDate)
+            tasks = await fetchTaskData(today, annoEndDate);
+            events = await fetchEventData(today, annoEndDate);
         } else {
-            tasks = [];
-            events = [];
+            let startIndex = dayRange.indexOf(dayDisplayData[0].x);
+            let targetIndex = (startIndex + 30 >= dayDisplayData.length) 
+                ? dayRange.length - 1 
+                : startIndex + 30;
+            annoEndDate = new Date(dayRange[targetIndex])
+            tasks = await fetchTaskData(today, annoEndDate);
+            events = await fetchEventData(today, annoEndDate);;
         }
 
 
@@ -576,9 +636,9 @@ async function main() {
         const nearestTrend = trendAnnotation(x1, x2, y1, y2, color);
 
 
-    const dayVelocityTrend = trendAnnotation(dayDisplayData[0].x, dayVelocity.x, dayDisplayData[0].y, 0, 'rgba(75, 192, 192, 1)')
-    const weekVelocityTrend = trendAnnotation(weekDisplayData[0].x, formatWeek(getWeek(new Date(weekVelocity.x))), weekDisplayData[0].y, 0, 'rgba(75, 192, 192, 1)')
-    const monthVelocityTrend = trendAnnotation(monthDisplayData[0].x, formatMonth(new Date(monthVelocity.x)), monthDisplayData[0].y, 0, 'rgba(75, 192, 192, 1)')
+    const dayVelocityTrend = trendAnnotation(VelocityStart.x, dayVelocity.x, VelocityStart.y, 0, 'rgba(75, 192, 192, 1)')
+    const weekVelocityTrend = trendAnnotation(weekMaxElement.x, formatWeek(getWeek(new Date(weekVelocity.x))), weekMaxElement.y, 0, 'rgba(75, 192, 192, 1)')
+    const monthVelocityTrend = trendAnnotation(monthMaxElement.x, formatMonth(new Date(monthVelocity.x)), monthMaxElement.y, 0, 'rgba(75, 192, 192, 1)')
 
     const dayLineAnnotations = [...dayTaskAnnotations, ...dayEventAnnotations, dayTodayAnnotation];
     const weekLineAnnotations = [...weekTaskAnnotations, ...weekEventAnnotations, weekTodayAnnotation];
@@ -597,9 +657,11 @@ async function main() {
         monthTrendAnnotations = [monthVelocityTrend, {}];
     }
 
+    const notEnoughDataText = "Not enough data to estimate velocity. Come back tomorrow to see if there's any progress"
+
     if (!dayVelocity.x || !dayVelocity.velocity) {
         const element = document.getElementById('not-enough-data');
-        element.textContent = "Not enough data to estimate velocity.";
+        element.textContent = notEnoughDataText;
         element.style.color = 'yellow';
     }
 
@@ -623,7 +685,7 @@ async function main() {
         if (timescale === 'week') {
 
             if (!weekVelocity.x || !weekVelocity.velocity) {
-                element.textContent = "Not enough data to estimate velocity.";
+                element.textContent = notEnoughDataText;
                 element.style.color = 'yellow';
             } else {
                 element.textContent = "";
@@ -639,7 +701,7 @@ async function main() {
 
             if (!monthVelocity.x || !monthVelocity.velocity) {
                 const element = document.getElementById('not-enough-data');
-                element.textContent = "Not enough data to estimate velocity.";
+                element.textContent = notEnoughDataText;
                 element.style.color = 'yellow';
             } else {
                 element.textContent = "";
@@ -655,7 +717,7 @@ async function main() {
 
             if (!dayVelocity.x || !dayVelocity.velocity) {
                 const element = document.getElementById('not-enough-data');
-                element.textContent = "Not enough data to estimate velocity.";
+                element.textContent = notEnoughDataText;
                 element.style.color = 'yellow';
             } else {
                 element.textContent = "";
@@ -675,7 +737,11 @@ async function main() {
         });
         let length = chart.config.options.plugins.annotation.annotations.length
         let annotation = chart.options.plugins.annotation.annotations[length - 1];
+        if (tasks.length !== 0 || events.length !== 0) {
         annotation.display = (timescale === 'day');
+        } else {
+            annotation.display = false;
+        }
         chart.update();
     });
 
