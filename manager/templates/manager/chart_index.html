@@ -16,7 +16,10 @@
         <div class="col-md-8 mb-4">
           <div class="card">
             <div class="card-body">
-                <canvas id="overview-chart"></canvas>
+                <div>
+                  <canvas id="overview-chart"></canvas>
+                </div>
+                <div class="text-center" id="null-tooltip"></div>
             </div>
           </div>
         </div>
@@ -38,10 +41,14 @@
     <div class="col-md-8 mb-2 m-2" align="center">
     <a href="{% url 'manager:dashboard' %}" class="btn btn-primary">Back to dashboard</a>
     </div>
-    </div>
     {% else %}
+    <div class="row d-flex justify-content-center align-items-center">
+    <div class="col-md-8 mb-2 m-2" align="center">
     <p>Your child currently doesn't have any taskboards</p>
     <a href="{% url 'manager:dashboard' %}" class="btn btn-primary">Back to dashboard</a>
+    </div>
+    </div>
+    </div>
   </div>
     {% endif %}
 <div>

@@ -19,10 +19,7 @@ async function fetchRecentVelocity(taskboardID) {
 
 const taskboardVelocities = document.querySelectorAll('[id^="tb-"]');
 for (let i = 0; i < taskboardVelocities.length; i++) {
-// actual code
-//    let velocity = await fetchRecentVelocity(taskboardVelocities[i].id.split('-').slice(-1)[0])
-// place holder code
-    const velocity = 4;
+    let velocity = await fetchRecentVelocity(taskboardVelocities[i].id.split('-').slice(-1)[0]);
     if (velocity > 0){
     taskboardVelocities[i].innerHTML = `<div>Recent velocity: ${velocity}</div>`;
     } else {
@@ -68,6 +65,12 @@ const options = {
         }
     }
 };
+
+const helpText = document.getElementById('null-tooltip')
+if (toDoCount + lateCount + inProgressCount + doneCount <= 0) {
+    helpText.innerHTML = "Your child currently has no tasks!";
+    };
+
 
 new Chart(ctx, {
     type: 'pie',
