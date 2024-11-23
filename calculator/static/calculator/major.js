@@ -101,13 +101,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const weightData = Array.from(weightInputs, (input) => {
       return {
         'weight': input.value !== '' ? input.value : '0',
-        'exam': input.id,
+        'exam': input.id.split('-')[1],
       };
     });
 
     const totalWeight = weightData.reduce(
-      (sum, item) => sum + Number(item.weight),
-      0
+      (sum, item) => sum + Number(item.weight), 0
     );
     if (totalWeight !== 100) {
       alert(

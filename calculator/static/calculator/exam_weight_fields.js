@@ -40,7 +40,6 @@ class ExamWeightFields extends AbstractExamFields {
     }
   }
 
-  // TODO: change
   generateCards(exam, savedValue) {
     const placeholder = 'Percentage (0-100)';
     const weightValue = savedValue ? savedValue !== 0 : '';

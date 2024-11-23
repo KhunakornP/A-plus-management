@@ -155,7 +155,7 @@ def load_score_history() -> None:
             )
         except Major.MultipleObjectsReturned:
             raise Major.MultipleObjectsReturned(
-                f"University: {row["university"]}, faculty:{row["faculty"]}"
+                f"University: {row['university']}, faculty:{row['faculty']}"
             )
     print("Successfully loaded score history.")
 

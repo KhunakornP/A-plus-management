@@ -52,7 +52,7 @@ class StudentExamScoreViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=_status)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=["post", "get"])
+    @action(detail=False, methods=["post"])
     def calculate_score(self, request: HttpRequest) -> HttpResponse:
         """Calculate the user's score based on the score weights.
 
