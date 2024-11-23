@@ -24,6 +24,6 @@ class CriteriaSet(models.Model):
     https://course.mytcas.com/programs/10010128901101A
     """
 
-    name = models.CharField(max_length=50, default="Unnamed CriteriaSet")
+    name = models.CharField(max_length=200, default="Unnamed CriteriaSet")
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
     criteria = models.ManyToManyField(Criterion)
