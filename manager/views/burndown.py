@@ -164,7 +164,8 @@ class VelocityViewSet(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            data = EstimateHistory.objects.filter(date__in=latest_entries, taskboard=taskboard_id)
+            data = EstimateHistory.objects.filter(date__in=latest_entries,
+                                                   taskboard=taskboard_id)
             return data.order_by("date")
         elif interval == "month":
             # get the latest history objects for each month
@@ -175,7 +176,8 @@ class VelocityViewSet(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            data = EstimateHistory.objects.filter(date__in=latest_entries, taskboard=taskboard_id)
+            data = EstimateHistory.objects.filter(date__in=latest_entries,
+                                                   taskboard=taskboard_id)
             return data.order_by("date")
         return taskboard_data
 
@@ -213,7 +215,8 @@ class EstimateHistoryViewset(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            queryset = EstimateHistory.objects.filter(date__in=latest_entries, taskboard=taskboard_id)
+            queryset = EstimateHistory.objects.filter(date__in=latest_entries,
+                                                       taskboard=taskboard_id)
         elif interval == "month":
             # get the latest history objects for each month
             latest_entries = (
@@ -223,7 +226,8 @@ class EstimateHistoryViewset(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            queryset = EstimateHistory.objects.filter(date__in=latest_entries, taskboard=taskboard_id)
+            queryset = EstimateHistory.objects.filter(date__in=latest_entries,
+                                                       taskboard=taskboard_id)
         # if not queryset:
         #     return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = EstimateHistorySerializer(queryset, many=True)
