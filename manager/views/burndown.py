@@ -90,4 +90,3 @@ class ChartIndexView(generic.ListView):
         context = super().get_context_data(**kwargs)
         context["user_id"] = self.kwargs["user_id"]
         return context
-
