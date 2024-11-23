@@ -84,3 +84,10 @@ class ChartIndexView(generic.ListView):
         chart for each taskboard.
         """
         return Taskboard.objects.filter(user__id=self.kwargs["user_id"])
+
+    def get_context_data(self, **kwargs):
+        """Pass the current student's id as context data."""
+        context = super().get_context_data(**kwargs)
+        context["user_id"] = self.kwargs["user_id"]
+        return context
+
