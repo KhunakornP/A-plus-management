@@ -4,7 +4,7 @@ import csv
 import os
 import re
 from functools import reduce
-from calculator.models import University, Faculty, Major, Exams
+from calculator.models import University, Faculty, Major, Exams, CriteriaSet
 
 PATH = os.path.join(os.getcwd(), os.path.join("calculator", "data"))
 
@@ -96,10 +96,39 @@ def load_exams():
         print("Successfully imported exams data.")
 
 
+def load_criteria():
+    """Load the score criteria of each major."""
+    with open(os.path.join(PATH, "criteria.csv"), encoding="utf-8-sig") as f:
+        rows = csv.DictReader(f)
+        for row in rows:
+            criteria_set = CriteriaSet.objects.get_or_create(
+                name=row["criteria_name"],
+                major=Major.objects.get(code=row["major_code"]),
+            )[0]
+            criteria = eval(eval(row["criteria"]))
+            for exam_name, criterion in criteria.items():
+                try:
+                    weight = criterion["weight"]
+                    min_score = criterion["min_score"]
+                    criteria_set.criteria.get_or_create(
+                        exam=Exams.objects.get(name=exam_name.strip()),
+                        weight=weight,
+                        min_score=min_score,
+                    )
+                except Exams.DoesNotExist as e:
+                    raise ValueError(f"exam{exam_name}not found") from e
+            criteria_set.save()
+
+        print("Successfully loaded criteria.")
+
+
+def load_score_history(criteria_set):
+    """Load the score history."""
+    pass
+
+
 def run():
     """Run the import script."""
     load_uni_faculty_major()
     load_exams()
-
-
-run()
+    load_criteria()
