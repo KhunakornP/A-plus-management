@@ -43,6 +43,35 @@ class SetUpPageTest(TestCase):
         redirect_with_next = f"{reverse('manager:main_login')}?next={url}"
         self.assertRedirects(response, redirect_with_next)
 
+    def test_get_setup_page(self):
+        """As a non-verified and authenticated user I can access the setup page."""
+        self.client.login(username="myTcasser", password="myTcasdabest123")
+        url = reverse("manager:user_setup")
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+
+    def test_validated_user_post(self):
+        """A verified user cannot POST to the setup page."""
+        content_type = ContentType.objects.get_for_model(UserPermissions)
+        verified, created = Permission.objects.get_or_create(
+            codename="is_verified", content_type=content_type
+        )
+        self.user1.user_permissions.add(verified)
+        self.user = User.objects.get(pk=self.user1.pk)
+        self.client.login(username="myTcasser", password="myTcasdabest123")
+        url = reverse("manager:user_setup")
+        response = self.client.post(url)
+        self.assertEqual(302, response.status_code)
+        self.assertRedirects(response, reverse("manager:taskboard_index"))
+
+    def test_unauthenticated_post(self):
+        """An unauthenticated user cannot set up their account."""
+        url = reverse("manager:user_setup")
+        response = self.client.post(url)
+        self.assertEqual(302, response.status_code)
+        redirect_with_next = f"{reverse('manager:main_login')}?next={url}"
+        self.assertRedirects(response, redirect_with_next)
+
     def test_get_regular_student_perms(self):
         """Test getting permissions as a regular student."""
         self.client.login(username="myTcasser", password="myTcasdabest123")

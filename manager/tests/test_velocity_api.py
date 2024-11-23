@@ -76,5 +76,5 @@ class EstimateHistoryViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["velocity"], 40.0)
         # 40 hr left this month should finish by next month
-        next_month = self.today.replace(month=max(self.today.month% 12 + 1, 1))
+        next_month = self.today.replace(month=max(self.today.month % 12 + 1, 1))
         self.assertEqual(response.data["x"], next_month.strftime("%Y-%m-%d"))
