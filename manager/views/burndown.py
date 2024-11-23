@@ -137,7 +137,9 @@ class VelocityViewSet(viewsets.ViewSet):
         if interval == "week":
             return (today + timezone.timedelta(days=units * 7)).strftime("%Y-%m-%d")
         elif interval == "month":
-            finish_date = today.replace(month=max((today.month + units -1)%12+1, 1))
+            finish_date = today.replace(
+                month=max((today.month + units - 1) % 12 + 1, 1)
+            )
             return finish_date.strftime("%Y-%m-%d")
         return (today + timezone.timedelta(days=units)).strftime("%Y-%m-%d")
 
@@ -164,8 +166,9 @@ class VelocityViewSet(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            data = EstimateHistory.objects.filter(date__in=latest_entries,
-                                                   taskboard=taskboard_id)
+            data = EstimateHistory.objects.filter(
+                date__in=latest_entries, taskboard=taskboard_id
+            )
             return data.order_by("date")
         elif interval == "month":
             # get the latest history objects for each month
@@ -176,8 +179,9 @@ class VelocityViewSet(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            data = EstimateHistory.objects.filter(date__in=latest_entries,
-                                                   taskboard=taskboard_id)
+            data = EstimateHistory.objects.filter(
+                date__in=latest_entries, taskboard=taskboard_id
+            )
             return data.order_by("date")
         return taskboard_data
 
@@ -215,8 +219,9 @@ class EstimateHistoryViewset(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            queryset = EstimateHistory.objects.filter(date__in=latest_entries,
-                                                       taskboard=taskboard_id)
+            queryset = EstimateHistory.objects.filter(
+                date__in=latest_entries, taskboard=taskboard_id
+            )
         elif interval == "month":
             # get the latest history objects for each month
             latest_entries = (
@@ -226,8 +231,9 @@ class EstimateHistoryViewset(viewsets.ViewSet):
                 .values_list("most_recent", flat=True)
             )
             # filter the db again for objects that are in the above query
-            queryset = EstimateHistory.objects.filter(date__in=latest_entries,
-                                                       taskboard=taskboard_id)
+            queryset = EstimateHistory.objects.filter(
+                date__in=latest_entries, taskboard=taskboard_id
+            )
         # if not queryset:
         #     return Response(status=status.HTTP_400_BAD_REQUEST)
         serializer = EstimateHistorySerializer(queryset, many=True)
