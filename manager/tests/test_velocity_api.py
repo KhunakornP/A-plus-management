@@ -5,7 +5,7 @@ from django.utils import timezone
 from .templates_for_tests import create_taskboard, create_estimate_hisotry
 from django.contrib.auth.models import User
 from rest_framework import status
-from datetime import date, timedelta
+from datetime import timedelta
 
 
 class EstimateHistoryViewTests(TestCase):
