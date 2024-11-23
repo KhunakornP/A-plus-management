@@ -1,0 +1,22 @@
+name,max_score,core
+GPAX,4,False
+ความถนัดทั่วไป (TGAT),300,True
+คะแนนรวม,100,True
+การสื่อสารภาษาอังกฤษ (TGAT1),100,True
+การคิดอย่างมีเหตุผล (TGAT2),100,True
+สมรรถนะการทำงาน (TGAT3),100,True
+ความถนัดวิทยาศาสตร์ เทคโนโลยี วิศวกรรมศาสตร์ (TPAT3),100,True
+A-Level คณิตศาสตร์ประยุกต์ 1 (พื้นฐาน+เพิ่มเติม),100,True
+A-Level ฟิสิกส์,100,True
+A-Level เคมี,100,True
+A-Level คณิตศาสตร์ประยุกต์ 2 (พื้นฐาน),100,True
+A-Level สังคมศาสตร์,100,True
+A-Level ภาษาไทย,100,True
+A-Level ภาษาอังกฤษ,100,True
+A-Level ภาษาฝรั่งเศส,100,True
+A-Level ภาษาเยอรมัน,100,True
+A-Level ภาษาญี่ปุ่น,100,True
+A-Level ภาษาเกาหลี,100,True
+A-Level ภาษาจีน,100,True
+A-Level ภาษาบาลี,100,True
+A-Level ภาษาสเปน,100,True

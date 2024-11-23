@@ -9,3 +9,7 @@ dj-rest-auth[with_social] >= 6.0
 markdown>=3.7
 django-filter>=24.3
 djangorestframework-simplejwt >= 5.3
+django-extensions>=3.2.3
+psycopg2>=2.9.10
+gunicorn >= 23.0.0
+whitenoise[brotli] >= 6.8.2
