@@ -17,6 +17,7 @@ from rest_framework.views import APIView
 import jwt
 from time import sleep, time
 from django.conf import settings
+from decouple import config
 
 
 class GoogleOAuth2IatValidationAdapter(GoogleOAuth2Adapter):
@@ -72,7 +73,11 @@ class GoogleLoginCallback(APIView):
             messages.error(request, "Google sign in failed: Please login again.")
             return redirect(reverse("manager:main_login"))
 
-        token_endpoint_url = urljoin("http://localhost:8000", reverse("google_login"))
+        token_endpoint_url = urljoin(
+            config("BASE_URL", default="http://localhost:8000/"),
+            reverse("google_login"),
+        )
+
         params = {
             "process": "login",
         }
@@ -90,7 +95,8 @@ class GoogleLoginCallback(APIView):
                 backend="allauth.account.auth_backends.AuthenticationBackend",
             )
             return redirect(reverse("manager:taskboard_index"))
-        except (ValueError, IndexError):
+        except (ValueError, IndexError) as e:
+            print(e)
             messages.error(request, "Authentication Error: Please login again.")
             return redirect(reverse("manager:main_login"))
 
