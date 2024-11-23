@@ -40,7 +40,8 @@ class SetUpPageTest(TestCase):
         url = reverse("manager:user_setup")
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        self.assertRedirects(response, reverse("manager:main_login"))
+        redirect_with_next = f"{reverse('manager:main_login')}?next={url}"
+        self.assertRedirects(response, redirect_with_next)
 
     def test_get_regular_student_perms(self):
         """Test getting permissions as a regular student."""

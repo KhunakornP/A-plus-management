@@ -56,7 +56,8 @@ class DashboardViewTestCase(TestCase):
         url = reverse("manager:dashboard")
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        self.assertRedirects(response, reverse("manager:main_login"))
+        redirect_with_next = f"{reverse('manager:main_login')}?next={url}"
+        self.assertRedirects(response, redirect_with_next)
 
     def test_access_by_student(self):
         """Only parents can access the parent dashboard."""
