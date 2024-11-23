@@ -9,7 +9,5 @@ def today_midnight():
 
     :returns: A datetime object for midnight of the current day.
     """
-    midnight = timezone.now().replace(
-        hour=0, minute=0, second=0, microsecond=0
-    ) + timezone.timedelta(days=1)
+    midnight = timezone.now().replace(hour=23, minute=59, second=59, microsecond=999999)
     return midnight

@@ -20,6 +20,7 @@ class UserPermissions(models.Model):
         permissions = [
             ("is_taking_A_levels", "User who has access to the calculator"),
             ("is_parent", "User who has access to the parent dashboard"),
+            ("is_verified", "User who has finished setting up their account"),
         ]
 
 

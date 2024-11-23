@@ -9,3 +9,6 @@
 u {
   cursor: pointer;
 }
+div {
+  user-select: none;
+}

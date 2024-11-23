@@ -111,6 +111,18 @@ class TaskViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
+    def test_get_user_tasks(self):
+        """Test getting all tasks belonging to a specific user."""
+        user2 = User.objects.create_user(
+            username="Howard.W", email="testuser@nowhere.com"
+        )
+        user2.save()
+        tb3 = create_taskboard(user2, "Daily board")
+        create_task("Go shopping", "TODO", tb3)
+        response = self.client.get(f"/api/tasks/?user={self.user1.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+
     def test_get_tasks_in_one_taskboard_exclude_status(self):
         """Test getting tasks except those with the given status in a taskboard."""
         response = self.client.get(f"/api/tasks/?taskboard={self.taskboard_1.id}")

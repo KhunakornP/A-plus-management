@@ -1,6 +1,6 @@
 """Top-level functions used in more than 1 test file."""
 
-from manager.models import Task, Taskboard, ParentInfo, StudentInfo
+from manager.models import Task, Taskboard, ParentInfo, StudentInfo, EstimateHistory
 from django.contrib.auth.models import User, Permission
 from django.test import TestCase
 from django.urls import reverse
@@ -71,3 +71,18 @@ def create_task(title: str, status: str, taskboard: Taskboard, end_date=None) ->
     return Task.objects.create(
         title=title, status=status, end_date=end_date, taskboard=taskboard
     )
+
+
+def create_estimate_hisotry(tb: Taskboard, date, time_remaining: int):
+    """Create a new Task bounded to a specific taskboard.
+
+    :param title: Task's title
+    :param tb: the Taskboard that this task would be bounded to
+    :return: a Task object
+    """
+    history = EstimateHistory.objects.create(
+        taskboard=tb, date=date, time_remaining=time_remaining
+    )
+    history.time_remaining = time_remaining
+    history.save()
+    return history

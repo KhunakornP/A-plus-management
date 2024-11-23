@@ -15,10 +15,11 @@ class TaskViewSet(viewsets.ViewSet):
         """
         List Tasks based on query parameters.
 
-        There are 2 query parameters: taskboard and exclude.
+        There are 3 query parameters: taskboard, user, and exclude.
         :taskboard: used to get all Tasks related to a specific Taskboard.
         :exclude:   used to filter out one specific Tasks status
                     and Tasks that belonged to other user.
+        :user:      used to get all tasks belonging to the given user.
         If none of the query parameters are given, it will list all Tasks.
 
         :param request: The HTTP request.
@@ -27,6 +28,7 @@ class TaskViewSet(viewsets.ViewSet):
         queryset = Task.objects.all()
         taskboard_id = request.query_params.get("taskboard")
         ignore_status = request.query_params.get("exclude")
+        user = request.query_params.get("user")
         # get all non-finished tasks from the taskboard.
         if ignore_status and taskboard_id:
             queryset = Task.objects.filter(
@@ -40,6 +42,9 @@ class TaskViewSet(viewsets.ViewSet):
             queryset = Task.objects.filter(
                 ~Q(status=ignore_status), taskboard__user=request.user
             )
+        # get all tasks of the given user
+        elif user:
+            queryset = Task.objects.filter(taskboard__user=user)
         serializer = TaskSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

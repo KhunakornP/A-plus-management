@@ -2,7 +2,7 @@
 
 from datetime import datetime, time, date
 from django.utils import timezone
-from manager.models import Task
+from manager.models import Task, today_midnight
 from .templates_for_tests import create_task, create_taskboard, BaseTestCase
 
 
@@ -39,6 +39,21 @@ class TaskModelTestcase(BaseTestCase):
         t2 = create_task("Do biology homework", "TODO", taskboard)
         t3 = create_task("Clean the house", "Finished", taskboard)
         self.assertEqual([t1, t2, t3], list(taskboard.task_set.all()))
+
+    def test_task_is_due_today(self):
+        """Tasks with a deadline within today should return True."""
+        taskboard = create_taskboard(self.user1)
+        t1 = create_task("Study math", "TODO", taskboard)
+        self.assertEqual(t1.end_date, today_midnight())
+        self.assertTrue(t1.due_today())
+
+    def test_task_not_due_today(self):
+        """Tasks with a deadline on another day should return False."""
+        taskboard = create_taskboard(self.user1)
+        t1 = create_task(
+            "Study math", "TODO", taskboard, timezone.now() + timezone.timedelta(days=1)
+        )
+        self.assertFalse(t1.due_today())
 
     def test_task_default_end_date(self):
         """The default end date of a task is midnight of the date of its creation."""

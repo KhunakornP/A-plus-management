@@ -6,6 +6,9 @@
 <link rel="stylesheet" href="{% static 'manager/calendar.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
 <script src="{% static 'manager/taskboard.js' %}" defer type="module"></script>
+{% if user_id %}
+  {{ user_id|json_script:"student_id" }}
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -77,13 +80,11 @@
     </div>
   </div>
 
-  <!-- btn btn-primary btn-sm w-100 position-fixed bottom-0 start-50 translate-middle-x -->
-
   <div class="row justify-content-center position-fixed bottom-0 start-50 translate-middle-x w-100 mb-2">
-    <button class="btn btn-primary btn-sm col-auto mx-2 p-2" data-bs-toggle="modal" data-bs-target="#addTask">
+    <button class="btn btn-primary btn-sm col-auto mx-2 p-2" data-bs-toggle="modal" data-bs-target="#addTask" id="add-task">
       Add Task
     </button>
-    <button class="btn btn-sm btn-primary col-auto mx-2 p-2" id="burndown-chart" onclick="location.href='burndown'">
+    <button class="btn btn-sm btn-primary col-auto mx-2 p-2" id="burndown-chart" onclick="alertBurndown()">
       Burndown Chart
     </button>
   </div>  
@@ -135,4 +136,9 @@
     </div>
   </div>
 </div>
+<script>
+function alertBurndown() {
+  alert("Sorry, the burndown chart is unavailable. \nPlease try again another time!")
+}
+</script>
 {% endblock %}

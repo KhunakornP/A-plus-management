@@ -7,17 +7,29 @@
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
   <script src="{% static 'manager/taskboard_index.js' %}" defer type="module"></script>
   {{ request.user.id|json_script:"user_id" }}
+  {% if viewed_user %}
+  {{ viewed_user.id|json_script:"student_id" }}
+  {% endif %}
 {% endblock %}
 
 {% block content %}
+{% if viewed_user %}
+  <p class="p-2"> Currently viewing {{viewed_user.studentinfo.displayed_name}}'s taskboards</p>
+  {% endif %}
 <div class="container py-5">
   <div class="row justify-content-center" id="taskboard-container"></div>
 
 
   <div class="justify-content-center row">
+    {% if viewed_user %}
+    <button type="button" class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="center" disabled>
+      Create a taskboard
+    </button>
+    {% else %}
     <button type="button" class="btn btn-primary position-fixed bottom-0 start-50 translate-middle-x" data-bs-toggle="modal" data-bs-target="#staticBackdrop" class="center">
       Create a taskboard
     </button>
+    {% endif %}
 
     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">

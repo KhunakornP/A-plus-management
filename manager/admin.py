@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import Taskboard, EstimateHistory, Event, Task, StudentInfo, ParentInfo
 from calculator.models import University, Faculty, Major, CriteriaSet, Exams, Criterion, StudentExamScore
 
+
 admin.site.register(Taskboard)
 admin.site.register(Event)
 admin.site.register(Task)

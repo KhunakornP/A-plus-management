@@ -21,6 +21,24 @@ const taskModalET = document.getElementById('modal-task-et');
 const taskboardID = window.location.href.split('/').slice(-2)[0];
 let currentTaskID = 0;
 
+let studentID;
+  if (document.getElementById('student_id')) {
+  studentID = JSON.parse(document.getElementById('student_id').textContent);
+  console.log(studentID);
+  } else {
+  studentID = '';
+  }
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+if (studentID !== ''){
+    createBtn.setAttribute('disabled', true);
+    deleteBtn.setAttribute('disabled', true);
+    editBtn.setAttribute('disabled', true);
+    document.getElementById('add-task').setAttribute('disabled', true);
+}
+})
+
 import {
   formatLocalISO,
   getValidDateISOString,
@@ -81,7 +99,9 @@ function generateTaskCard(task) {
     'text-center',
     'py-2'
   );
+  if (studentID === ''){
   card.setAttribute('draggable', true);
+  }
 
   const innerCard = document.createElement('div');
   innerCard.classList.add('my-0', 'py-0', 'link-light', 'task-card');
@@ -147,7 +167,7 @@ function bindDragCard(card, task) {
 }
 
 async function getTaskboardName() {
-  const response = await fetch(`/api/taskboards/${taskboardID}`);
+  const response = await fetch(`/api/taskboards/${taskboardID}/?user_id=${studentID}`);
   const tb = await response.json();
   return tb.name;
 }
@@ -156,7 +176,7 @@ async function renderColumns() {
   for (const column of columns) {
     column.innerHTML = '';
   }
-  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}`);
+  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}&user_id=${studentID}`);
   const tasks = await response.json();
   const toDoTasks = tasks.filter((task) => task.status === 'TODO');
   const inProgressTasks = tasks.filter((task) => task.status === 'IN PROGRESS');
