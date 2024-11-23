@@ -41,6 +41,7 @@ function removeSelectOptions(selectElement) {
   for (i = L; i >= 1; i--) {
     selectElement.remove(i);
   }
+  selectElement.selectedIndex=0;
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

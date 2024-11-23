@@ -4,12 +4,19 @@ import csv
 import os
 import re
 from functools import reduce
-from calculator.models import University, Faculty, Major, Exams, CriteriaSet
+from calculator.models import (
+    University,
+    Faculty,
+    Major,
+    Exams,
+    CriteriaSet,
+    ScoreHistory,
+)
 
 PATH = os.path.join(os.getcwd(), os.path.join("calculator", "data"))
 
 
-def load_uni_faculty_major():
+def load_uni_faculty_major() -> None:
     """Create University, Faculty and Major objects."""
     data = get_non_duplicate_major_sample()
     for row in data:
@@ -20,13 +27,17 @@ def load_uni_faculty_major():
         major = Major.objects.get_or_create(
             name=row["major"], code=row["major_code"], faculty=faculty
         )[0]
+        criteria_set = CriteriaSet.objects.get_or_create(
+            name=row["criteria_set"], major=major
+        )[0]
         university.save()
         faculty.save()
         major.save()
+        criteria_set.save()
     print("Successfully imported University, Faculty and Major data")
 
 
-def get_non_duplicate_major_sample():
+def get_non_duplicate_major_sample() -> None:
     """Get sample of Unviersity, Faculty and Major.
 
     Due to time constraints, we only create demo for 3 universities.
@@ -50,12 +61,14 @@ def get_non_duplicate_major_sample():
                     "faculty": row["คณะ"],
                     "major": row["หลักสูตร"],
                     "major_code": row["รหัสหลักสูตร"],
+                    "criteria_set": row["รายละเอียด"]
+                    if row["รายละเอียด"] != ""
+                    else row["หลักสูตร"],
                     "min_score": string_to_numeric(row["คะแนนต่ำสุด หลังประมวลผลรอบ 2"]),
                     "max_score": string_to_numeric(row["คะแนนสูงสุด หลังประมวลผลรอบ 2"]),
                     "register": string_to_numeric(row["สมัคร"]),
                     "max_seat": string_to_numeric(row["รับ"]),
                     "admitted": string_to_numeric(row["ผ่าน(รอบ2)"]),
-                    "year": 2567,
                 },
                 csv.DictReader(f),
             ),
@@ -82,7 +95,7 @@ def string_to_numeric(n: str) -> float | int:
     return int(cleaned_n)
 
 
-def load_exams():
+def load_exams() -> None:
     """Create Exams objects."""
     with open(os.path.join(PATH, "exams.csv"), encoding="utf-8-sig") as f:
         rows = csv.DictReader(f)
@@ -96,7 +109,7 @@ def load_exams():
         print("Successfully imported exams data.")
 
 
-def load_criteria():
+def load_criteria() -> None:
     """Load the score criteria of each major."""
     with open(os.path.join(PATH, "criteria.csv"), encoding="utf-8-sig") as f:
         rows = csv.DictReader(f)
@@ -116,19 +129,40 @@ def load_criteria():
                         min_score=min_score,
                     )
                 except Exams.DoesNotExist as e:
-                    raise ValueError(f"exam{exam_name}not found") from e
+                    raise Exams.DoesNotExist(f"Exam {exam_name} Not Found.") from e
             criteria_set.save()
 
         print("Successfully loaded criteria.")
 
 
-def load_score_history(criteria_set):
+def load_score_history() -> None:
     """Load the score history."""
-    pass
+    non_duplicate_sample = get_non_duplicate_major_sample()
+    for row in non_duplicate_sample:
+        try:
+            major = Major.objects.get(code=row["major_code"])
+            ScoreHistory.objects.create(
+                major=major,
+                criteria_set=CriteriaSet.objects.get(
+                    name=row["criteria_set"], major=major
+                ),
+                min_score=row["min_score"],
+                max_score=row["max_score"],
+                register=row["register"],
+                max_seat=row["max_seat"],
+                admitted=row["admitted"],
+                year=2567,
+            )
+        except Major.MultipleObjectsReturned:
+            raise Major.MultipleObjectsReturned(
+                f"University: {row["university"]}, faculty:{row["faculty"]}"
+            )
+    print("Successfully loaded score history.")
 
 
-def run():
+def run() -> None:
     """Run the import script."""
     load_uni_faculty_major()
     load_exams()
     load_criteria()
+    load_score_history()

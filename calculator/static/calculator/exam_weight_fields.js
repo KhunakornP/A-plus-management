@@ -13,7 +13,7 @@ class ExamWeightFields extends AbstractExamFields {
     let criteria = await response.json();
     const result = {};
     for (const obj of criteria.criteria) {
-      result[obj.id] = {
+      result[obj.exam] = {
         'weight': obj.weight,
         'min_score': obj.min_score,
       };
@@ -34,7 +34,7 @@ class ExamWeightFields extends AbstractExamFields {
     const scoreWeight = await this.fetchSavedDataJSON(criteriaID);
     const weightInputs = document.querySelectorAll('.exam-weight-input');
     for (const w of weightInputs) {
-      const examID = Number(w.id);
+      const examID = Number((w.id).split("-")[1]);
       const weight = examID in scoreWeight ? scoreWeight[examID].weight : '';
       w.value = weight;
     }
@@ -48,15 +48,12 @@ class ExamWeightFields extends AbstractExamFields {
     examField.innerHTML = `
     <div class="card-body exam-card">
     <label for="${exam.name}">${exam.name}</label>
-    <input type="number" min="0" max="100" class="form-control exam-weight-input" id="${exam.id}" value="${weightValue}", placeholder="${placeholder}">
+    <input type="number" min="0" max="100" class="form-control exam-weight-input" id="exam-${exam.id}" value="${weightValue}", placeholder="${placeholder}">
     </div>
     `;
     return examField;
   }
 
-  redirect() {
-    // TODO: do.
-  }
 }
 
 export { ExamWeightFields };
