@@ -73,5 +73,5 @@ def get_taskboard_details(request, taskboard_id: int, user_id: int):
         user = User.objects.get(pk=user_id)
     except User.DoesNotExist:
         return redirect(reverse("manager:dashboard"))
-    context = {"user_id": user.id}
+    context = {"user_id": user.id, "taskboard_id": taskboard_id}
     return render(request, "manager/taskboard.html", context)
