@@ -214,6 +214,7 @@ class ChartIndexView(generic.ListView):
         context["user_id"] = self.kwargs["user_id"]
         return context
 
+
 class EstimateHistoryViewset(viewsets.ModelViewSet):
     """A viewset for EstimateHistory."""
 
