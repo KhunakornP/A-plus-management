@@ -30,6 +30,11 @@ DEBUG = config('DEBUG', cast=bool, default='False')
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv(),
                        default='localhost, 127.0.0.1, ::1, testserver')
 
+PRODUCTION = config('PRODUCTION', default=False, cast=bool)
+
+if PRODUCTION:
+    CSRF_TRUSTED_ORIGINS = config('TRUSTED_ORIGINS', cast=Csv(),
+                           default='https://verysecuresite.js')
 
 # Application definition
 
@@ -41,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'manager.apps.ManagerConfig',
+    'calculator.apps.CalculatorConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'django.contrib.sites',
@@ -50,14 +56,17 @@ INSTALLED_APPS = [
     'dj_rest_auth.registration',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
@@ -88,10 +97,18 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': ({
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME', default='database_name'),
+        'USER': config('DB_USERNAME', default='username'),
+        'PASSWORD': config('DB_PASSWORD', default='password'),
+        'HOST': config('DB_HOST', default='123.345.678.1'),
+        'PORT': config('DB_PORT', default='111111')
+    } if PRODUCTION else
+        {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        })
 }
 
 
@@ -139,7 +156,13 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S.%fZ",
 }
 
+if not DEBUG:
+    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = (
+            "rest_framework.renderers.JSONRenderer",
+        )
+
 SITE_ID = config('SITE_ID', cast=int, default=3)
+LOGIN_URL = 'manager:main_login'
 LOGOUT_REDIRECT_URL = 'manager:main_login'
 
 #  The maximum difference between the iat and server time allowed in seconds
@@ -149,6 +172,9 @@ GOOGLE_CLIENT_ID = config("CLIENT_ID", default="bogusID.google.com")
 
 SOCIALACCOUNT_STORE_TOKENS = True
 
+CSRF_COOKIE_SECURE = True
+
+SESSION_COOKIE_SECURE = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -166,6 +192,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+if not DEBUG:
+    # Tell Django to copy static assets into a path called
+    # `staticfiles` (this is specific to Render).
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    # Enable the WhiteNoise storage backend,
+    # which compresses static files to reduce disk use and renames the files
+    # with unique names for each version to support long-term caching.
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

@@ -1,0 +1,1 @@
+from .templates_for_tests import BaseTestCase

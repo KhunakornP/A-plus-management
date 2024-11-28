@@ -10,10 +10,11 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.jest,
+        ...globals.jquery,
         bootstrap: "readonly",
         FullCalendar: "readonly",
         Cookies: "readonly",
-        Chart: "readonly"
+        Chart: "readonly",
       }
     },
     rules: {

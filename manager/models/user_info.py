@@ -20,6 +20,7 @@ class UserPermissions(models.Model):
         permissions = [
             ("is_taking_A_levels", "User who has access to the calculator"),
             ("is_parent", "User who has access to the parent dashboard"),
+            ("is_verified", "User who has finished setting up their account"),
         ]
 
 
@@ -43,10 +44,7 @@ class StudentInfo(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     displayed_name = models.CharField(max_length=50)
-    parent = models.ForeignKey(
+    parent = models.ManyToManyField(
         User,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
         related_name="student_set",
     )

@@ -1,0 +1,93 @@
+{% load static %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="{% static 'manager/role_form.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{% static 'manager/role_form.js' %}" defer></script>
+<nav>
+  <ul class="nav nav-tabs" id="nav-tab" role="tablist" style="display: none">
+    <li class="nav-link active" id="nav-role-tab" data-bs-toggle="tab" data-bs-target="#nav-role" type="button" role="tab" aria-controls="nav-role" aria-selected="true">Home</li>
+    <li class="nav-link" id="nav-calculator-tab" data-bs-toggle="tab" data-bs-target="#nav-calculator" type="button" role="tab" aria-controls="nav-calculator" aria-selected="false">Profile</li>
+  </ul>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+  <div class="tab-pane fade show active" id="nav-role" role="tabpanel" aria-labelledby="nav-role-tab">
+    <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-16 col-xl-15">
+        <div class="card shadow-2-strong d-flex" style="border-radius: 1rem;">
+          <div class="card-body p-5 text-center">
+            <h3 class="mb-5">Are you a parent or a student?</h3>
+            <div class="row row-cols-1 row-cols-md-2">
+              <div class="col mb-4">
+            <div class="card" style="width: 18rem;" id="c1">
+              <div class="card-body">
+                <img src="/static/manager/images/parents.png" class="card-img-top" alt="parent img">
+                <h5 class="card-title">I am a parent</h5>
+                <a href="#parent_selected" class="hidden-link stretched-link" id="parent">Continue</a>
+              </div>
+            </div>
+            </div>
+            <div class="col mb-4">
+            <div class="card" style="width: 18rem;" id="c2">
+              <div class="card-body">
+                <img src="/static/manager/images/student.png" class="card-img-top" alt="student img">
+                <h5 class="card-title">I am a student</h5>
+                <a href="#student_selected" class="hidden-link stretched-link" id="student">Continue</a>
+              </div>
+            </div>
+            </div>
+            </div>
+            <a class="btn btn-primary btnNext">Next</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="tab-pane fade" id="nav-calculator" role="tabpanel" aria-labelledby="nav-calculator-tab">
+    <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-12 col-md-8 col-lg-16 col-xl-15">
+        <div class="card shadow-2-strong" style="border-radius: 1rem;">
+          <div class="card-body p-5 text-center">
+            <h3 class="mb-5">Are you taking the A Levels?</h3>
+            <div class="row row-cols-1 row-cols-md-2">
+              <div class="col mb-4">
+            <div class="card" style="width: 18rem;" id="c3">
+              <div class="card-body">
+                <img src="/static/manager/images/checked.png" class="card-img-top" alt="Yes">
+                <h5 class="card-title">I'm taking the A-Levels</h5>
+                <a href="#examinee" class="hidden-link stretched-link" id="a_level">Continue</a>
+              </div>
+              </div>
+            </div>
+              <div class="col mb-4">
+            <div class="card" style="width: 18rem;" id="c4">
+              <div class="card-body">
+                <img src="/static/manager/images/x-button.png" class="card-img-top" alt="No">
+                <h5 class="card-title">I'm not taking the A-Levels</h5>
+                <a href="#not_examinee" class="hidden-link stretched-link" id="not_a_level">Continue</a>
+              </div>
+            </div>
+            </div>
+            </div>
+            <div class="row">
+              <div class="col-md-1">
+                <a class="btn btn-primary btnPrevious">Back</a>
+              </div>
+            <div class="col-md-3">
+            <form action="{% url 'manager:user_setup' %}" onsubmit="validateForm(event)" method="post">
+              {% csrf_token %}
+              <input type="hidden" id="type" name="type" value="">
+              <input type="hidden" id="exam" name="exam" value="">
+              <button type="submit" class="btn btn-primary" id="submit">Confirm</button>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>

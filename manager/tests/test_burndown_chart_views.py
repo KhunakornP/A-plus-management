@@ -1,1 +1,0 @@
-"""Test Burndown chart views."""

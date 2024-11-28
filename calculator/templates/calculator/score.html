@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block headcontent %}
+  <title>Results | A-Level Calculator</title>
+
+  {% load static %}
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
+  <script src="{% static 'calculator/score.js' %}" type="module" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h2 class="p-4 text-center rounded">Calculation Results</h2>
+  <div class="row justify-content-center flex-row h-100 mx-3">
+    <div class="col d-flex flex-column">
+      <div>
+        <h3>
+          Your Score is:
+        </h3> 
+      </div>
+
+      <div style="font-size: 7rem;">
+        {{request.session.score}}/100
+      </div>
+
+      <div class="min-criteria" id="{{request.session.criteria_id}}">
+        <h4>Minimum Score of Each Exam Required</h4>
+      </div>
+
+    </div>
+    <div class="col d-flex flex-column">
+      <h3>Last Year's statistics</h3>
+
+      <div class="py-2" id="min-score">
+        Minimum Score: -
+      </div>
+
+      <div class="py-2" id="max-score">
+        Maximum Score: -
+      </div>
+
+      <div class="py-2" id="max-seat">
+        Total Seats: -
+      </div>
+
+      <div class="py-2" id="register">
+        Applicants: -
+      </div>
+
+      <div class="py-2" id="admitted">
+        Admitted: -
+      </div>
+
+      <div class="py-2 mytcas-link-container" id="{{request.session.major}}">
+        More Information at 
+        <a href="https://mytcas.com/" id="my-tcas-link">MyTCAS</a>
+      </div>
+
+      <div>
+        <a href="{% url "calculator:major" %}" class="btn btn-primary my-2">Back</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

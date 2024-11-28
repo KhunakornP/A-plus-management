@@ -7,6 +7,8 @@ from urllib.parse import urljoin
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_not_required
+from django.utils.decorators import method_decorator
 from django.shortcuts import redirect
 import requests
 from django.urls import reverse
@@ -15,6 +17,7 @@ from rest_framework.views import APIView
 import jwt
 from time import sleep, time
 from django.conf import settings
+from decouple import config
 
 
 class GoogleOAuth2IatValidationAdapter(GoogleOAuth2Adapter):
@@ -53,6 +56,7 @@ class GoogleOAuth2IatValidationAdapter(GoogleOAuth2Adapter):
         return super().complete_login(request, app, token, response, **kwargs)
 
 
+@method_decorator(login_not_required, name="dispatch")
 class GoogleLoginCallback(APIView):
     """Class for handling token exchange between Google and Server."""
 
@@ -69,7 +73,11 @@ class GoogleLoginCallback(APIView):
             messages.error(request, "Google sign in failed: Please login again.")
             return redirect(reverse("manager:main_login"))
 
-        token_endpoint_url = urljoin("http://localhost:8000", reverse("google_login"))
+        token_endpoint_url = urljoin(
+            config("BASE_URL", default="http://localhost:8000/"),
+            reverse("google_login"),
+        )
+
         params = {
             "process": "login",
         }
@@ -86,12 +94,14 @@ class GoogleLoginCallback(APIView):
                 user,
                 backend="allauth.account.auth_backends.AuthenticationBackend",
             )
-            return redirect(reverse("manager:taskboard_index"))
-        except (ValueError, IndexError):
+            return redirect(reverse("manager:user_setup"))
+        except (ValueError, IndexError) as e:
+            print(e)
             messages.error(request, "Authentication Error: Please login again.")
             return redirect(reverse("manager:main_login"))
 
 
+@method_decorator(login_not_required, name="dispatch")
 class GoogleLogin(SocialLoginView):
     """Social Login View for Google OAuth."""
 

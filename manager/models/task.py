@@ -36,6 +36,10 @@ class Task(models.Model):
         except Task.DoesNotExist:
             return self.time_estimate
 
+    def due_today(self):
+        """Check if the task is due today."""
+        return self.end_date.day == timezone.now().day
+
     def __status_changed_to_done(self) -> bool:
         """Check whether status of existing tasks are changed to DONE.
 

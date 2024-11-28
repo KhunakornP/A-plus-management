@@ -1,14 +1,19 @@
 """A view to create default roles upon user creation."""
 
-from manager.models import StudentInfo
-
+from django.contrib.contenttypes.models import ContentType
+from django.shortcuts import redirect
+from django.urls import reverse
+from manager.models import StudentInfo, UserPermissions, ParentInfo
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
+from django.contrib.auth.decorators import login_not_required
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.conf import settings
 
 
+@method_decorator(login_not_required, name="dispatch")
 class LoginView(TemplateView):
     """View for rendering the login page."""
 
@@ -26,6 +31,63 @@ class LoginView(TemplateView):
         return context
 
 
+class UserSetupView(TemplateView):
+    """A view for the user to select their 'role'."""
+
+    template_name = "manager/account_creation.html"
+
+    def get(self, request, *args, **kwargs):
+        """
+        Override the GET request and check if the user has set up their account.
+
+        Redirect the user to the main page if they already have.
+        """
+        # check if user is logged in
+        if not self.request.user.is_authenticated:
+            return redirect(reverse("manager:main_login"))
+        # check if user has already set up their account
+        if self.request.user.has_perm("manager.is_verified"):
+            return redirect(reverse("manager:taskboard_index"))
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        """Set up the user's account information based on the given fields."""
+        # check if user is logged in
+        if not self.request.user.is_authenticated:
+            return redirect(reverse("manager:main_login"))
+        # check if user has already set up their account
+        if self.request.user.has_perm("manager.is_verified"):
+            return redirect(reverse("manager:taskboard_index"))
+        content_type = ContentType.objects.get_for_model(UserPermissions)
+        verified, created = Permission.objects.get_or_create(
+            codename="is_verified", content_type=content_type
+        )
+        parent, created = Permission.objects.get_or_create(
+            codename="is_parent", content_type=content_type
+        )
+        calc_access, created = Permission.objects.get_or_create(
+            codename="is_taking_A_levels", content_type=content_type
+        )
+        if request.POST["type"] == "parent":
+            info = StudentInfo.objects.get(user=self.request.user)
+            new_info = ParentInfo.objects.create(
+                user=self.request.user, displayed_name=info.displayed_name
+            )
+            info.delete()
+            new_info.save()
+            self.request.user.user_permissions.add(verified)
+            self.request.user.user_permissions.add(parent)
+            self.request.user.user_permissions.add(calc_access)
+            return redirect(reverse("manager:taskboard_index"))
+        # if user is not a parent then they are a student
+        # check if they take the A-levels
+        if request.POST["exam"] == "true":
+            self.request.user.user_permissions.add(calc_access)
+        self.request.user.user_permissions.add(verified)
+        return redirect(reverse("manager:taskboard_index"))
+
+
+@method_decorator(login_not_required, name="dispatch")
 @receiver(post_save, sender=User)
 def create_default_info_on_user_creation(sender, instance, created, **kwargs):
     """

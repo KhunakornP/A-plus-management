@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block headcontent %}
+  <title>Charts</title>
+  {% load static %}
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <script src="{% static 'manager/chart_index.js' %}" defer type="module"></script>
+  {{ user_id|json_script:"user_id" }}
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row d-flex justify-content-center align-items-center">
+        <h3 class="text-center">Overview of taskboard progress</h3>
+        <div class="col-md-8 mb-4">
+          <div class="card">
+            <div class="card-body">
+                <div>
+                  <canvas id="overview-chart"></canvas>
+                </div>
+                <div class="text-center" id="null-tooltip"></div>
+            </div>
+          </div>
+        </div>
+    </div>
+    {% if taskboards %}
+    <div class="row d-flex justify-content-center align-items-center">
+        <h3 class="text-center">Burndown charts</h3>
+        {% for taskboard in taskboards %}
+        <div class="col-md-8 mb-2">
+          <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Taskboard: {{ taskboard.name }}</h5>
+                <div id="tb-{{taskboard.id}}">velocity placeholder</div>
+                <a class="btn btn-primary" onclick="alertBurndown()">Go to chart</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+    <div class="col-md-8 mb-2 m-2" align="center">
+    <a href="{% url 'manager:dashboard' %}" class="btn btn-primary">Back to dashboard</a>
+    </div>
+    {% else %}
+    <div class="row d-flex justify-content-center align-items-center">
+    <div class="col-md-8 mb-2 m-2" align="center">
+    <p>Your child currently doesn't have any taskboards</p>
+    <a href="{% url 'manager:dashboard' %}" class="btn btn-primary">Back to dashboard</a>
+    </div>
+    </div>
+    </div>
+  </div>
+    {% endif %}
+<div>
+<script>
+function alertBurndown() {
+  alert("Sorry, the burndown chart is unavailable. \nPlease try again another time!")
+}
+</script>
+{% endblock %}
