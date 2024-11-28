@@ -40,7 +40,7 @@ class TaskboardView(generic.TemplateView):
     template_name = "manager/taskboard.html"
 
     def get_context_data(self, **kwargs):
-        """Pass the id of the taskboard as context"""
+        """Pass the id of the taskboard as context."""
         context = super().get_context_data(**kwargs)
         context["taskboard_id"] = self.kwargs["pk"]
         return context
