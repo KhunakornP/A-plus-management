@@ -324,6 +324,16 @@ function calculateVelocityTrend(estHistData) {
 
 Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
   .then(([estimateHistoryData, tasksData, eventData]) => {
+    if (estimateHistoryData.length === 0) {
+        const ctx = document.getElementById('no-data');
+        ctx.innerHTML = `It seems like you haven't added any tasks. Add some tasks on the taskboard.`;
+        ctx.style.height = '220px';
+        ctx.style.textAlign = 'center';
+        updateDoneByEstimate(0);
+        updateVelocityEstimate(0);
+        updateWarningEstimate(0);
+        return;
+    }
     // Fill estimate history data
     const estHistData = fillEstHistData(estimateHistoryData);
 
