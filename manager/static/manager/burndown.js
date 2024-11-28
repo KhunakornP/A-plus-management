@@ -322,6 +322,29 @@ function calculateVelocityTrend(estHistData) {
     return { velocityEndDate, velocityTrend, velocitySlope};
 }
 
+function scroller(scroll, chart) {
+    const dataLength = chart.data.labels.length
+
+    if (scroll.deltaY > 0) {
+        if (chart.config.options.scales.x.max >= dataLength - 1) {
+            chart.config.options.scales.x.min = dataLength - 14;
+            chart.config.options.scales.x.max = dataLength - 1;
+        } else {
+            chart.config.options.scales.x.min += 1;
+            chart.config.options.scales.x.max += 1;
+        }
+    } else if (scroll.deltaY < 0) {
+        if (chart.config.options.scales.x.min <= 0) {
+            chart.config.options.scales.x.min = 0;
+            chart.config.options.scales.x.max = 13;
+        } else {
+            chart.config.options.scales.x.min -= 1;
+            chart.config.options.scales.x.max -= 1;
+        }
+    }
+    chart.update();
+}
+
 Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
   .then(([estimateHistoryData, tasksData, eventData]) => {
     if (estimateHistoryData.length === 0) {
@@ -329,7 +352,7 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
         ctx.innerHTML = `It seems like you haven't added any tasks. Add some tasks on the taskboard.`;
         ctx.style.height = '220px';
         ctx.style.textAlign = 'center';
-        updateDoneByEstimate(0);
+        updateDoneByEstimate('');
         updateVelocityEstimate(0);
         updateWarningEstimate(0);
         return;
@@ -383,6 +406,10 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     createCheckboxes(document.getElementById('event-checkboxes'), filteredEventData, 'event', () => updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0]));
 
     updateAnnotations(taskAnnotations, eventAnnotations, chart, estHistData, velocityEndDate[0])
+    
+    chart.canvas.addEventListener('wheel', (e) => {
+        scroller(e, chart);
+    })
 
   })
   .catch(error => {
