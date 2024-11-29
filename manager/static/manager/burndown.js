@@ -334,7 +334,7 @@ function scroller(scroll, chart) {
     const currentMinIndex = labels.indexOf(chart.config.options.scales.x.min);
     const currentMaxIndex = labels.indexOf(chart.config.options.scales.x.max);
 
-    if (totalLabels > 31) {
+    if (currentMinIndex >= 0 && currentMaxIndex >= 0) {
         if (scroll.deltaY > 0) {
             if (currentMaxIndex >= totalLabels - 1) {
                 // Stop scrolling if at the end of the labels
