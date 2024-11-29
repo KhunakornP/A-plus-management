@@ -84,9 +84,9 @@
     <button class="btn btn-primary btn-sm col-auto mx-2 p-2" data-bs-toggle="modal" data-bs-target="#addTask" id="add-task">
       Add Task
     </button>
-    <button class="btn btn-sm btn-primary col-auto mx-2 p-2" id="burndown-chart" onclick="alertBurndown()">
+    <a href="{% url 'manager:burndown_chart' taskboard_id %}" class="btn btn-sm btn-primary col-auto mx-2 p-2" id="burndown-chart">
       Burndown Chart
-    </button>
+    </a>
   </div>  
 
   <div class="modal fade" id="addTask" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addTaskLabel" aria-hidden="true">
@@ -136,9 +136,4 @@
     </div>
   </div>
 </div>
-<script>
-function alertBurndown() {
-  alert("Sorry, the burndown chart is unavailable. \nPlease try again another time!")
-}
-</script>
 {% endblock %}

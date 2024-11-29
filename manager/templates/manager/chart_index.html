@@ -33,7 +33,7 @@
             <div class="card-body">
                 <h5 class="card-title">Taskboard: {{ taskboard.name }}</h5>
                 <div id="tb-{{taskboard.id}}">velocity placeholder</div>
-                <a class="btn btn-primary" onclick="alertBurndown()">Go to chart</a>
+                <a href="{% url 'manager:burndown_chart' taskboard_id=taskboard.id %}" class="btn btn-primary">Go to chart</a>
             </div>
           </div>
         </div>
@@ -52,9 +52,4 @@
   </div>
     {% endif %}
 <div>
-<script>
-function alertBurndown() {
-  alert("Sorry, the burndown chart is unavailable. \nPlease try again another time!")
-}
-</script>
 {% endblock %}
