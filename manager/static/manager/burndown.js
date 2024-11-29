@@ -140,7 +140,12 @@ function trendAnnotation(x1, x2, y1, y2, color) {
 }
 
 function initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotations, scaleMax) {
-    const yMax = trendAnnotations[trendAnnotations.length-2].yMin;
+
+    const chartStartDate = lineAnnotations[lineAnnotations.length - 1].value;
+
+    const startIndex = dates.indexOf(chartStartDate);
+    const adjustedStartIndex = startIndex <= 7 ? 0 : startIndex - 7;
+    const endIndex = adjustedStartIndex + scaleMax;
 
     return new Chart(ctx, {
         type: 'bar',
@@ -157,12 +162,12 @@ function initializeChart(ctx, dates, estHistData, lineAnnotations, trendAnnotati
         options: {
             scales: {
                 x: {
-                    min: 0,
-                    max: scaleMax,
+                    type: 'category',
+                    min: dates[adjustedStartIndex],
+                    max: dates[endIndex],
                 },
                 y: {
                     beginAtZero: true,
-                    max: yMax
                 }
             },
             plugins: {
@@ -323,26 +328,36 @@ function calculateVelocityTrend(estHistData) {
 }
 
 function scroller(scroll, chart) {
-    const dataLength = chart.data.labels.length
+    const labels = chart.data.labels;
+    const totalLabels = labels.length;
 
-    if (scroll.deltaY > 0) {
-        if (chart.config.options.scales.x.max >= dataLength - 1) {
-            chart.config.options.scales.x.min = dataLength - 14;
-            chart.config.options.scales.x.max = dataLength - 1;
-        } else {
-            chart.config.options.scales.x.min += 1;
-            chart.config.options.scales.x.max += 1;
+    const currentMinIndex = labels.indexOf(chart.config.options.scales.x.min);
+    const currentMaxIndex = labels.indexOf(chart.config.options.scales.x.max);
+
+    if (totalLabels > 31) {
+        if (scroll.deltaY > 0) {
+            if (currentMaxIndex >= totalLabels - 1) {
+                // Stop scrolling if at the end of the labels
+                chart.config.options.scales.x.min = labels[totalLabels - 31];
+                chart.config.options.scales.x.max = labels[totalLabels - 1];
+            } else {
+                // Shift the range forward by 1
+                chart.config.options.scales.x.min = labels[currentMinIndex + 1];
+                chart.config.options.scales.x.max = labels[currentMaxIndex + 1];
+            }
+        } else if (scroll.deltaY < 0) {
+            if (currentMinIndex <= 0) {
+                // Stop scrolling if at the start of the labels
+                chart.config.options.scales.x.min = labels[0];
+                chart.config.options.scales.x.max = labels[30];
+            } else {
+                // Shift the range backward by 1
+                chart.config.options.scales.x.min = labels[currentMinIndex - 1];
+                chart.config.options.scales.x.max = labels[currentMaxIndex - 1];
+            }
         }
-    } else if (scroll.deltaY < 0) {
-        if (chart.config.options.scales.x.min <= 0) {
-            chart.config.options.scales.x.min = 0;
-            chart.config.options.scales.x.max = 13;
-        } else {
-            chart.config.options.scales.x.min -= 1;
-            chart.config.options.scales.x.max -= 1;
-        }
+        chart.update();
     }
-    chart.update();
 }
 
 Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
@@ -364,6 +379,12 @@ Promise.all([fetchEstimateHistoryData(), fetchTaskJson(), fetchEventJson()])
     const { velocityEndDate, velocityTrend, velocitySlope} = calculateVelocityTrend(estHistData);
     updateVelocityEstimate(velocitySlope);
     updateDoneByEstimate(velocityEndDate);
+
+    if (velocityEndDate.length === 0) {
+        const element = document.getElementById('not-enough-data');
+        element.innerHTML = "Not enough data to estimate velocity.<br> Come back tomorrow to see any progress.";
+        element.style.color = 'yellow';
+    }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
