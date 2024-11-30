@@ -90,6 +90,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btn = document.getElementById('create-tb-btn');
   const userID = JSON.parse(document.getElementById('user_id').textContent);
   const nameInput = document.getElementById('taskboard-title');
+  nameInput.addEventListener('paste', (event) => {
+    const maxLength = nameInput.getAttribute('maxlength');
+    event.clipboardData.getData('text/plain').slice(0, maxLength)
+  });
   btn.addEventListener('click', async () => {
     try {
       const response = await fetch('/api/taskboards/', {

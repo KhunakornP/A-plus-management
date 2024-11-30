@@ -249,6 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       editBtn.innerHTML = 'Done';
     } else {
       editBtn.innerHTML = 'Edit';
+      offcanvas.hide()
       updateTask();
     }
   });
