@@ -4,44 +4,63 @@
 {% endblock %}
 {% block content %}
 
-<div class="container-fluid">
-  <a href="#" class="btn btn-secondary my-3">
-    Back to Taskboard
-  </a>
-  <div class="row align-items-start">
-    <div class="col">
-      Graph {{taskboard_id}}
-
-      {% for event in events %}
-      {{event}}
-      {% endfor %}
+<div class="container">
+  <div class="row my-5 px-4">
+    <div class="col-md-8 col-12">
+      <div class="card">
+        <div class="card-body">
+          <h5>Burndown Chart</h5>
+          <hr>
+          <div id="no-data"></div>
+          <canvas id="myChart"></canvas>
+        </div>
+      </div>
     </div>
-
-    <div class="col">
-      <h2>Select Event</h2>
-      <form method="post">
-        {% csrf_token %}
-
-        <div class="form-check">
-          <input class="form-check-input" name="events" type="checkbox" value="a" id="flexCheckDefault">
-          <label class="form-check-label" for="flexCheckDefault">
-            Default checkbox
-          </label>
+  
+    <div class="col-md-4 col-12">
+      <div class="card">
+        <div class="card-body">
+          <h5>Information</h5>
+          <hr>
+          <p id="not-enough-data"></p>
+          <p id="slope"></p>
+          <p id="done-by"></p>
+          <p id="warning"></p>
         </div>
-
-        <div class="form-check">
-          <input class="form-check-input" name="events" type="checkbox" value="c" id="flexCheckChecked">
-          <label class="form-check-label" for="flexCheckChecked">
-            Checked checkbox
-          </label>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-6 col-12">
+          <div class="card">
+            <div class="card-body" style="height: 200px; overflow-y: auto;">
+              <h5>Tasks</h5>
+              <hr>
+              <div id="task-checkboxes"></div>
+            </div>
+          </div>
         </div>
-
-        <input type="submit" value="View event on graph">
-
-      </form>
-    
+        <div class="col-md-6 col-12">
+          <div class="card">
+            <div class="card-body" style="height: 200px; overflow-y: auto;">
+              <h5>Events</h5>
+              <hr>
+              <div id="event-checkboxes"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-end">
+        <a id="taskboard-link" href="#" class="btn btn-info mx-2" style="margin-top: 20px;">Back to Taskboard</a>
+      </div>  
+    </div>
   </div>
+</div>
+
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
+
+{% load static %}
+<script src="{% static 'manager/burndown.js' %}" defer></script>
 
 {% endblock %}

@@ -1,7 +1,9 @@
 """Module for views relating to burndown chart pages."""
 
-from manager.models import EstimateHistory, Taskboard
+from manager.serializers import EstimateHistorySerializer
+from manager.models import EstimateHistory
 from django.views import generic
+from manager.models import Taskboard
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from django.utils import timezone
@@ -185,6 +187,12 @@ class VelocityViewSet(viewsets.ViewSet):
         return taskboard_data
 
 
+class BurndownView(generic.TemplateView):
+    """A view for the burndown chart page."""
+
+    template_name = "manager/burndown.html"
+
+
 class ChartIndexView(generic.ListView):
     """A view that displays all burn-down charts of a student."""
 
@@ -207,7 +215,23 @@ class ChartIndexView(generic.ListView):
         return context
 
 
-class BurndownView(generic.TemplateView):
-    """A view for the burndown chart page."""
+class EstimateHistoryViewset(viewsets.ModelViewSet):
+    """A viewset for EstimateHistory."""
 
-    template_name = "manager/burndown.html"
+    serializer_class = EstimateHistorySerializer
+
+    def get_queryset(self):
+        """Return EstimateHistory objects based on taskboard id."""
+        taskboard_id = self.request.query_params.get("taskboard")
+        return EstimateHistory.objects.filter(taskboard=taskboard_id).order_by("date")
+
+    def list(self, request):
+        """
+        List EstimateHistory objects of a certain taskboard.
+
+        :param request: The HTTP request.
+        :return: Response with tasks.
+        """
+        queryset = self.get_queryset()
+        serializer = EstimateHistorySerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

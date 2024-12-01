@@ -54,6 +54,12 @@ class TaskboardView(generic.TemplateView):
 
     template_name = "manager/taskboard.html"
 
+    def get_context_data(self, **kwargs):
+        """Pass the id of the taskboard as context."""
+        context = super().get_context_data(**kwargs)
+        context["taskboard_id"] = self.kwargs["pk"]
+        return context
+
 
 def get_user_taskboard(request, user_id: int):
     """
@@ -82,5 +88,5 @@ def get_taskboard_details(request, taskboard_id: int, user_id: int):
         user = User.objects.get(pk=user_id)
     except User.DoesNotExist:
         return redirect(reverse("manager:dashboard"))
-    context = {"user_id": user.id}
+    context = {"user_id": user.id, "taskboard_id": taskboard_id}
     return render(request, "manager/taskboard.html", context)
