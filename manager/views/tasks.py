@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from manager.serializers import TaskSerializer
 
 
-def is_user_authorized(requesting_user: User, user_id:int) -> bool:
+def is_user_authorized(requesting_user: User, user_id: int) -> bool:
     """Check if the current user has access to another user's content."""
     if not requesting_user.has_perm("manager.is_parent"):
         return False

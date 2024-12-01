@@ -53,9 +53,7 @@ class TaskViewTests(TestCase):
         tb = create_taskboard(self.user2, "Shopping list")
         create_task("Buy milk", "TODO", tb)
         create_task("Buy cool toy", "INPROGRESS", tb)
-        self.user1.user_permissions.add(
-            Permission.objects.get(codename="is_parent")
-        )
+        self.user1.user_permissions.add(Permission.objects.get(codename="is_parent"))
         self.assertTrue(self.user1.has_perm("manager.is_parent"))
         response = self.client.get(f"/api/tasks/?user={self.user2.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -71,9 +69,7 @@ class TaskViewTests(TestCase):
         """
         tb = create_taskboard(self.user2, "Shopping list")
         create_task("Buy milk", "TODO", tb)
-        self.user1.user_permissions.add(
-            Permission.objects.get(codename="is_parent")
-        )
+        self.user1.user_permissions.add(Permission.objects.get(codename="is_parent"))
         self.assertTrue(self.user1.has_perm("manager.is_parent"))
         response = self.client.get(f"/api/tasks/?taskboard={tb.id}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
