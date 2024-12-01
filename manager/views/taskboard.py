@@ -1,9 +1,10 @@
 """Views for handling taskboard creation, deletion, update and render."""
 
 from rest_framework.authtoken.admin import User
+from rest_framework.response import Response
 from manager.models import Taskboard
 from django.views import generic
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from manager.serializers import TaskboardSerializer
 from django.shortcuts import redirect, reverse, render
 
@@ -26,6 +27,20 @@ class TaskboardViewSet(viewsets.ModelViewSet):
         if query:
             return Taskboard.objects.filter(user__pk=query)
         return Taskboard.objects.filter(user=self.request.user)
+
+    def create(self, request):
+        """
+        Create a new Task object.
+
+        :param request: The HTTP request with event data.
+        :return: Response with created event.
+        """
+        data = request.data
+        serializer = TaskboardSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save(user=self.request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TaskboardIndexView(generic.TemplateView):

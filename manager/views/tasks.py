@@ -65,6 +65,7 @@ class TaskViewSet(viewsets.ViewSet):
         # get all tasks belonging to the current user
         else:
             queryset = Task.objects.filter(taskboard__user=request.user)
+        queryset = queryset.order_by("end_date")
         serializer = TaskSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
