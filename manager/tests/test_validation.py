@@ -4,8 +4,6 @@ from datetime import datetime
 from rest_framework import status
 from django.utils import timezone
 from django.test import TestCase
-from manager.models import Taskboard, Task, StudentInfo
-from typing import Any, Optional
 from .templates_for_tests import create_taskboard, create_task
 from django.contrib.auth.models import User, Permission
 
@@ -46,10 +44,7 @@ class TaskViewTests(TestCase):
         self.user3.save()
 
     def test_get_other_users_tasks(self):
-        """
-        Only the parent of a user or the user themselves
-        should be able to view a user's tasks.
-        """
+        """Only the parent of a user or the user can view the user's tasks."""
         tb = create_taskboard(self.user2, "Shopping list")
         create_task("Buy milk", "TODO", tb)
         create_task("Buy cool toy", "INPROGRESS", tb)
@@ -63,10 +58,7 @@ class TaskViewTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_other_users_taskboard(self):
-        """
-        Only the parent of a user or the user themselves
-        should be able to view a user's task boards.
-        """
+        """Only the parent of a user or the user can view the user's taskboards."""
         tb = create_taskboard(self.user2, "Shopping list")
         create_task("Buy milk", "TODO", tb)
         self.user1.user_permissions.add(Permission.objects.get(codename="is_parent"))
