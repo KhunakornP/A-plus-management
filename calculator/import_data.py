@@ -3,6 +3,7 @@
 import csv
 import os
 import re
+from enum import Enum
 from functools import reduce
 from calculator.models import (
     University,
@@ -14,6 +15,36 @@ from calculator.models import (
 )
 
 PATH = os.path.join(os.getcwd(), os.path.join("calculator", "data"))
+
+
+class MajorClassification(Enum):
+    """An Enum to store different classifications of majors in Thailand."""
+
+    A = "ภาคปกติ"
+    B = "ภาคพิเศษ"
+    C = "สองภาษา/สามภาษา"
+    D = "ภาษาต่างประทศ"
+    E = "หลักสูตรนานาชาติ"
+    F = "Double Degree - ภาษาไทย ปกติ"
+    G = "Double Degree - นานาชาติ พิเศษ"
+    H = "Joint Degree - ภาษาไทย"
+    I = "Joint Degree - นานาชาติ"  # noqa: E741
+    L = "ต่อเนื่อง - ปกติ"
+    O = "ภาคบัณฑิต เทียบโอนเพื่อปริญญาใบที่ 2 พิเศษ"  # noqa: E741
+    P = "Double Degree - นานาชาติ ปกติ"
+    Q = "Double Degree - ภาษาไทย พิเศษ"
+
+    @classmethod
+    def get_major_classification(cls, major_code: str) -> str:
+        """Get major classification from major code.
+
+        :param major_code: the code of the major
+        :return: the value of the major code from this enum
+        """
+        try:
+            return MajorClassification[major_code[-1]].value
+        except (KeyError, IndexError):
+            return "อื่นๆ"
 
 
 def load_uni_faculty_major() -> None:
@@ -35,6 +66,19 @@ def load_uni_faculty_major() -> None:
         major.save()
         criteria_set.save()
     print("Successfully imported University, Faculty and Major data")
+
+
+def format_major_name(major_name: str, campus: str, major_code: str) -> str:
+    """Format major name to also include campus and major classification.
+
+    :param major_name: name of the major.
+    :param campus: campus that offer the major.
+    :param major_code: the code of the major
+    :return: major name + campus + classification
+    """
+    return "{} {} ({})".format(
+        major_name, campus, MajorClassification.get_major_classification(major_code)
+    )
 
 
 def get_non_duplicate_major_sample() -> None:
@@ -59,7 +103,9 @@ def get_non_duplicate_major_sample() -> None:
                 lambda row: {
                     "university": row["สถาบัน"],
                     "faculty": row["คณะ"],
-                    "major": row["หลักสูตร"],
+                    "major": format_major_name(
+                        row["หลักสูตร"], row["วิทยาเขต"], row["รหัสหลักสูตร"]
+                    ),
                     "major_code": row["รหัสหลักสูตร"],
                     "criteria_set": row["รายละเอียด"]
                     if row["รายละเอียด"] != ""
