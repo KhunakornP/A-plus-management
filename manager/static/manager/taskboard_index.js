@@ -1,15 +1,20 @@
-import { getErrorDiv, insertErrorDiv, removeErrorDivs, processAndAppend } from './utils.js';
+import {
+  getErrorDiv,
+  insertErrorDiv,
+  removeErrorDivs,
+  processAndAppend,
+} from './utils.js';
 
 let studentID;
-  if (document.getElementById('student_id')) {
+if (document.getElementById('student_id')) {
   studentID = JSON.parse(document.getElementById('student_id').textContent);
   console.log(studentID);
-  } else {
+} else {
   studentID = '';
-  }
+}
 
 async function fetchTaskboardJSON() {
-  const response = await fetch(`/api/taskboards/?user_id=${studentID}`)
+  const response = await fetch(`/api/taskboards/?user_id=${studentID}`);
   const taskboards = await response.json();
   return taskboards;
 }
@@ -18,7 +23,7 @@ function generateTaskboardCard(taskboard) {
   const card = document.createElement('div');
   card.classList.add('col-lg-4', 'col-md-6', 'mb-4');
   if (studentID === '') {
-  card.innerHTML = `
+    card.innerHTML = `
     <div class="card h-100 bg-light-subtle border-0 shadow-lg rounded-lg overflow-hidden" id="taskboard-${taskboard.id}">
       <div class="card-header bg-warning text-white text-center py-4">
           <h4 class="mb-0"> ${taskboard.name}</h4>
@@ -32,7 +37,7 @@ function generateTaskboardCard(taskboard) {
     </div>
   `;
   } else {
-  card.innerHTML = `
+    card.innerHTML = `
     <div class="card h-100 bg-light-subtle border-0 shadow-lg rounded-lg overflow-hidden" id="taskboard-${taskboard.id}">
       <div class="card-header bg-warning text-white text-center py-4">
           <h4 class="mb-0"> ${taskboard.name}</h4>
@@ -62,9 +67,9 @@ async function renderTaskboards() {
     document.getElementById('taskboard-container').innerHTML =
       noTaskboardMessage;
   }
-  console.log(studentID)
-  if (studentID === ''){
-  bindDeleteButtons();
+  console.log(studentID);
+  if (studentID === '') {
+    bindDeleteButtons();
   }
 }
 
@@ -90,6 +95,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btn = document.getElementById('create-tb-btn');
   const userID = JSON.parse(document.getElementById('user_id').textContent);
   const nameInput = document.getElementById('taskboard-title');
+  nameInput.addEventListener('paste', (event) => {
+    const maxLength = nameInput.getAttribute('maxlength');
+    event.clipboardData.getData('text/plain').slice(0, maxLength);
+  });
   btn.addEventListener('click', async () => {
     try {
       const response = await fetch('/api/taskboards/', {
