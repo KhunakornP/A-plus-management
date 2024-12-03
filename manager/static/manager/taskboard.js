@@ -1,3 +1,5 @@
+const MAX_TASK_LENGTH = 300;
+
 const columns = document.querySelectorAll('.drop_area');
 const offcanvas = new bootstrap.Offcanvas('#task-offcanvas');
 const createTaskModal = new bootstrap.Modal('#addTask');
@@ -22,22 +24,21 @@ const taskboardID = window.location.href.split('/').slice(-2)[0];
 let currentTaskID = 0;
 
 let studentID;
-  if (document.getElementById('student_id')) {
+if (document.getElementById('student_id')) {
   studentID = JSON.parse(document.getElementById('student_id').textContent);
   console.log(studentID);
-  } else {
+} else {
   studentID = '';
-  }
-
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
-if (studentID !== ''){
+  if (studentID !== '') {
     createBtn.setAttribute('disabled', true);
     deleteBtn.setAttribute('disabled', true);
     editBtn.setAttribute('disabled', true);
     document.getElementById('add-task').setAttribute('disabled', true);
-}
-})
+  }
+});
 
 import {
   formatLocalISO,
@@ -83,8 +84,6 @@ async function updateTask() {
   }
 }
 
-
-
 function generateTaskCard(task) {
   const card = document.createElement('div');
   card.classList.add(
@@ -99,8 +98,8 @@ function generateTaskCard(task) {
     'text-center',
     'py-2'
   );
-  if (studentID === ''){
-  card.setAttribute('draggable', true);
+  if (studentID === '') {
+    card.setAttribute('draggable', true);
   }
 
   const innerCard = document.createElement('div');
@@ -134,14 +133,21 @@ function bindClickCard(innerCard, task) {
 
 function colorCard(card, task) {
   const taskText = card.querySelector('u');
-  if (taskNearDueDate(task.end_date)) {
-    card.classList.remove('border-white');
-    card.classList.add('border-warning');
-    taskText.classList.add('text-warning');
-  } else if (taskPassedDueDate(task.end_date)) {
-    card.classList.remove('border-white');
-    card.classList.add('border-danger');
-    taskText.classList.add('text-danger');
+  if (task.status !== 'DONE') {
+    if (taskNearDueDate(task.end_date)) {
+      card.classList.remove('border-white');
+      card.classList.add('border-warning');
+      taskText.classList.add('text-warning');
+    } else if (taskPassedDueDate(task.end_date)) {
+      card.classList.remove('border-white');
+      card.classList.add('border-danger');
+      taskText.classList.add('text-danger');
+    }
+  } else {
+    card.classList.remove('border-danger');
+    card.classList.remove('border-warning');
+    card.classList.add('border-white');
+    taskText.className = '';
   }
 }
 
@@ -163,11 +169,16 @@ function bindDragCard(card, task) {
         'status': card.parentNode.id,
       }),
     });
+    let task = await fetch(`/api/tasks/${currentTaskID}`);
+    task = await task.json();
+    colorCard(card, task);
   });
 }
 
 async function getTaskboardName() {
-  const response = await fetch(`/api/taskboards/${taskboardID}/?user_id=${studentID}`);
+  const response = await fetch(
+    `/api/taskboards/${taskboardID}/?user_id=${studentID}`
+  );
   const tb = await response.json();
   return tb.name;
 }
@@ -176,7 +187,9 @@ async function renderColumns() {
   for (const column of columns) {
     column.innerHTML = '';
   }
-  const response = await fetch(`/api/tasks/?taskboard=${taskboardID}&user_id=${studentID}`);
+  const response = await fetch(
+    `/api/tasks/?taskboard=${taskboardID}&user_id=${studentID}`
+  );
   const tasks = await response.json();
   const toDoTasks = tasks.filter((task) => task.status === 'TODO');
   const inProgressTasks = tasks.filter((task) => task.status === 'IN PROGRESS');
@@ -225,7 +238,7 @@ function toggleSelectField(selectField, on) {
     selectField.setAttribute('disabled', 'true');
     selectField.classList.remove('form-control');
     selectField.classList.add('form-control-plaintext');
-}
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -249,6 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       editBtn.innerHTML = 'Done';
     } else {
       editBtn.innerHTML = 'Edit';
+      offcanvas.hide();
       updateTask();
     }
   });
@@ -313,5 +327,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         dropArea.insertBefore(draggable, afterElement);
       }
     });
+  });
+
+  taskModalTitle.addEventListener('paste', (event) => {
+    event.clipboardData.getData('text/plain').slice(0, MAX_TASK_LENGTH);
+  });
+
+  taskOffcanvasTitle.addEventListener('paste', (event) => {
+    event.clipboardData.getData('text/plain').slice(0, MAX_TASK_LENGTH);
   });
 });
