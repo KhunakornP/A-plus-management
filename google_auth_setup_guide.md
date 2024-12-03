@@ -56,6 +56,12 @@
     - Sites: move `http://localhost:8000/` to chosen sites
 <img src="./Wiki-images/google-Oauth-guide/admin2.JPG" width="850"><br>
 6. find the site id of `http://localhost:8000/`
+    - You can check the site id using the url in the admin site
+    - for example:
+      - Click on the sites tab and click on `http://localhost:8000/`
+      - The url shown should be something like `http://127.0.0.1:8000/admin/sites/site/3/change/` 
+      - In this case this means that the site id is 3
+<br>OR<br>
     - in a terminal run `python manage.py shell`
     - `from django.contrib.sites.models import Site`
     - `sorted([(site.id,site.name) for site in Site.objects.all()])`

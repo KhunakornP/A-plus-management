@@ -53,20 +53,25 @@ pip install -r requirements.txt
 python manage.py migrate
 ```
 
-7. import data
+7. import calculator data
 
 ```
-#TODO update this when the data fixture is finalized
+python manage.py runscript calculator.import_data -v3
 ```
 
-8. create a .env file <br>
-note: Decide if we want a sample.env or if we will use testing.env
+8. create a .env file with the following variables <br>
+    - CALLBACK = http://localhost:8000/api/auth/google-oauth2/callback/
+    - BASE_URL = http://localhost:8000/
+    - SECRET_KEY = # a random secret key, see testing.env to see how to generate one
+    - DEBUG = True
+    - SITE_ID = 2
 
-9. get your [google credentials](https://support.google.com/cloud/answer/6158849?hl=en) and put them into .env
+9. get your [google credentials](https://support.google.com/cloud/answer/6158849?hl=en) configure the site and put them into .env
     - detailed instructions [here](google_auth_setup_guide.md#Setting-up-Google-OAuth-2.0)
     - **DO NOT** publish your client id and secret on the internet.
 
 ## How to run tests
+To verify that the installation was completed successfully run the following tests
 1. Django tests:
   ```
   python manage.py runserver
