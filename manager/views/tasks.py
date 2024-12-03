@@ -1,11 +1,20 @@
 """Views for handling task creation, deletion and updates."""
 
+from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from manager.models import Task
+from manager.models import Task, StudentInfo, Taskboard
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from manager.serializers import TaskSerializer
+
+
+def is_user_authorized(requesting_user: User, user_id: int) -> bool:
+    """Check if the current user has access to another user's content."""
+    if not requesting_user.has_perm("manager.is_parent"):
+        return False
+    info = StudentInfo.objects.get(user=user_id)
+    return info.parent.filter(email=requesting_user.email).exists()
 
 
 class TaskViewSet(viewsets.ViewSet):
@@ -25,7 +34,6 @@ class TaskViewSet(viewsets.ViewSet):
         :param request: The HTTP request.
         :return: Response with tasks.
         """
-        queryset = Task.objects.all().order_by("end_date")
         taskboard_id = request.query_params.get("taskboard")
         ignore_status = request.query_params.get("exclude")
         user = request.query_params.get("user")
@@ -36,15 +44,28 @@ class TaskViewSet(viewsets.ViewSet):
             )
         # get tasks in a taskboard.
         elif taskboard_id:
+            # see if the taskboard exists
+            try:
+                owner = Taskboard.objects.get(pk=taskboard_id).user.id
+            except Taskboard.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            if request.user.id != owner and not is_user_authorized(request.user, owner):
+                return Response(status=status.HTTP_404_NOT_FOUND)
             queryset = Task.objects.filter(taskboard=taskboard_id)
         # get non-finished tasks for the calendar.
         elif ignore_status:
             queryset = Task.objects.filter(
                 ~Q(status=ignore_status), taskboard__user=request.user
             )
-        # get all tasks of the given user
+        # get all tasks of the given user, if self should have access
         elif user:
+            if not is_user_authorized(request.user, user):
+                return Response(status=status.HTTP_404_NOT_FOUND)
             queryset = Task.objects.filter(taskboard__user=user)
+        # get all tasks belonging to the current user
+        else:
+            queryset = Task.objects.filter(taskboard__user=request.user)
+        queryset = queryset.order_by("end_date")
         serializer = TaskSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
