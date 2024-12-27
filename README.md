@@ -6,8 +6,8 @@
 [![codecov](https://codecov.io/gh/KhunakornP/A-plus-management/graph/badge.svg?token=JDHENE1ET7)](https://codecov.io/gh/KhunakornP/A-plus-management)
 <br>
 
-An application for managing work and productivity for students using
-the [Django framework](https://www.djangoproject.com/).
+An application that aims to help students manage, plan work, and view their productivity.\
+Built using the [Django framework](https://www.djangoproject.com/).
 
 ## Installation
 Please see [Installation.md](Installation.md#How-to-install) for installation instructions.
@@ -39,3 +39,6 @@ All project documents can be found in the [project wiki](../../wiki/Home).
 - [Vision Statement](../../wiki/Vision%20Statement)
 - [Requirements](../../wiki/Requirements)
 - [Project Plan](../../wiki/Project%20Plan)
+
+## End-To-End tests
+See: https://github.com/KhunakornP/A-plus-E2E.git
